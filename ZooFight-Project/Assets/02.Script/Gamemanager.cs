@@ -19,10 +19,12 @@ public class Gamemanager : MonoBehaviour
     public static Gamemanager Inst => inst;
 
     #region Scene
-    private const string Connect = "0. Connect"; 
-    private const string LOBBY = "1. MatchLobby";
-    private const string READY = "2. LoadRoom";
-    private const string INGAME = "3. InGame";
+    private const string LOGIN = "LoginScene";
+    private const string LOBBY = "MainMenuScene";
+    private const string READY = "LoadingScene";
+    private const string INGAME = "GameScene";
+    private const string RESULT = "ResultScene";
+    private const string CREDIT = "CreditScene";
     #endregion
 
     #region Actions-Events
@@ -43,7 +45,7 @@ public class Gamemanager : MonoBehaviour
 
     public float PollingRate = 30.0f;
 
-    public enum GameState { Connect, MatchLobby, Ready, Start, InGame, Over, Result, Reconnect };
+    public enum GameState { Login, MatchLobby, Ready, Start, InGame, Over, Result, Reconnect };
     private GameState gameState;
     #endregion
 
@@ -58,9 +60,9 @@ public class Gamemanager : MonoBehaviour
     // 팀멤버 <Id,컴포넌트> 조합 
     public int MaxTeamMember = 1;
     public List<int> RedTeamId;
-    public Dictionary<int,PlayerController> RedTeamPlayers;
+    public Dictionary<int, PlayerController> RedTeamPlayers;
     public List<int> BlueTeamId;
-    public Dictionary<int,PlayerController> BlueTeamPlayers;
+    public Dictionary<int, PlayerController> BlueTeamPlayers;
 
     public BlockObject RedTeamBlock;
     public BlockObject BlueTeamBlock;
@@ -73,26 +75,41 @@ public class Gamemanager : MonoBehaviour
         if (inst == null)
         {
             inst = FindObjectOfType<Gamemanager>();     // 게임 시작 시 자기 자신을 담음
-            Debug.LogError("GameManager 인스턴스가 존재하지 않습니다.");
+
+            if (inst == null)
+            {
+                Debug.LogError("Gamemanager 인스턴스가 존재하지 않습니다.");
+            }
         }
-        if(inst != this)
+        if (inst != this)
         {
             Destroy(this.gameObject);
         }
-
+        // 60프레임 고정
+        Application.targetFrameRate = 60;
+        // 게임중 슬립모드 해제
         Screen.sleepTimeout = SleepTimeout.NeverSleep;
 
+        //InGameUpdateCoroutine = InGameUpdate();
 
         DontDestroyOnLoad(this.gameObject);         // 씬 전환에 영향을 받지 않게 만듬
     }
-
+    public static Gamemanager GetInstance()
+    {
+        if (inst == null)
+        {
+            Debug.LogError("Gamemanager 인스턴스가 존재하지 않습니다.");
+            return null;
+        }
+        return inst;
+    }
 
 
     // Start is called before the first frame update
     void Start()
     {
-        
-        gameState = GameState.Connect;
+
+        gameState = GameState.Login;
         ClientUpdateCoroutine = PollingRateUpdate();
         StartCoroutine(ClientUpdateCoroutine);
 
@@ -104,13 +121,28 @@ public class Gamemanager : MonoBehaviour
     void Update()
     {
         Times += Time.deltaTime;
-        
+
     }
-    
+
 
     private void FixedUpdate()
     {
-        
+
+    }
+
+    IEnumerator InGameUpdate()
+    {
+        while (true)
+        {
+            if (gameState != GameState.InGame)
+            {
+                StopCoroutine(InGameUpdateCoroutine);
+                yield return null;
+            }
+            InGame();
+            AfterInGame();
+            yield return new WaitForSeconds(.1f); //1초 단위
+        }
     }
 
     public IEnumerator PollingRateUpdate()
@@ -126,11 +158,163 @@ public class Gamemanager : MonoBehaviour
         }
     }
 
+    #region scene
+    private void Login()
+    {
+        // OnLogin();
+        // ChangeScene(LOGIN);
+    }
+
+    private void MatchLobby(Action<bool> func)
+    {
+        if (func != null)
+        {
+            ChangeSceneAsync(LOBBY, func);
+        }
+        else
+        {
+            ChangeScene(LOBBY);
+        }
+    }
+
+    private void GameReady()
+    {
+        Debug.Log("게임 레디 상태 돌입");
+        ChangeScene(READY);
+        OnGameReady();
+    }
+
+    private void GameStart()
+    {
+        //delegate 초기화
+        InGame = delegate { };
+        AfterInGame = delegate { };
+        OnGameOver = delegate { };
+        OnGameResult = delegate { };
+
+        //OnGameStart();
+        // 게임씬이 로드되면 Start에서 OnGameStart 호출
+        ChangeScene(INGAME);
+    }
+
+    private void GameOver()
+    {
+        OnGameOver();
+    }
+
+    private void GameResult()
+    {
+        OnGameResult();
+    }
+
+    private void GameReconnect()
+    {
+        //delegate 초기화
+        InGame = delegate { };
+        AfterInGame = delegate { };
+        OnGameOver = delegate { };
+        OnGameResult = delegate { };
+
+        OnGameReconnect();
+        ChangeScene(INGAME);
+        ChangeState(Gamemanager.GameState.InGame);
+    }
+
+    public GameState GetGameState()
+    {
+        return gameState;
+    }
+
+    public void ChangeState(GameState state, Action<bool> func = null)
+    {
+        gameState = state;
+        switch (gameState)
+        {
+            case GameState.Login:
+                Login();
+                break;
+            case GameState.MatchLobby:
+                MatchLobby(func);
+                break;
+            case GameState.Ready:
+                GameReady();
+                break;
+            case GameState.Start:
+                GameStart();
+                break;
+            case GameState.Over:
+                GameOver();
+                break;
+            case GameState.Result:
+                GameResult();
+                break;
+            case GameState.InGame:
+                // 코루틴 시작
+                StartCoroutine(InGameUpdateCoroutine);
+                break;
+            case GameState.Reconnect:
+                GameReconnect();
+                break;
+            default:
+                Debug.Log("알수없는 스테이트입니다. 확인해주세요.");
+                break;
+        }
+    }
+
+    public bool IsLobbyScene()
+    {
+        return SceneManager.GetActiveScene().name == LOBBY;
+    }
+
+    private void ChangeScene(string scene)
+    {
+        if (scene != LOGIN && scene != INGAME && scene != LOBBY && scene != READY)
+        {
+            Debug.Log("알수없는 씬 입니다.");
+            return;
+        }
+        SceneManager.LoadScene(scene);
+    }
+
+    private void ChangeSceneAsync(string scene, Action<bool> func)
+    {
+        asyncSceneName = string.Empty;
+        if (scene != LOGIN && scene != INGAME && scene != LOBBY && scene != READY)
+        {
+            Debug.Log("알수없는 씬 입니다.");
+            return;
+        }
+        asyncSceneName = scene;
+
+        StartCoroutine("LoadScene", func);
+    }
+
+    private IEnumerator LoadScene(Action<bool> func)
+    {
+        var asyncScene = SceneManager.LoadSceneAsync(asyncSceneName);
+        asyncScene.allowSceneActivation = true;
+
+        bool isCallFunc = false;
+        while (asyncScene.isDone == false)
+        {
+            if (asyncScene.progress <= 0.9f)
+            {
+                func(false);
+            }
+            else if (isCallFunc == false)
+            {
+                isCallFunc = true;
+                func(true);
+            }
+            yield return null;
+        }
+    }
+    #endregion
 
     #region  정보인출
 
     // 각 팀원 목록
-    public Dictionary<int,PlayerController> GetTeam(HitScanner.Team team)
+    public Dictionary<int, PlayerController> GetTeam(HitScanner.Team team)
     {
         switch (team)
         {
@@ -144,7 +328,7 @@ public class Gamemanager : MonoBehaviour
                 return null;
         }
     }
-    public Dictionary<int,PlayerController> GetEnemyTeam(HitScanner.Team team)
+    public Dictionary<int, PlayerController> GetEnemyTeam(HitScanner.Team team)
     {
         switch (team)
         {
@@ -153,8 +337,8 @@ public class Gamemanager : MonoBehaviour
             case HitScanner.Team.BlueTeam:
                 return RedTeamPlayers;
             case HitScanner.Team.NotSetting:
-                    return null;
-                default: return null;
+                return null;
+            default: return null;
         }
     }
 
@@ -209,8 +393,8 @@ public class Gamemanager : MonoBehaviour
         {
             return BlueTeamPlayers[playerId];
         }
-        else if(RedTeamPlayers.ContainsKey(playerId)) 
-        { 
+        else if (RedTeamPlayers.ContainsKey(playerId))
+        {
             return RedTeamPlayers[playerId];
         }
         else
@@ -225,7 +409,7 @@ public class Gamemanager : MonoBehaviour
         switch (team)
         {
             case HitScanner.Team.RedTeam:
-                if(RedTeamBlock != null) return RedTeamBlock;
+                if (RedTeamBlock != null) return RedTeamBlock;
                 else return null;
             case HitScanner.Team.NotSetting:
                 return null;
@@ -259,7 +443,7 @@ public class Gamemanager : MonoBehaviour
         switch (obj.myTeam)
         {
             case HitScanner.Team.RedTeam:
-                if(RedTeamBlock != null)
+                if (RedTeamBlock != null)
                 {
                     RedTeamBlock = obj;
                 }
@@ -267,7 +451,7 @@ public class Gamemanager : MonoBehaviour
             case HitScanner.Team.NotSetting:
                 return;
             case HitScanner.Team.BlueTeam:
-                if(BlueTeamBlock != null)
+                if (BlueTeamBlock != null)
                 {
                     BlueTeamBlock = obj;
                 }
