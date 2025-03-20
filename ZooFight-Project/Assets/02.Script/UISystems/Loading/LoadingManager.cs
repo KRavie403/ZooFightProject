@@ -6,10 +6,12 @@ using UnityEngine.SceneManagement;
 
 public class LoadingManager : MonoBehaviour
 {
+
     public GameObject loginBtn;
 
     public static string loadScene;
     public static int loadType;
+
     public static void LoadSceneHandle(string _name, int _loadType)
     {
         loadScene = _name;
@@ -25,4 +27,5 @@ public class LoadingManager : MonoBehaviour
     {
         SceneManager.LoadScene("LoadingScene");
     }
+
 }

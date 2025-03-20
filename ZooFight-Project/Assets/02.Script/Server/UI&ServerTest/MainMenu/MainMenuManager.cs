@@ -52,7 +52,7 @@ public partial class MainMenuManager : MonoBehaviour
     {
         if (instance == null)
         {
-            Debug.LogError("LobbyUI 인스턴스가 존재하지 않습니다.");
+            Debug.LogError("MainMenuManager 인스턴스가 존재하지 않습니다.");
             return null;
         }
 
@@ -138,29 +138,29 @@ public partial class MainMenuManager : MonoBehaviour
             return;
         }
 
-        Enqueue(Backend.BMember.GetUserInfo, callback =>
-        {
+        //Enqueue(Backend.BMember.GetUserInfo, callback =>
+        //{
 
-            if (!callback.IsSuccess())
-            {
-                Debug.LogError("유저 정보 불러오기 실패\n" + callback);
-                loginSuccessFunc(false, string.Format(BackendError,
-                callback.GetStatusCode(), callback.GetErrorCode(), callback.GetMessage()));
-                return;
-            }
-            Debug.Log("유저정보\n" + callback);
+        //    if (!callback.IsSuccess())
+        //    {
+        //        Debug.LogError("유저 정보 불러오기 실패\n" + callback);
+        //        loginSuccessFunc(false, string.Format(BackendError,
+        //        callback.GetStatusCode(), callback.GetErrorCode(), callback.GetMessage()));
+        //        return;
+        //    }
+        //    Debug.Log("유저정보\n" + callback);
 
-            var info = callback.GetReturnValuetoJSON()["row"];
-            if (loginSuccessFunc == null)
-            {
-                Debug.Log("loginSuccess is null");
-            }
+        //    var info = callback.GetReturnValuetoJSON()["row"];
+        //    if (loginSuccessFunc == null)
+        //    {
+        //        Debug.Log("loginSuccess is null");
+        //    }
 
-            if (loginSuccessFunc != null)
-            {
-                BackEndMatchManager.GetInstance().GetMatchList(loginSuccessFunc);
-            }
-        });
+        //    if (loginSuccessFunc != null)
+        //    {
+        //        BackEndMatchManager.GetInstance().GetMatchList(loginSuccessFunc);
+        //    }
+        //});
     }
 
     /// <summary>
@@ -195,7 +195,7 @@ public partial class MainMenuManager : MonoBehaviour
         foreach (var btn in arrawBtns) btn.SetActive(false);
     }
 
-    private async UniTaskVoid StartMatchmakingTimer()
+    private async UniTask StartMatchmakingTimer()
     {
         _isMatchmaking = true;
         _cts = new CancellationTokenSource();
@@ -206,24 +206,21 @@ public partial class MainMenuManager : MonoBehaviour
         {
             while (_isMatchmaking)
             {
-                Debug.Log($"초기 elapsedTime 값: {elapsedTime}");
+                int minutes = elapsedTime / 60;
+                int seconds = elapsedTime % 60;
 
-                int minutes = Mathf.FloorToInt(elapsedTime / 60);
-                int seconds = Mathf.FloorToInt(elapsedTime % 60);
+                timerText.text = $"{minutes:00}:{seconds:00}";
 
-                timerText.text = string.Format("{0:00}:{1:00}", minutes, seconds);
-
-                // 1초 대기
-                await UniTask.Delay(1000, cancellationToken: _cts.Token);
-
+                await UniTask.Delay(TimeSpan.FromSeconds(1), cancellationToken: _cts.Token);
                 elapsedTime++;
             }
         }
         catch (OperationCanceledException)
         {
-            Debug.Log("매칭 취소됨");
+            Debug.Log("매칭 종료");
         }
     }
+
 
     // 매칭을 종료할 때 호출
     public void StopMatchmaking()
@@ -383,7 +380,7 @@ public partial class MainMenuManager : MonoBehaviour
             //matchInfo.matchType, matchInfo.matchModeType);
     }
 
-    private async UniTask LoadLoadingScene()
+    public async UniTask LoadLoadingScene()
     {
         // 현재 로딩 씬이 이미 로드되어 있는 경우 언로드
         if (SceneManager.GetSceneByName("LoadingScene").isLoaded)
@@ -487,7 +484,7 @@ public partial class MainMenuManager : MonoBehaviour
         Debug.Log("활성화된 탭이 존재하지 않습니다.");
 
         // 로딩 씬을 비동기적으로 로드하고, 이후 게임 씬을 로드
-        LoadLoadingScene().Forget();
+        //LoadLoadingScene().Forget();
     }
 
     //private void ClearReadyUserList()

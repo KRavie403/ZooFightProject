@@ -134,12 +134,12 @@ public partial class BackEndMatchManager : MonoBehaviour
     {
         Debug.Log("게임 시작 메시지 수신. 게임 설정 시작");
         // 게임 시작 메시지가 오면 게임을 레디 상태로 변경
-        //if (GameManager.GetInstance().GetGameState() != GameManager.GameState.Ready)
-        //{
-        //    isHost = false;
-        //    isSetHost = false;
-        //    OnGameReady();
-        //}
+        if (Gamemanager.GetInstance().GetGameState() != Gamemanager.GameState.Ready)
+        {
+            isHost = false;
+            isSetHost = false;
+            OnGameReady();
+        }
     }
 
 
@@ -428,7 +428,8 @@ public partial class BackEndMatchManager : MonoBehaviour
                 ProcessAIDate(aiPlayerInfo);
                 return true;
             case Protocol.Type.LoadRoomScene:
-                //LobbyUI.GetInstance().ChangeRoomLoadScene();
+                //GameSceneManager.GetInstance().ChangeRoomLoadScene();
+                Gamemanager.GetInstance().ChangeState(Gamemanager.GameState.Ready);
                 if (IsHost() == true)
                 {
                     Debug.Log("5초 후 게임 씬 전환 메시지 송신");
@@ -436,7 +437,7 @@ public partial class BackEndMatchManager : MonoBehaviour
                 }
                 return true;
             case Protocol.Type.LoadGameScene:
-                //GameManager.GetInstance().ChangeState(GameManager.GameState.Start);
+                Gamemanager.GetInstance().ChangeState(Gamemanager.GameState.Start);
                 return true;
         }
         return false;
