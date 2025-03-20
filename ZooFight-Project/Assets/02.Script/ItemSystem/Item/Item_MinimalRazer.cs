@@ -13,7 +13,7 @@ using UnityEngine;
 /// </summary>
 
 
-public class Item_MinimalRazer : Items 
+public class Item_MinimalRazer : Items ,IHitScanner
 {
     public Item_MinimalRazer(PlayerController player) : base(player)
     {
@@ -30,6 +30,33 @@ public class Item_MinimalRazer : Items
 
     public HitScanner myHitScanner;
 
+    #region 히트스캔 코드
+    bool isHit = false;
+
+    public Component[] myTarget;
+
+    Component IHitScanner.myComp => this as Component;
+
+    Component[] IHitScanner.myTargets
+    {
+        get => myTarget;
+    }
+
+    void IHitScanner.AddTarget(Component[] target)
+    {
+        myTarget = target;
+    }
+
+    void IHitScanner.Hit()
+    {
+        //foreach (Component target in myTarget)
+        //{
+        //    target.GetComponent<IHitScanTarget>().Hit(this as Component);
+        //}
+        isHit = true;
+    }
+
+    #endregion
 
 
     Vector3 Dir = Vector3.zero;
@@ -97,21 +124,29 @@ public class Item_MinimalRazer : Items
         {
             duringTime += Time.deltaTime;
 
+            HitScan.Inst.HitScans(this.gameObject, 0.5f, ScanTarget.Player, ScanType.Sphere);
 
-            // 타겟 검출이 됫을 경우 
-            if(Targets != null)
+            if (isHit)
             {
-                foreach (GameObject T in Targets)
-                {
-                    if (curTargets.Contains(T)) continue;
-
-                    if (T.GetComponent<PlayerController>() != null)
-                    {
-                        T.GetComponent<PlayerController>().PlayerSizeChange(0.5f);
-                        curTargets.Add(T);
-                    }
-                }
+                myTarget[0].GetComponent<IHitScanTarget>().Hit(this);
+                break;
             }
+            // 타겟 검출이 됫을 경우 
+            //if(Targets != null)
+            //{
+            //    foreach (GameObject T in Targets)
+            //    {
+            //        if (curTargets.Contains(T)) continue;
+
+            //        if (T.GetComponent<PlayerController>() != null)
+            //        {
+            //            T.GetComponent<PlayerController>().PlayerSizeChange(0.5f);
+            //            curTargets.Add(T);
+            //        }
+            //    }
+            //}
+
+
         }
 
         // 사용 종료시 크기 원상복구

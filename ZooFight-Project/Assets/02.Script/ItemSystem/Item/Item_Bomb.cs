@@ -10,8 +10,9 @@ using UnityEngine;
 /// Value 4 폭탄 속도
 /// Value 5 사거리
 /// 캐릭터만 밀려남 블럭은 밀려나지않음
+/// <param name="Value1">데미지</param>
 /// </summary>
-public class Item_Bomb : Items
+public class Item_Bomb : Items ,IHitScanner
 {
     public Item_Bomb(PlayerController player) : base(player)
     {
@@ -26,15 +27,42 @@ public class Item_Bomb : Items
     [SerializeField]
     GameObject ActivedObj;
 
-
     public HitScanner myHitScanner;
-
     
     bool isGroundCrash = false;
+
+    #region 히트스캔 코드
+    bool isHit = false;
+
+    public Component[] myTarget;
+
+    Component IHitScanner.myComp => this as Component;
+
+    Component[] IHitScanner.myTargets
+    {
+        get => myTarget;
+    }
+
+    void IHitScanner.AddTarget(Component[] target)
+    {
+        myTarget = target;
+    }
+
+    void IHitScanner.Hit()
+    {
+        //foreach (Component target in myTarget)
+        //{
+        //    target.GetComponent<IHitScanTarget>().Hit(this as Component);
+        //}
+        isHit = true;
+    }
+
+    #endregion
 
     protected override void Awake()
     {
         base.Awake();
+        myCode = ItemCode.BananaTrap;
 
         //GetComponent<Rigidbody>().useGravity = false;
     }
@@ -81,11 +109,8 @@ public class Item_Bomb : Items
                 isMoveEnd = true;
                 myPlayer.ItemUseEnd();
             });
-        //myPlayer.SetState()
+
         float duringTime = 0;
-        //myHitScanner.SetScanActive(true);
-
-
 
         while (!isDone)
         {
@@ -108,13 +133,21 @@ public class Item_Bomb : Items
 
 
             // 동작감지시 효과적용 및 이펙트 , 사운드 출력
-            if (Targets.Count != 0) 
-            {
-                // 타겟이 잡히면 동작시키고 터트림
-                BombExplosionEffect();
-                Debug.Log("BombStart");
+            //if (Targets.Count != 0) 
+            //{
+            //    // 타겟이 잡히면 동작시키고 터트림
+            //    BombExplosionEffect();
+            //    Debug.Log("BombStart");
 
-                isDone = false;
+            //    isDone = false;
+            //}
+
+            HitScan.Inst.HitScans(this.gameObject, 0.5f, ScanTarget.Player, ScanType.Sphere);
+
+            if (isHit)
+            {
+                myTarget[0].GetComponent<IHitScanTarget>().Hit(this);
+                break;
             }
 
             // 발동시 오브젝트 작동 불능처리

@@ -1,8 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.Mathematics;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -11,7 +9,7 @@ using UnityEngine.Events;
 
 
 
-public class PlayerController : MovementController, IHitBox
+public class PlayerController : MovementController, IHitScanTarget , IHitScanner
 {
     
     #region 참조 변수 목록
@@ -91,9 +89,13 @@ public class PlayerController : MovementController, IHitBox
     bool IsRunning = false;
     bool isJump = false;
     bool isAbleMove = false;
-   
 
-
+    [SerializeField]
+    bool isForceMoving = false;
+    
+    [SerializeField]
+    bool isPushing = false;
+    bool isSliding = false;
     
     public bool isCrashed = false;
     public bool isKeyReverse
@@ -106,20 +108,88 @@ public class PlayerController : MovementController, IHitBox
         get { return myData.isGrab; }
         set { myData.isGrab = value;}
     }
-
     // 캐릭터 위치 검증여부
     bool isDenial = false;
     Vector2 acceleration = Vector2.zero;
 
-    Component IHitBox.myHitBox
+
+    #region 히트스캔코드
+
+    Component IHitScanner.myComp => this as Component;
+    Component IHitScanTarget.myComp => this as Component;
+
+    int IHitScanTarget.testcode => TestCode;
+    public int TestCode = 0;
+    Component[] myTarget;
+    Component[] IHitScanner.myTargets => myTarget;
+
+
+    void IHitScanner.AddTarget(Component[] target)
     {
-        get => this as Component;
+
     }
 
-    HitScanner.Team IHitBox.Team
+    void IHitScanner.Hit()
     {
-        get => myTeam;
+
     }
+
+
+    /// <summary>
+    /// 타격을 전달받은 주체가 플레이어일때 
+    /// </summary>
+    /// <param name="component"></param>
+    void IHitScanTarget.Hit(Component component)
+    {
+        Debug.Log(component);
+
+        if (component.GetComponent<ScanTester>() != null) 
+        {
+            Debug.Log("Scanned");
+            PushedOut(component.transform.position, 5.5f, 10.0f);
+            return;
+        }
+        // 주체가 플레이어일때
+        if (component.GetComponent<PlayerController>() != null)
+        {
+
+        }
+        // 주체가 아이템일때
+        else if (component.GetComponent<Items>() != null) 
+        {
+            Items item = component.GetComponent<Items>();
+            switch (item.myCode)
+            {
+                case ItemCode.Bomb:
+                    PushedOut(component.transform.position, component.GetComponent<Item_Bomb>().Value3, 10.0f);
+                    GetDamaged(component.GetComponent<Item_Bomb>().Value1);
+                    break;
+                case ItemCode.BananaTrap:
+                    //Slide()
+                    break;
+                case ItemCode.BlockChangeScroll:
+                    break;
+                case ItemCode.CurseScroll:
+                    break;
+                case ItemCode.SpiderBomb:
+                    GetCrowdControl(StatusCode.Slow,component.GetComponent<Item_SpiderBomb>().Value2,component.GetComponent<Item_SpiderBomb>().Value1);
+                    break;
+                case ItemCode.InkBomb:
+                    break;
+                case ItemCode.ToyHammer:
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    Type IHitScanTarget.GetMyType() 
+    { 
+        return GetType();
+    }
+
+    #endregion
 
     #endregion
 
@@ -232,7 +302,13 @@ public class PlayerController : MovementController, IHitBox
 
     }
 
-    // 플레이어 정보주입 - 세션id , 팀 , 플레이어 id 
+    /// <summary>
+    /// 플레이어 정보주입 - 세션id , 팀 , 플레이어 id
+    /// 정보주입 전까지는 생성상태 유지될수 있도록 유지 필요
+    /// </summary>
+    /// <param name="PlayerTeam"></param>
+    /// <param name="SessionID"></param>
+    /// <param name="PlayerID"></param>
     public void CharacterInitalize(HitScanner.Team PlayerTeam,int SessionID,int PlayerID)
     {
         myTeam = PlayerTeam;
@@ -257,6 +333,8 @@ public class PlayerController : MovementController, IHitBox
     #endregion
 
     #region 캐릭터 무브먼트
+
+    public IEnumerator ForceMovement;
 
     #region 캐릭터 이동
 
@@ -322,6 +400,7 @@ public class PlayerController : MovementController, IHitBox
     }
 
     #region 이동관련 신규코드
+
 
     /// <summary>
     /// 플레이어의 이동을 진행 하는 함수
@@ -400,7 +479,10 @@ public class PlayerController : MovementController, IHitBox
     public void CurAxisMove()
     {
         //CharacterMove(AxisX, AxisY, isDenial);
-        CharacterMove(myData.isDenial, AxisX, AxisY);
+        if(!isForceMoving)
+        {
+            CharacterMove(myData.isDenial, AxisX, AxisY);
+        }
     }
 
     public void Move(float AxisX , float AxisY)
@@ -423,7 +505,7 @@ public class PlayerController : MovementController, IHitBox
 
         // 프로토콜 전송용 벡터
         Vector3 Dir = MakeDir(AxisX, AxisY);
-        //transform.Translate(MoveSpeed * Time.deltaTime * Direction, Space.Self);
+        //transform.Translate(MoveSpeed * time.deltaTime * Direction, Space.Self);
         transform.position += MakeDir(AxisX, AxisY) * Speed * Time.deltaTime;
 
         if (isGrab)
@@ -469,13 +551,37 @@ public class PlayerController : MovementController, IHitBox
         }
     }
 
+    /// <summary>
+    /// 캐릭터를 특정 방향(dir)으로 일정 거리(dist)만큼 speed 만큼의 속도로 미끄러지게 하는 함수
+    /// </summary>
+    /// <param name="dir"></param>
+    /// <param name="dist"></param>
+    /// <param name="Speed"></param>
+    /// <param name="e"></param>
     public void Slide(Vector3 dir, float dist, float Speed, UnityAction e = null)
     {
-        StartCoroutine(CharacterSlide(dir, dist, Speed, e));   
+        if (!isSliding)
+        {
+            if (ForceMovement != null)
+            {
+                StopCoroutine(ForceMovement);
+            }
+            ForceMovement = CharacterSlide(dir, dist, Speed, () => { if (e != null)  e?.Invoke();  isForceMoving = false; });
+            StartCoroutine(ForceMovement);
+            isSliding = true;
+        }
+        else
+        {
+            StopCoroutine(ForceMovement);
+            ForceMovement = CharacterSlide(dir, dist, Speed, () => { if (e != null)  e?.Invoke();  isForceMoving = false; });
+            StartCoroutine(ForceMovement);
+            isSliding = true;
+        }
+        //StartCoroutine(CharacterSlide(dir, dist, Speed, e));   
     }
 
     /// <summary>
-    /// 
+    /// Slide 함수의 동적 연출을 담당하는 함수
     /// </summary>
     /// <param name="dir">밀려나는 방향</param>
     /// <param name="Dist">밀려나는 거리</param>
@@ -486,14 +592,17 @@ public class PlayerController : MovementController, IHitBox
     {
         float duringTime = 0.0f;
 
+        Vector3 newDir = new Vector3(dir.x, 0.0f, dir.z);
+        newDir.Normalize();
+
         myAnim.SetBool("IsSlide", true);
-        
         myAnim.SetTrigger("Sliding");
+
         while (duringTime < Dist/Speed)
         {
             duringTime += Time.deltaTime;
-            CharacterMove(false, dir.x, dir.z);
-            
+            //CharacterMove(false, dir.x, dir.z);
+            transform.position += Dir * Speed * Time.deltaTime;
             yield return null;
         }
         
@@ -501,6 +610,86 @@ public class PlayerController : MovementController, IHitBox
 
         e?.Invoke();
     }
+
+
+    /// <summary>
+    /// Pos 기준으로 거리 Dist 만큼까지 밀려나는 함수
+    /// Dist 와 Player의 위치의 연관없이 거리만큼만 밀려남 
+    /// </summary>
+    /// <param name="Pos"></param>
+    /// <param name="Dist"></param>
+    /// <param name="Speed"></param>
+    /// <param name="e"></param>
+    public void PushedOut(Vector3 Pos, float Dist, float Speed, UnityAction e = null)
+    {
+
+        if(!isPushing)
+        {
+            if(ForceMovement != null)
+            {
+                StopCoroutine(ForceMovement);
+            }
+            ForceMovement = PushOut(Pos, Dist, Speed, () => {
+                if (e != null) e?.Invoke(); 
+                isForceMoving = false;
+                Debug.Log("PushEnd");
+            });
+            Debug.Log("PushStart");
+            StartCoroutine(ForceMovement);
+        }
+        else
+        {
+            StopCoroutine(ForceMovement);
+            ForceMovement = PushOut(Pos, Dist, Speed, () => {
+                if (e != null) e?.Invoke();
+                isForceMoving = false;
+                Debug.Log("PushEnd");
+            });
+            Debug.Log("PushStart"); 
+            StartCoroutine(ForceMovement);
+        }
+    }
+
+    /// <summary>
+    /// PushedOut 함수의 연속적 동작을 담당하는 함수
+    /// </summary>
+    /// <param name="Pos"></param>
+    /// <param name="Dist"></param>
+    /// <param name="Speed"></param>
+    /// <param name="e"></param>
+    /// <returns></returns>
+    IEnumerator PushOut(Vector3 Pos, float Dist, float Speed, UnityAction e = null)
+    {
+        isPushing = true;
+        isForceMoving = true;
+
+        Vector3 NewPos = new Vector3(Pos.x, 0.0f, Pos.z);
+        Vector3 NewTpos = new Vector3(transform.position.x, 0.0f, transform.position.z);
+        // 지점부터 플레이어 방향으로의 벡터를 생성
+        Vector3 Dir = NewTpos - NewPos;
+
+        // 이동해야할 거리를 측정
+        float newDist = Dist - Dir.magnitude;
+
+        float duringTime = 0;
+        // 벡터의 크기를 1로 고정
+        Dir.Normalize();
+        Debug.Log(Dir.magnitude);
+
+        // 이동시간만큼 이동
+        while (duringTime < newDist/Speed)
+        {
+            duringTime += Time.deltaTime;
+
+            transform.position += Dir * Speed * Time.deltaTime;
+            //transform.Translate(Dir * Speed * time.deltaTime);
+
+            yield return null;
+        }
+        e?.Invoke();
+        isPushing = false;  
+    }
+
 
     /// <summary>
     /// 패킷 데이터용 이동 함수
@@ -735,25 +924,12 @@ public class PlayerController : MovementController, IHitBox
     #region 판정관련
     [SerializeField] float RecoveryTime = 2.0f;
 
+
+
     /// <summary>
-    /// 플레이어가 직접적으로 공격할때
+    /// Damage 수치만큼 데미지를 받는 함수
     /// </summary>
-    /// <param name="comp"></param>
-    void IHitBox.HitAction(Component comp)
-    {
-        //comp.GetComponent<myHitScanner>().MyDamage
-        //switch (comp.GetType())
-        //{
-        //    case typeof(Item_BananaTrap):
-        //        break;
-        //    default:
-        //        break;
-        //}
-
-        GetDamaged(comp.GetComponent<HitScanner>().MyDamage);
-    }
-
-    // 단타 데미지를 받는 함수
+    /// <param name="Damage"></param>
     public void GetDamaged(float Damage)
     {
         Debug.Log("Damaged");
@@ -768,27 +944,26 @@ public class PlayerController : MovementController, IHitBox
 
     }
     
-
+    /// <summary>
+    /// time 동안 총합 Damage 수치만큼 데미지를 받는 함수
+    /// </summary>
+    /// <param name="Damage"></param>
+    /// <param name="time"></param>
     public void GetDotDamaged(float Damage,float time)
     {
         StartCoroutine(DotDamaged(Damage,time));
 
     }
 
-    // 실드가 없을때 실드획득
-    public void GetShield(float ShieldValue)
+    /// <summary>
+    /// Value 수치만큼 실드량을 회복하는 함수
+    /// </summary>
+    /// <param name="Value"></param>
+    public void GetShield(float Value)
     {
-        if (ShieldValue < 0) return;
-        if( ShieldValue > MaxShield) 
-        { 
-
-        }
-        else
-        {
-            isShield = true;
-            CurShield = ShieldValue;
-        }
-
+        if (Value < 0) return;
+        isShield = true;
+        CurShield = Value > MaxShield ? MaxShield : Value;  
     }
 
     public IEnumerator StaminaWork()
@@ -811,15 +986,22 @@ public class PlayerController : MovementController, IHitBox
         }
     }
 
-    // 상태이상을 받는 함수
-    public void GetCrowdControl(StatusCode code, float Time, float Power=0)
+    /// <summary>
+    /// 상태이상을 받는 함수
+    /// </summary>
+    /// <param name="code">상태이상 종류</param>
+    /// <param name="time">상태이상 지속시간</param>
+    /// <param name="Power">상태이상 강도</param>
+    public void GetCrowdControl(StatusCode code, float time, float Power=0)
     {
 
         switch (code)
         {
             case StatusCode.Normal:
                 break;
+            // 강도 = 느려지는 정도
             case StatusCode.Slow:
+                GetSlow(time,Power);
                 break;
             case StatusCode.Blind:
                 break;
@@ -837,6 +1019,27 @@ public class PlayerController : MovementController, IHitBox
     public void DownAction()
     {
         PlayerSM.ChangeState(p_States[pState.Down]);
+    }
+
+    public void GetSlow(float time,float Power)
+    {
+        
+    }
+
+    public IEnumerator Slow(float time, float Power)
+    {
+        float duringTime = 0;
+
+        float tempRate = BaseSpeedRate;
+
+        BaseSpeedRate = Power;
+        while (duringTime > time)
+        {
+            duringTime += Time.deltaTime;
+            yield return null;
+        }
+
+        BaseSpeedRate = tempRate;
     }
 
     public void CharacterRecovery()
@@ -872,16 +1075,10 @@ public class PlayerController : MovementController, IHitBox
     // 공격 판정 함수
     public void PlayerAttack()
     {
-        Collider[] colliders = Physics.OverlapSphere(transform.position, 0.3f, groundMask);
+        HitScan.Inst.HitScans(AttackPoint.gameObject, 0.2f, ScanTarget.Player, ScanType.Cube);
 
-        foreach (Collider collider in colliders)
-        {
-            PlayerController player = collider.GetComponent<PlayerController>();
-            if (player != null) 
-            {
-                //if(player.myTeam == )
-            }
-        }
+
+
     }
 
     // 플레이어의 크기를 입력받은 사이즈로 변경, 변경완료후 입력 받은 명령이 있다면 처리

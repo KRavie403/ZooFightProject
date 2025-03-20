@@ -3,21 +3,47 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// ¾ÆÀÌÅÛ¸í : ÈÖÇÎ±â
-/// Value 1 ¹Ì´Â Èû
-/// Value 2 ¹Ì´Â ½Ã°£
-/// Value 3 ¹Ì´Â ¹İ°æ
-/// Value 4 ¹Ì´Â ±æÀÌ
+/// ì•„ì´í…œëª… : íœ˜í•‘ê¸°
+/// Value 1 ë¯¸ëŠ” í˜
+/// Value 2 ë¯¸ëŠ” ì‹œê°„
+/// Value 3 ë¯¸ëŠ” ë°˜ê²½
+/// Value 4 ë¯¸ëŠ” ê¸¸ì´
 /// </summary>
 
-public class Item_WhippingMachine : Items
+public class Item_WhippingMachine : Items, IHitScanner
 {
     public Item_WhippingMachine(PlayerController player) : base(player)
     {
 
     }
 
+    #region íˆíŠ¸ìŠ¤ìº” ì½”ë“œ
+    bool isHit = false;
 
+    public Component[] myTarget;
+
+    Component IHitScanner.myComp => this as Component;
+
+    Component[] IHitScanner.myTargets
+    {
+        get => myTarget;
+    }
+
+    void IHitScanner.AddTarget(Component[] target)
+    {
+        myTarget = target;
+    }
+
+    void IHitScanner.Hit()
+    {
+        //foreach (Component target in myTarget)
+        //{
+        //    target.GetComponent<IHitScanTarget>().Hit(this as Component);
+        //}
+        isHit = true;
+    }
+
+    #endregion
 
     EffectPlayer myEffect;
 
@@ -46,23 +72,32 @@ public class Item_WhippingMachine : Items
 
     public IEnumerator MachineActive(Vector3 pos)
     {
-        // ¹æÇâ ÁöÁ¤
+        // ë°©í–¥ ì§€ì •
         Vector3 dir = Vector3.Normalize(pos - myPlayer.transform.position) * Value4;
 
-        // ÀÌÆåÆ® Ãâ·Â´ë±â
+        // ì´í™íŠ¸ ì¶œë ¥ëŒ€ê¸°
 
-        // »ç¿îµå Àç»ı´ë±â
+        // ì‚¬ìš´ë“œ ì¬ìƒëŒ€ê¸°
 
-
-        // Áö¼Ó½Ã°£µ¿¾È µ¿ÀÛ
-        while (true)
+        float duringTime = 0;
+        // ì§€ì†ì‹œê°„ë™ì•ˆ ë™ì‘
+        while (duringTime < Value2) 
         {
-            // Áö¼Ó½Ã°£ Ä«¿îÆ®
+            duringTime += Time.deltaTime;
+            // ì§€ì†ì‹œê°„ ì¹´ìš´íŠ¸
+
+            HitScan.Inst.HitScans(this.gameObject, 0.5f, ScanTarget.Player, ScanType.Sphere);
+
+            if (isHit)
+            {
+                myTarget[0].GetComponent<IHitScanTarget>().Hit(this);
+                break;
+            }
 
 
-            // ÇÇ°İ´ë»ó °¨Áö
+            // í”¼ê²©ëŒ€ìƒ ê°ì§€
 
-            // ÇÇ°İ´ë»ó °¨Áö½Ã ÀÌÆåÆ® »ç¿îµå Ãâ·Â & ¹Ğ¾î³»±â
+            // í”¼ê²©ëŒ€ìƒ ê°ì§€ì‹œ ì´í™íŠ¸ ì‚¬ìš´ë“œ ì¶œë ¥ & ë°€ì–´ë‚´ê¸°
 
             yield return null;
         }
