@@ -6,20 +6,65 @@ using Cysharp.Threading.Tasks;
 
 public class GameSceneManager : MonoBehaviour
 {
+    private static GameSceneManager instance;
+
     //public GameObject[] overlayImage;
     public GameObject matchingImages;
     public GameObject minimapUI;    // 미니맵
     public GameObject[] characterStat;
     public int curUser = 0;
 
+    public GameObject startCountObject;
+    public GameObject reconnectBoardObject;
+
     [SerializeField] private Image[] _characterImage = new Image[3];    // 캐릭터 프로필 이미지
     //[SerializeField] private Sprite[] _textSprite = new Sprite[2];
     [SerializeField] private string _character = "";         // 유저 캐릭터 종류
 
+    private Text startCountText;
+    private Text reconnectBoardText;
+    const string HostOfflineMsg = "호스트와의 연결이 끊어졌습니다.\n연결 대기중";
+    const string PlayerReconnectMsg = "{0} 플레이어 재접속중...";
+
+    public static GameSceneManager GetInstance()
+    {
+        if (instance == null)
+        {
+            Debug.LogError("GameSceneManager 인스턴스가 존재하지 않습니다.");
+            return null;
+        }
+
+        return instance;
+    }
 
     private void Awake()
     {
+        if (matchingImages == null)
+        {
+            matchingImages = GameObject.Find("MatchingImages");
+        }
+        if (minimapUI == null)
+        {
+            minimapUI = GameObject.Find("MinimapUI");
+        }
+        if(characterStat[0] == null)
+        {
+            characterStat[0] = GameObject.Find("User0Stat");
+        }
+        if (characterStat[1] == null)
+        {
+            characterStat[1] = GameObject.Find("User1Stat");
+        }
+
+        startCountText = startCountObject.GetComponentInChildren<Text>();
+        startCountObject.SetActive(true);
+
         GetUser(curUser);
+
+#if DEBUG || UNITY_EDITOR
+        Debug.Log("인게임 UI 설정 완료");
+#endif
+
     }
 
     private void Start()
@@ -82,5 +127,48 @@ public class GameSceneManager : MonoBehaviour
         //overlayImage[0].SetActive(false);
         //overlayImage[1].SetActive(false);
         matchingImages.SetActive(false);
+    }
+
+    public void SetStartCount(int time, bool isEnable = true)
+    {
+        startCountObject.SetActive(isEnable);
+        if (isEnable)
+        {
+            if (time == 0)
+            {
+                startCountText.text = "Game Start!";
+            }
+            else
+            {
+                startCountText.text = string.Format("{0}", time);
+            }
+        }
+    }
+
+    public void SetHostWaitBoard()
+    {
+        reconnectBoardText.text = HostOfflineMsg;
+        reconnectBoardObject.SetActive(true);
+        // 4초 후 재접속 메시지 닫음
+        Invoke("ReconnectBoardClose", 4.0f);
+    }
+
+    public void SetReconnectBoard(string playerName)
+    {
+        reconnectBoardText.text = string.Format(PlayerReconnectMsg, playerName);
+        reconnectBoardObject.SetActive(true);
+        // 4초 후 재접속 메시지 닫음
+        Invoke("ReconnectBoardClose", 4.0f);
+    }
+
+
+    public void ChangeRoomLoadScene()
+    {
+        Gamemanager.GetInstance().ChangeState(Gamemanager.GameState.Ready);
+    }
+
+    private void ReconnectBoardClose()
+    {
+        reconnectBoardObject.SetActive(false);
     }
 }

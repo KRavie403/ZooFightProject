@@ -107,11 +107,16 @@ public partial class BackEndMatchManager : MonoBehaviour
         //matchInfos.matchType = MatchType.Random;
         //matchInfos.matchModeType = MatchModeType.OneOnOne;
         //matchInfos.inDate = "2024-04-18T15:02:57.046Z";
-        Backend.Match.RequestMatchMaking(MatchType.Random, MatchModeType.OneOnOne, "2024-04-18T15:02:57.046Z");
+        Backend.Match.RequestMatchMaking(matchInfos[index].matchType, matchInfos[index].matchModeType, matchInfos[index].inDate);
         if (isConnectInGameServer)
         {
             Backend.Match.LeaveGameServer(); //인게임 서버 접속되어 있을 경우를 대비해 인게임 서버 리브 호출
         }
+        //Backend.Match.RequestMatchMaking(MatchType.Random, MatchModeType.OneOnOne, "2024-04-18T15:02:57.046Z");
+        //if (isConnectInGameServer)
+        //{
+        //    Backend.Match.LeaveGameServer(); //인게임 서버 접속되어 있을 경우를 대비해 인게임 서버 리브 호출
+        //}
     }
 
     // 매칭 신청 취소하기

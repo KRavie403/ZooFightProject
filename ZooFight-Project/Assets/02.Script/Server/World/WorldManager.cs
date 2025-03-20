@@ -16,7 +16,7 @@ public class WorldManager : MonoBehaviour
     public GameObject playerPool;
     public GameObject playerPrefeb;
     public int numOfPlayer = 0;
-    public GameObject particle;
+    //public GameObject particle;               // (수정)
     private const int MAXPLAYER = 6;
     public int alivePlayer { get; set; }
     private Dictionary<SessionId, PlayerController> players;
@@ -192,11 +192,11 @@ public class WorldManager : MonoBehaviour
             if (BackEndMatchManager.GetInstance().IsMySessionId(sessionId))
             {
                 myPlayerIndex = sessionId;
-                //players[sessionId].Initialize(true, myPlayerIndex, BackEndMatchManager.GetInstance().GetNickNameBySessionId(sessionId), statringPoints[index].w);
+                players[sessionId].Initialize(true, myPlayerIndex, BackEndMatchManager.GetInstance().GetNickNameBySessionId(sessionId), statringPoints[index].w);
             }
             else
             {
-                //players[sessionId].Initialize(false, sessionId, BackEndMatchManager.GetInstance().GetNickNameBySessionId(sessionId), statringPoints[index].w);
+                players[sessionId].Initialize(false, sessionId, BackEndMatchManager.GetInstance().GetNickNameBySessionId(sessionId), statringPoints[index].w);
             }
             index += 1;
         }
@@ -262,7 +262,7 @@ public class WorldManager : MonoBehaviour
     {
         foreach (var player in players)
         {
-           // player.Value.SetMoveVector(Vector3.zero);
+            player.Value.SetMoveVector(Vector3.zero);
         }
     }
 
@@ -281,10 +281,10 @@ public class WorldManager : MonoBehaviour
     {
         Debug.Log("Game Result");
 
-        //if (GameManager.GetInstance().IsLobbyScene())
-        //{
-        //    GameManager.GetInstance().ChangeState(GameManager.GameState.MatchLobby);
-        //}
+        if (GameManager.GetInstance().IsLobbyScene())
+        {
+            GameManager.GetInstance().ChangeState(GameManager.GameState.MatchLobby);
+        }
     }
 
     public void OnRecieve(MatchRelayEventArgs args)
@@ -377,17 +377,17 @@ public class WorldManager : MonoBehaviour
         bool isAttack = false;
         bool isNoMove = false;
 
-        //int keyData = keyMessage.keyData;
+        int keyData = keyMessage.keyData;
 
         Vector3 moveVector = Vector3.zero;
         Vector3 attackPos = Vector3.zero;
-        //Vector3 playerPos = players[index].GetPosition();
-        //if ((keyData & KeyEventCode.MOVE) == KeyEventCode.MOVE)
-        //{
-        //    moveVector = new Vector3(keyMessage.x, keyMessage.y, keyMessage.z);
-        //    moveVector = Vector3.Normalize(moveVector);
-        //    isMove = true;
-        //}
+        Vector3 playerPos = players[index].GetPosition();
+        if ((keyData & KeyEventCode.MOVE) == KeyEventCode.MOVE)
+        {
+            moveVector = new Vector3(keyMessage.x, keyMessage.y, keyMessage.z);
+            moveVector = Vector3.Normalize(moveVector);
+            isMove = true;
+        }
         //if ((keyData & KeyEventCode.ATTACK) == KeyEventCode.ATTACK)
         //{
         //    attackPos = new Vector3(keyMessage.x, keyMessage.y, keyMessage.z);
@@ -395,21 +395,21 @@ public class WorldManager : MonoBehaviour
         //    isAttack = true;
         //}
 
-        //if ((keyData & KeyEventCode.NO_MOVE) == KeyEventCode.NO_MOVE)
-        //{
-        //    isNoMove = true;
-        //}
+        if ((keyData & KeyEventCode.NO_MOVE) == KeyEventCode.NO_MOVE)
+        {
+            isNoMove = true;
+        }
 
         if (isMove)
         {
-            //players[index].SetMoveVector(moveVector);
-            //PlayerMoveMessage msg = new PlayerMoveMessage(index, playerPos, moveVector);
-            //BackEndMatchManager.GetInstance().SendDataToInGame<PlayerMoveMessage>(msg);
+            players[index].SetMoveVector(moveVector);
+            PlayerMoveMessage msg = new PlayerMoveMessage(index, playerPos, moveVector);
+            BackEndMatchManager.GetInstance().SendDataToInGame<PlayerMoveMessage>(msg);
         }
         if (isNoMove)
         {
-            //PlayerNoMoveMessage msg = new PlayerNoMoveMessage(index, playerPos);
-            //BackEndMatchManager.GetInstance().SendDataToInGame<PlayerNoMoveMessage>(msg);
+            PlayerNoMoveMessage msg = new PlayerNoMoveMessage(index, playerPos);
+            BackEndMatchManager.GetInstance().SendDataToInGame<PlayerNoMoveMessage>(msg);
         }
         if (isAttack)
         {
@@ -434,16 +434,16 @@ public class WorldManager : MonoBehaviour
         }
         Vector3 moveVector = new Vector3(data.xDir, data.yDir, data.zDir);
         //moveVector가 같으면 방향 & 이동량 같으므로 적용 굳이 안함
-        //if (!moveVector.Equals(players[data.playerSession].moveVector))
-        //{
-        //    players[data.playerSession].SetPosition(data.xPos, data.yPos, data.zPos);
-        //    players[data.playerSession].SetMoveVector(moveVector);
-        //}
+        if (!moveVector.Equals(players[data.playerSession].moveVector))
+        {
+            players[data.playerSession].SetPosition(data.xPos, data.yPos, data.zPos);
+            players[data.playerSession].SetMoveVector(moveVector);
+        }
     }
     private void ProcessPlayerData(PlayerNoMoveMessage data)
     {
-        //players[data.playerSession].SetPosition(data.xPos, data.yPos, data.zPos);
-        //players[data.playerSession].SetMoveVector(Vector3.zero);
+        players[data.playerSession].SetPosition(data.xPos, data.yPos, data.zPos);
+        players[data.playerSession].SetMoveVector(Vector3.zero);
     }
     private void ProcessPlayerData(PlayerAttackMessage data)
     {
@@ -452,7 +452,7 @@ public class WorldManager : MonoBehaviour
             //호스트면 리턴
             return;
         }
-        //players[data.playerSession].Attack(new Vector3(data.dir_x, data.dir_y, data.dir_z));
+        players[data.playerSession].Attack(new Vector3(data.dir_x, data.dir_y, data.dir_z));
     }
     private void ProcessPlayerData(PlayerDamegedMessage data)
     {
@@ -464,30 +464,30 @@ public class WorldManager : MonoBehaviour
     {
         // 플레이어 데이터 동기화
         int index = 0;
-        //if (players == null)
-        //{
-        //    Debug.LogError("Player Poll is null!");
-        //    return;
-        //}
-        //foreach (var player in players)
-        //{
-        //    var y = player.Value.GetPosition().y;
-        //    player.Value.SetPosition(new Vector3(syncMessage.xPos[index], y, syncMessage.zPos[index]));
-        //    player.Value.SetHP(syncMessage.hpValue[index]);
-        //    index++;
-        //}
+        if (players == null)
+        {
+            Debug.LogError("Player Poll is null!");
+            return;
+        }
+        foreach (var player in players)
+        {
+            var y = player.Value.GetPosition().y;
+            player.Value.SetPosition(new Vector3(syncMessage.xPos[index], y, syncMessage.zPos[index]));
+            player.Value.SetHP(syncMessage.hpValue[index]);
+            index++;
+        }
         BackEndMatchManager.GetInstance().SetHostSession(syncMessage.host);
     }
 
     public bool IsMyPlayerMove()
     {
-        //return players[myPlayerIndex].isMove;
+        return players[myPlayerIndex].isMove;
         return true;
     }
 
     public bool IsMyPlayerRotate()
     {
-        //return players[myPlayerIndex].isRotate;
+        return players[myPlayerIndex].isRotate;
         return true;
     }
 
@@ -503,27 +503,27 @@ public class WorldManager : MonoBehaviour
 
     public GameSyncMessage GetNowGameState(SessionId hostSession)
     {
-        //int numOfClient = players.Count;
+        int numOfClient = players.Count;
 
-        //float[] xPos = new float[numOfClient];
-        //float[] zPos = new float[numOfClient];
-        //int[] hp = new int[numOfClient];
-        //bool[] online = new bool[numOfClient];
-        //int index = 0;
-        //foreach (var player in players)
-        //{
-        //    xPos[index] = player.Value.GetPosition().x;
-        //    zPos[index] = player.Value.GetPosition().z;
-        //    hp[index] = player.Value.hp;
-        //    index++;
-        //}
-        //return new GameSyncMessage(hostSession, numOfClient, xPos, zPos, hp, online);
+        float[] xPos = new float[numOfClient];
+        float[] zPos = new float[numOfClient];
+        int[] hp = new int[numOfClient];
+        bool[] online = new bool[numOfClient];
+        int index = 0;
+        foreach (var player in players)
+        {
+            xPos[index] = player.Value.GetPosition().x;
+            zPos[index] = player.Value.GetPosition().z;
+            hp[index] = player.Value.hp;
+            index++;
+        }
+        return new GameSyncMessage(hostSession, numOfClient, xPos, zPos, hp, online);
         return null;
     }
 
     public Vector3 GetMyPlayerPos()
     {
-        //return players[myPlayerIndex].GetPosition();
+        return players[myPlayerIndex].GetPosition();
         return Vector3.zero;
     }
 }
