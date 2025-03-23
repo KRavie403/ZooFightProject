@@ -192,11 +192,11 @@ public class WorldManager : MonoBehaviour
             if (BackEndMatchManager.GetInstance().IsMySessionId(sessionId))
             {
                 myPlayerIndex = sessionId;
-                players[sessionId].Initialize(true, myPlayerIndex, BackEndMatchManager.GetInstance().GetNickNameBySessionId(sessionId), statringPoints[index].w);
+                //players[sessionId].Initialize(true, myPlayerIndex, BackEndMatchManager.GetInstance().GetNickNameBySessionId(sessionId), statringPoints[index].w);
             }
             else
             {
-                players[sessionId].Initialize(false, sessionId, BackEndMatchManager.GetInstance().GetNickNameBySessionId(sessionId), statringPoints[index].w);
+                //players[sessionId].Initialize(false, sessionId, BackEndMatchManager.GetInstance().GetNickNameBySessionId(sessionId), statringPoints[index].w);
             }
             index += 1;
         }
@@ -262,7 +262,7 @@ public class WorldManager : MonoBehaviour
     {
         foreach (var player in players)
         {
-            player.Value.SetMoveVector(Vector3.zero);
+            //player.Value.SetMoveVector(Vector3.zero);
         }
     }
 
@@ -281,9 +281,9 @@ public class WorldManager : MonoBehaviour
     {
         Debug.Log("Game Result");
 
-        if (GameManager.GetInstance().IsLobbyScene())
+        if (Gamemanager.GetInstance().IsLobbyScene())
         {
-            GameManager.GetInstance().ChangeState(GameManager.GameState.MatchLobby);
+            Gamemanager.GetInstance().ChangeState(Gamemanager.GameState.MatchLobby);
         }
     }
 
@@ -402,7 +402,7 @@ public class WorldManager : MonoBehaviour
 
         if (isMove)
         {
-            players[index].SetMoveVector(moveVector);
+            //players[index].SetMoveVector(moveVector);
             PlayerMoveMessage msg = new PlayerMoveMessage(index, playerPos, moveVector);
             BackEndMatchManager.GetInstance().SendDataToInGame<PlayerMoveMessage>(msg);
         }
@@ -434,16 +434,16 @@ public class WorldManager : MonoBehaviour
         }
         Vector3 moveVector = new Vector3(data.xDir, data.yDir, data.zDir);
         //moveVector가 같으면 방향 & 이동량 같으므로 적용 굳이 안함
-        if (!moveVector.Equals(players[data.playerSession].moveVector))
-        {
-            players[data.playerSession].SetPosition(data.xPos, data.yPos, data.zPos);
-            players[data.playerSession].SetMoveVector(moveVector);
-        }
+        //if (!moveVector.Equals(players[data.playerSession].moveVector))
+        //{
+        //    players[data.playerSession].SetPosition(data.xPos, data.yPos, data.zPos);
+        //    players[data.playerSession].SetMoveVector(moveVector);
+        //}
     }
     private void ProcessPlayerData(PlayerNoMoveMessage data)
     {
-        players[data.playerSession].SetPosition(data.xPos, data.yPos, data.zPos);
-        players[data.playerSession].SetMoveVector(Vector3.zero);
+        //players[data.playerSession].SetPosition(data.xPos, data.yPos, data.zPos);
+        //players[data.playerSession].SetMoveVector(Vector3.zero);
     }
     private void ProcessPlayerData(PlayerAttackMessage data)
     {
@@ -452,7 +452,7 @@ public class WorldManager : MonoBehaviour
             //호스트면 리턴
             return;
         }
-        players[data.playerSession].Attack(new Vector3(data.dir_x, data.dir_y, data.dir_z));
+        //players[data.playerSession].Attack(new Vector3(data.dir_x, data.dir_y, data.dir_z));
     }
     private void ProcessPlayerData(PlayerDamegedMessage data)
     {
@@ -473,7 +473,7 @@ public class WorldManager : MonoBehaviour
         {
             var y = player.Value.GetPosition().y;
             player.Value.SetPosition(new Vector3(syncMessage.xPos[index], y, syncMessage.zPos[index]));
-            player.Value.SetHP(syncMessage.hpValue[index]);
+            //player.Value.SetHP(syncMessage.hpValue[index]);
             index++;
         }
         BackEndMatchManager.GetInstance().SetHostSession(syncMessage.host);
@@ -481,13 +481,13 @@ public class WorldManager : MonoBehaviour
 
     public bool IsMyPlayerMove()
     {
-        return players[myPlayerIndex].isMove;
+        //return players[myPlayerIndex].isMove;
         return true;
     }
 
     public bool IsMyPlayerRotate()
     {
-        return players[myPlayerIndex].isRotate;
+        //return players[myPlayerIndex].isRotate;
         return true;
     }
 
@@ -514,7 +514,7 @@ public class WorldManager : MonoBehaviour
         {
             xPos[index] = player.Value.GetPosition().x;
             zPos[index] = player.Value.GetPosition().z;
-            hp[index] = player.Value.hp;
+            //hp[index] = player.Value.hp;
             index++;
         }
         return new GameSyncMessage(hostSession, numOfClient, xPos, zPos, hp, online);
