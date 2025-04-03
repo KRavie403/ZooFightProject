@@ -61,23 +61,23 @@ public class CameraMovement : MonoBehaviour
             vertical -= 1;
 
         // WASD 키 입력
-        if (Input.GetKey(KeyCode.A))
-        {
-            horizontal -= 1;
-        }
-        if (Input.GetKey(KeyCode.D))
-        {
-            horizontal += 1;
-        }
+        //if (Input.GetKey(KeyCode.A))
+        //{
+        //    horizontal -= 1;
+        //}
+        //if (Input.GetKey(KeyCode.D))
+        //{
+        //    horizontal += 1;
+        //}
 
-        if (Input.GetKey(KeyCode.W))
-        {
-            vertical += 1;
-        }
-        if (Input.GetKey(KeyCode.S))
-        {
-            vertical -= 1;
-        }
+        //if (Input.GetKey(KeyCode.W))
+        //{
+        //    vertical += 1;
+        //}
+        //if (Input.GetKey(KeyCode.S))
+        //{
+        //    vertical -= 1;
+        //}
 
         Vector3 moveDirection = new Vector3(horizontal, vertical, 0).normalized;
         transform.Translate(moveDirection * moveSpeed * Time.deltaTime);

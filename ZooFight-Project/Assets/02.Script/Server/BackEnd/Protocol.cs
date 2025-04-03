@@ -17,6 +17,8 @@ namespace Protocol
         PlayerNoMove,   // 플레이어 이동 멈춤
         PlayerNoRotate, // 플레이어 회전 멈춤
         PlayerHoldItem, // 플레이어가 아이템을 들고있는 상태.
+        
+        PlayerModelId,
 
         bulletInfo, 
         //ItemInfo,       //플레이어가 가지고 있는 아이템 정보
@@ -401,6 +403,18 @@ namespace Protocol
                 hpValue[i] = hp[i];
                 onlineInfo[i] = online[i];
             }
+        }
+    }
+
+    public class PlayerModelIdMessage : Message
+    {
+        public SessionId playerSession;
+        public int modelId;
+
+        public PlayerModelIdMessage(SessionId session, int num) : base(Type.PlayerModelId)
+        {
+            this.playerSession = session;
+            this.modelId = num;
         }
     }
 }

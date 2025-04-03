@@ -184,7 +184,8 @@ MonoBehaviour:
   SessionId: 0
   CharacterID: -1
   myTeam: 0
-  MoveSpeed: 0
+  BaseSpeedRate: 0
+  _moveSpeed: 1
   RunSpeedRate: 1
   JumpHeight: 4
   MaxHP: 0
@@ -195,6 +196,12 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   MaxSP: 0
+  SPRecovery: 10
+  isShield: 0
+  UpdateShield:
+    m_PersistentCalls:
+      m_Calls: []
+  MaxShield: 0
   MotionSpeed: 2
   State: 0
   AxisX: 0
@@ -203,13 +210,12 @@ MonoBehaviour:
   TargetCamera: {fileID: 3118051548614708299}
   groundMask:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 0
   grabPoint: {fileID: 9212265269192179961}
+  AttackPoint: {fileID: 0}
+  ItemPoint: {fileID: 0}
   curItems: {fileID: 0}
-  IsMoving: 0
-  IsRunning: 0
-  isJump: 0
-  isGrab: 0
+  isCrashed: 0
   RecoveryTime: 2
 --- !u!136 &6219314074515022804
 CapsuleCollider:
