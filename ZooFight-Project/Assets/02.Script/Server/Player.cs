@@ -339,17 +339,17 @@ public class Player : MonoBehaviour
             coolTime -= Time.deltaTime;
         }
 
-        if (transform.position.y < -10.0f)
-        {
-            PlayerDie();
-            WorldManager.instance.dieEvent(index);
-        }
+        //if (transform.position.y < -10.0f)
+        //{
+        //    PlayerDie();
+        //    WorldManager.instance.dieEvent(index);
+        //}
 
-        if (hp <= 0)
-        {
-            PlayerDie();
-            WorldManager.instance.dieEvent(index);
-        }
+        //if (hp <= 0)
+        //{
+        //    PlayerDie();
+        //    WorldManager.instance.dieEvent(index);
+        //}
 
         //if (nameObject.activeSelf)
         //{

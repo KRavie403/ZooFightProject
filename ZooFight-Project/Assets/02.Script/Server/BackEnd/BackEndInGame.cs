@@ -428,7 +428,6 @@ public partial class BackEndMatchManager : MonoBehaviour
                 ProcessAIDate(aiPlayerInfo);
                 return true;
             case Protocol.Type.LoadRoomScene:
-                //GameSceneManager.GetInstance().ChangeRoomLoadScene();
                 Gamemanager.GetInstance().ChangeState(Gamemanager.GameState.Ready);
                 if (IsHost() == true)
                 {

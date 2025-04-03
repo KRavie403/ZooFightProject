@@ -90,7 +90,7 @@ public class Gamemanager : MonoBehaviour
         // 게임중 슬립모드 해제
         Screen.sleepTimeout = SleepTimeout.NeverSleep;
 
-        //InGameUpdateCoroutine = InGameUpdate();
+        InGameUpdateCoroutine = InGameUpdate();
 
         DontDestroyOnLoad(this.gameObject);         // 씬 전환에 영향을 받지 않게 만듬
     }
@@ -108,10 +108,9 @@ public class Gamemanager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
         gameState = GameState.Login;
-        ClientUpdateCoroutine = PollingRateUpdate();
-        StartCoroutine(ClientUpdateCoroutine);
+        //ClientUpdateCoroutine = PollingRateUpdate();
+        //StartCoroutine(ClientUpdateCoroutine);
 
         currentPlayer = FindObjectOfType<PlayerController>();
     }
@@ -136,6 +135,7 @@ public class Gamemanager : MonoBehaviour
         {
             if (gameState != GameState.InGame)
             {
+                Debug.Log("Not InGame State");
                 StopCoroutine(InGameUpdateCoroutine);
                 yield return null;
             }
@@ -250,6 +250,7 @@ public class Gamemanager : MonoBehaviour
                 break;
             case GameState.InGame:
                 // 코루틴 시작
+                Debug.Log("Start InGameUpdate");
                 StartCoroutine(InGameUpdateCoroutine);
                 break;
             case GameState.Reconnect:

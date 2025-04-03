@@ -6113,7 +6113,7 @@ MonoBehaviour:
   exitBtn: {fileID: 186581174}
   switchBtn: {fileID: 1948311385}
   selectBtn: {fileID: 534484553}
-  arrawBtns:
+  arrowBtns:
   - {fileID: 638101038}
   - {fileID: 841430785}
   tabObject: {fileID: 1811092093}

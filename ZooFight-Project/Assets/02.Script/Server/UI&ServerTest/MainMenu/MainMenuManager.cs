@@ -29,7 +29,7 @@ public partial class MainMenuManager : MonoBehaviour
     // 캐릭터 선택
     public GameObject switchBtn;
     public GameObject selectBtn;
-    public GameObject[] arrawBtns;
+    public GameObject[] arrowBtns;
     private bool _isSelect = true;
 
     // 매칭 유저
@@ -76,7 +76,7 @@ public partial class MainMenuManager : MonoBehaviour
         _matchingUI.SetActive(false);
         switchBtn.SetActive(true);
         selectBtn.SetActive(false);
-        foreach (var btn in arrawBtns) btn.SetActive(false);
+        foreach (var btn in arrowBtns) btn.SetActive(false);
         settingsBtn.onClick.AddListener(OnSettingsButtonClick);
 
         matchInfotabList = tabObject.GetComponentsInChildren<TabUI>();
@@ -182,7 +182,7 @@ public partial class MainMenuManager : MonoBehaviour
     {
         switchBtn.SetActive(false);
         selectBtn.SetActive(true);
-        foreach (var btn in arrawBtns) btn.SetActive(true);
+        foreach (var btn in arrowBtns) btn.SetActive(true);
     }
 
     /// <summary>
@@ -192,7 +192,7 @@ public partial class MainMenuManager : MonoBehaviour
     {
         switchBtn.SetActive(true);
         selectBtn.SetActive(false);
-        foreach (var btn in arrawBtns) btn.SetActive(false);
+        foreach (var btn in arrowBtns) btn.SetActive(false);
     }
 
     private async UniTask StartMatchmakingTimer()
