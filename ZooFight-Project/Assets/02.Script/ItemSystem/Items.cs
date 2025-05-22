@@ -11,7 +11,7 @@ interface IItems
 }
 
 
-public class Items : ItemProperty , IItems , IEffect
+public class Items : ItemProperty , IItems , IEffect ,IObjectId
 {
     public Items(PlayerController curPlayer)
     {
@@ -35,6 +35,11 @@ public class Items : ItemProperty , IItems , IEffect
     [SerializeField]
     EffectCode ItemEffect;
     EffectCode IEffect.EffectCode => ItemEffect;
+
+
+
+    public int ObjectId => myObjectId;
+    ObjectType IObjectId.ObjectType => myType;
 
     protected virtual void Awake()
     {

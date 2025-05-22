@@ -74,12 +74,12 @@ public class Item_BlockChangeScroll : Items
 
         float duringTime = 0;
         // 아군 , 상대편 블럭정보 가져오기
-        if (myPlayer.myTeam == HitScanner.Team.RedTeam)
+        if (myPlayer.myTeam == Team.RedTeam)
         {
             myBlock = Gamemanager.Inst.RedTeamBlock;
             enemyBlock = Gamemanager.Inst.BlueTeamBlock;
         }
-        else if (myPlayer.myTeam == HitScanner.Team.BlueTeam)
+        else if (myPlayer.myTeam == Team.BlueTeam)
         {
             myBlock = Gamemanager.Inst.BlueTeamBlock;
             enemyBlock = Gamemanager.Inst.RedTeamBlock;
@@ -160,12 +160,12 @@ public class Item_BlockChangeScroll : Items
     {
         float duringTime = 0;
         // 아군 , 상대편 블럭정보 가져오기
-        if(myPlayer.myTeam == HitScanner.Team.RedTeam)
+        if(myPlayer.myTeam == Team.RedTeam)
         {
             myBlock = Gamemanager.Inst.RedTeamBlock;
             enemyBlock = Gamemanager.Inst.BlueTeamBlock;
         }
-        else if (myPlayer.myTeam == HitScanner.Team.BlueTeam)
+        else if (myPlayer.myTeam == Team.BlueTeam)
         {
             myBlock = Gamemanager.Inst.BlueTeamBlock;
             enemyBlock = Gamemanager.Inst.RedTeamBlock;

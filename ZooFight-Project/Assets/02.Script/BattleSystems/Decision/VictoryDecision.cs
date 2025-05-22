@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 public class VictoryDecision : MonoBehaviour
 {
     [SerializeField]
-    HitScanner.Team DecisionTeam = HitScanner.Team.NotSetting;
+    Team DecisionTeam = Team.NotSetting;
 
     BlockObject enterBlock;
 
@@ -16,22 +16,22 @@ public class VictoryDecision : MonoBehaviour
     private void Update()
     {
         if (Gamemanager.Inst.IsGameEnd) return;
-        if (DecisionTeam == HitScanner.Team.NotSetting) return;
+        if (DecisionTeam == Team.NotSetting) return;
         if (enterBlock != null)
         {
-            if (enterBlock.myTeam == HitScanner.Team.NotSetting) return;
+            if (enterBlock.myTeam == Team.NotSetting) return;
 
             if (enterBlock.myTeam == DecisionTeam) 
             {
-                // ½Â¸®ÆÀ Á¤º¸ & °ÔÀÓ Á¾·á Á¤º¸ ÀúÀå
+                // ìŠ¹ë¦¬íŒ€ ì •ë³´ & ê²Œì„ ì¢…ë£Œ ì •ë³´ ì €ì¥
                 Gamemanager.Inst.IsGameEnd = true;
                 Gamemanager.Inst.VictoryTeam = enterBlock.myTeam;
 
-                // ½Â¸® & ÆĞ¹è ¾Ö´Ï¸ŞÀÌ¼Ç µîµî Ãâ·Â
+                // ìŠ¹ë¦¬ & íŒ¨ë°° ì• ë‹ˆë©”ì´ì…˜ ë“±ë“± ì¶œë ¥
                 WinnerTeamAction(Gamemanager.Inst.VictoryTeam);
                 LoseTeamAction(Gamemanager.Inst.VictoryTeam);
 
-                // ¾À ÀüÈ¯ ½ÇÇà
+                // ì”¬ ì „í™˜ ì‹¤í–‰
                 //if (movingNextSceneCoroutine != null)
                 //{
                 //    StopCoroutine(movingNextSceneCoroutine);
@@ -71,31 +71,31 @@ public class VictoryDecision : MonoBehaviour
         }
     }
 
-    public void WinnerTeamAction(HitScanner.Team WinnerTeam)
+    public void WinnerTeamAction(Team WinnerTeam)
     {
         //Gamemanager.Inst.GetTeam(WinnerTeam);
-        if (WinnerTeam == HitScanner.Team.NotSetting) return;
+        if (WinnerTeam == Team.NotSetting) return;
         Gamemanager.Inst.currentPlayer.WinAction();
-        // ¼­¹ö ¾÷·Îµå½Ã »ç¿ëÇÒ ºÎºĞ
+        // ì„œë²„ ì—…ë¡œë“œì‹œ ì‚¬ìš©í•  ë¶€ë¶„
         //for (int i = 0; i < Gamemanager.Inst.GetTeamId(WinnerTeam).Count; i++)
         //{
-        //    // ½Â¸® ¾Ö´Ï¸ŞÀÌ¼Ç µ¿ÀÛ
+        //    // ìŠ¹ë¦¬ ì• ë‹ˆë©”ì´ì…˜ ë™ì‘
         //    //if (Gamemanager.Inst.)
         //    Gamemanager.Inst.GetTeam(WinnerTeam)
         //        [Gamemanager.Inst.GetWinnerTeamId()[i]].WinAction();
         //}
 
     }
-    public void LoseTeamAction(HitScanner.Team WinnerTeam)
+    public void LoseTeamAction(Team WinnerTeam)
     {
         //Gamemanager.Inst.GetEnemyTeam(WinnerTeam);
-        if (WinnerTeam == HitScanner.Team.NotSetting) return;
+        if (WinnerTeam == Team.NotSetting) return;
         Gamemanager.Inst.currentPlayer.LoseAction();
 
-        // ¼­¹ö ¾÷·Îµå½Ã »ç¿ëÇÒºÎºĞ
+        // ì„œë²„ ì—…ë¡œë“œì‹œ ì‚¬ìš©í• ë¶€ë¶„
         //for (int i = 0; i < Gamemanager.Inst.GetTeamId((myHitScanner.Team)((int)WinnerTeam*-1)).Count; i++)
         //{
-        //    // ½Â¸® ¾Ö´Ï¸ŞÀÌ¼Ç µ¿ÀÛ
+        //    // ìŠ¹ë¦¬ ì• ë‹ˆë©”ì´ì…˜ ë™ì‘
         //    Gamemanager.Inst.GetEnemyTeam(WinnerTeam)
         //        [Gamemanager.Inst.GetLoserTeamId()[i]].LoseAction();
         //}
@@ -108,7 +108,7 @@ public class VictoryDecision : MonoBehaviour
         yield return new WaitForSeconds(1.0f);
         SceneManager.LoadScene(3);
 
-        //  ¾À ·Îµå ÈÄ ÄÚ·çÆ¾ ÂüÁ¶¸¦ ÃÊ±âÈ­
+        //  ì”¬ ë¡œë“œ í›„ ì½”ë£¨í‹´ ì°¸ì¡°ë¥¼ ì´ˆê¸°í™”
         movingNextSceneCoroutine = null;
     }
 

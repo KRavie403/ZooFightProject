@@ -1,16 +1,7 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum EntityType
-{
-    Player,
-    Block,
-    Wall,
-    Ground,
-    TypeCount
-}
+
 
 // 타격을 받는 대상이 가지고있는 인터페이스
 interface IHitBox 
@@ -20,7 +11,7 @@ interface IHitBox
         get; 
     }
     
-    public HitScanner.Team Team 
+    public Team Team 
     { 
         get; 
     }
@@ -35,7 +26,7 @@ interface IHitBox
 // 타격을 주는 객채가 가지고 잇는 클래스
 public class HitScanner : MonoBehaviour
 {
-    public enum Team { RedTeam = -1,NotSetting,BlueTeam,AllTarget}
+    //public enum Team { RedTeam = -1,NotSetting,BlueTeam,AllTarget}
 
     // 타격 대상
     Team targetTeam = Team.NotSetting;

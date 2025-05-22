@@ -25,7 +25,7 @@ public class Characater_ItemReady : BaseState
         base.Enter(BeforeState);
         player.SetState(PlayerController.pState.ItemReady);
         //player.curItems.
-        //player.curItems = ObjectPoolingManager.instance.GetObject<Items>
+        //player.curItems = ObjectPoolingManager.instance.GetObject<Item>
         //    (player.curItems.name, Vector3.zero, Quaternion.identity, player.ItemPoint,false);
         player.curItems.Initate(ItemSystem.Inst.ItemKeys[player.curItems.myCode].GetValues(),player);
         player.curItems.gameObject.SetActive(true);

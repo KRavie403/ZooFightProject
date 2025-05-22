@@ -102,6 +102,7 @@ public class ObjectPoolingManager : MonoBehaviour
     void MakeDir(string _name)
     {
         GameObject newDir = new GameObject(_name);
+        newDir.AddComponent<ObjectDir>();
         newDir.transform.SetParent(this.transform);
         poolParentDic[_name] = newDir.transform;
     }
@@ -122,6 +123,7 @@ public class ObjectPoolingManager : MonoBehaviour
             inst.name = _prefab.name;
             inst.SetActive(false);
         }
+        _parent.GetComponent<ObjectDir>().ReNewMyObj();
         return inst;
     }
 

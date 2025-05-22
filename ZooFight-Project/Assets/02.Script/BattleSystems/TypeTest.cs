@@ -26,7 +26,7 @@ public class TypeTest : MonoBehaviour ,IHitScanTarget
     
     }
 
-    void IHitScanTarget.Hit()
+    void IHitScanTarget.Hit(Component comp)
     {
         Debug.Log("Hit");
         transform.Translate(Vector3.forward);

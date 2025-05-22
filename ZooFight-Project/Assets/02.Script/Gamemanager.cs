@@ -7,7 +7,27 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 
+interface IObjectId
+{
+    int ObjectId
+    {
+        get;
+    }
 
+    ObjectType ObjectType { get; }
+
+
+} 
+
+public enum ObjectType : sbyte
+{
+    Character,
+    Item,
+    Effect,
+    Block,
+    ObjectDir,
+    TypeCount
+}
 
 // 게임매니저가 두가지의 업데이트를 담당함
 // 1.프레임간격의 업데이트
@@ -55,7 +75,7 @@ public class Gamemanager : MonoBehaviour
     public int CharacterID = -1;
 
     public bool IsGameEnd = false;
-    public HitScanner.Team VictoryTeam = HitScanner.Team.NotSetting;
+    public Team VictoryTeam = Team.NotSetting;
 
     // 팀멤버 <Id,컴포넌트> 조합 
     public int MaxTeamMember = 1;
@@ -64,9 +84,15 @@ public class Gamemanager : MonoBehaviour
     public List<int> BlueTeamId;
     public Dictionary<int, PlayerController> BlueTeamPlayers;
 
+    public Dictionary<int, GameObject> ActiveObjects;
+
+    public List<PlayerController> Players;
+
     public BlockObject RedTeamBlock;
     public BlockObject BlueTeamBlock;
 
+    public Dictionary<int, GameObject> SpawnObject;
+    
     #endregion
     //public WaitForSeconds BasicPollingRate
 
@@ -315,29 +341,37 @@ public class Gamemanager : MonoBehaviour
     #region  정보인출
 
     // 각 팀원 목록
-    public Dictionary<int, PlayerController> GetTeam(HitScanner.Team team)
+    public Dictionary<int, PlayerController> GetTeam(Team team)
     {
         switch (team)
         {
-            case HitScanner.Team.RedTeam:
+            case Team.RedTeam:
                 return RedTeamPlayers;
-            case HitScanner.Team.BlueTeam:
+            case Team.BlueTeam:
                 return BlueTeamPlayers;
-            case HitScanner.Team.NotSetting:
+            case Team.NotSetting:
                 return null;
             default:
                 return null;
         }
     }
-    public Dictionary<int, PlayerController> GetEnemyTeam(HitScanner.Team team)
+
+    public List<PlayerController> GetTeamPlayers(Team team)
+    {
+
+
+        return null;
+    }
+
+    public Dictionary<int, PlayerController> GetEnemyTeam(Team team)
     {
         switch (team)
         {
-            case HitScanner.Team.RedTeam:
+            case Team.RedTeam:
                 return BlueTeamPlayers;
-            case HitScanner.Team.BlueTeam:
+            case Team.BlueTeam:
                 return RedTeamPlayers;
-            case HitScanner.Team.NotSetting:
+            case Team.NotSetting:
                 return null;
             default: return null;
         }
@@ -348,11 +382,11 @@ public class Gamemanager : MonoBehaviour
     {
         switch (VictoryTeam)
         {
-            case HitScanner.Team.RedTeam:
+            case Team.RedTeam:
                 return RedTeamId;
-            case HitScanner.Team.NotSetting:
+            case Team.NotSetting:
                 return null;
-            case HitScanner.Team.BlueTeam:
+            case Team.BlueTeam:
                 return BlueTeamId;
             default:
                 return null;
@@ -362,26 +396,26 @@ public class Gamemanager : MonoBehaviour
     {
         switch (VictoryTeam)
         {
-            case HitScanner.Team.RedTeam:
+            case Team.RedTeam:
                 return BlueTeamId;
-            case HitScanner.Team.NotSetting:
+            case Team.NotSetting:
                 return null;
-            case HitScanner.Team.BlueTeam:
+            case Team.BlueTeam:
                 return RedTeamId;
             default:
                 return null;
         }
     }
     // 지정팀 팀원 id값
-    public List<int> GetTeamId(HitScanner.Team team)
+    public List<int> GetTeamId(Team team)
     {
         switch (team)
         {
-            case HitScanner.Team.RedTeam:
+            case Team.RedTeam:
                 return RedTeamId;
-            case HitScanner.Team.NotSetting:
+            case Team.NotSetting:
                 return null;
-            case HitScanner.Team.BlueTeam:
+            case Team.BlueTeam:
                 return BlueTeamId;
             default:
                 return null;
@@ -405,35 +439,35 @@ public class Gamemanager : MonoBehaviour
     }
 
     // 지정 팀 블럭
-    public BlockObject GetTeamBlock(HitScanner.Team team)
+    public BlockObject GetTeamBlock(Team team)
     {
         switch (team)
         {
-            case HitScanner.Team.RedTeam:
+            case Team.RedTeam:
                 if (RedTeamBlock != null) return RedTeamBlock;
                 else return null;
-            case HitScanner.Team.NotSetting:
+            case Team.NotSetting:
                 return null;
-            case HitScanner.Team.BlueTeam:
+            case Team.BlueTeam:
                 if (BlueTeamBlock != null) return BlueTeamBlock;
                 else return null;
-            case HitScanner.Team.AllTarget:
+            case Team.AllTarget:
                 return null;
             default:
                 return null;
         }
     }
-    public BlockObject GetEnemyBlock(HitScanner.Team team)
+    public BlockObject GetEnemyBlock(Team team)
     {
         switch (team)
         {
-            case HitScanner.Team.RedTeam:
+            case Team.RedTeam:
                 return BlueTeamBlock;
-            case HitScanner.Team.NotSetting:
+            case Team.NotSetting:
                 return null;
-            case HitScanner.Team.BlueTeam:
+            case Team.BlueTeam:
                 return RedTeamBlock;
-            case HitScanner.Team.AllTarget:
+            case Team.AllTarget:
                 return null;
             default:
                 return null;
@@ -443,21 +477,21 @@ public class Gamemanager : MonoBehaviour
     {
         switch (obj.myTeam)
         {
-            case HitScanner.Team.RedTeam:
+            case Team.RedTeam:
                 if (RedTeamBlock != null)
                 {
                     RedTeamBlock = obj;
                 }
                 return;
-            case HitScanner.Team.NotSetting:
+            case Team.NotSetting:
                 return;
-            case HitScanner.Team.BlueTeam:
+            case Team.BlueTeam:
                 if (BlueTeamBlock != null)
                 {
                     BlueTeamBlock = obj;
                 }
                 return;
-            case HitScanner.Team.AllTarget:
+            case Team.AllTarget:
                 return;
             default:
                 return;

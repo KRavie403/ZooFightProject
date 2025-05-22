@@ -11,7 +11,7 @@ using UnityEngine;
 /// Value 5 사거리
 /// </summary>
 
-public class Item_InkBomb : Items
+public class Item_InkBomb : Items , IHitScanner
 {
     public Item_InkBomb(PlayerController player) : base(player)
     {
@@ -30,6 +30,35 @@ public class Item_InkBomb : Items
     bool isGroundCrash = false;
 
     bool isItemActive = false;
+
+    #region 히트스캔 코드
+
+    bool isHit = false;
+    public Component[] myTarget;
+
+    Component IHitScanner.myComp => this as Component;
+
+    Component[] IHitScanner.myTargets
+    {
+        get => myTarget;
+    }
+
+    void IHitScanner.AddTarget(Component[] target)
+    {
+        myTarget = target;
+    }
+
+    void IHitScanner.Hit()
+    {
+        //foreach (Component target in myTarget)
+        //{
+        //    target.GetComponent<IHitScanTarget>().Hit(this as Component);
+        //}
+        isHit = true;
+    }
+
+    #endregion
+
 
     protected override void Awake()
     {
@@ -68,6 +97,15 @@ public class Item_InkBomb : Items
             if (isActive)
             {
                 duringTime += Time.deltaTime;
+
+                HitScan.Inst.HitScans(this.gameObject, 0.5f, ScanTarget.Player, ScanType.Sphere);
+
+                if (isHit)
+                {
+                    myTarget[0].GetComponent<IHitScanTarget>().Hit(this);
+                    break;
+                }
+
             }
 
             if(Targets.Count != 0)
@@ -75,6 +113,7 @@ public class Item_InkBomb : Items
 
             }
 
+            yield return null;
 
         }
     }

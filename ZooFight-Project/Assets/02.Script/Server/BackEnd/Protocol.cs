@@ -384,16 +384,16 @@ namespace Protocol
         public int count = 0;
         public float[] xPos = null;
         public float[] zPos = null;
-        public int[] hpValue = null;
+        public float[] hpValue = null;
         public bool[] onlineInfo = null;
 
-        public GameSyncMessage(SessionId host, int count, float[] x, float[] z, int[] hp, bool[] online) : base(Type.GameSync)
+        public GameSyncMessage(SessionId host, int count, float[] x, float[] z, float[] hp, bool[] online) : base(Type.GameSync)
         {
             this.host = host;
             this.count = count;
             this.xPos = new float[count];
             this.zPos = new float[count];
-            this.hpValue = new int[count];
+            this.hpValue = new float[count];
             this.onlineInfo = new bool[count];
 
             for (int i = 0; i < count; ++i)
