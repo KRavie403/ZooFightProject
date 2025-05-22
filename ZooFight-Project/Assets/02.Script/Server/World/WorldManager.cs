@@ -4,6 +4,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using TMPro;
+
 public class WorldManager : MonoBehaviour
 {
     static public WorldManager instance;
@@ -19,7 +21,11 @@ public class WorldManager : MonoBehaviour
     //public GameObject particle;               // (수정)
     private const int MAXPLAYER = 6;
     public int alivePlayer { get; set; }
-    private Dictionary<SessionId, PlayerController> players;
+    //private Dictionary<SessionId, PlayerController> players;
+    private Dictionary<SessionId, Player> players;
+    private Dictionary<int, string> playersList;
+    private Dictionary<SessionId, int> playerSessionId;
+    private Dictionary<int, GameSceneManager> playerProfiles;
     public GameObject startPointObject;
     private List<Vector4> statringPoints;
 
@@ -27,6 +33,7 @@ public class WorldManager : MonoBehaviour
     public delegate void PlayerDie(SessionId index);
     public PlayerDie dieEvent;
     #endregion
+
     void Awake()
     {
         instance = this;
@@ -59,8 +66,8 @@ public class WorldManager : MonoBehaviour
         }
         Debug.Log("게임 초기화 진행");
         gameRecord = new Stack<SessionId>();
-        //GameManager.OnGameOver += OnGameOver;
-        //GameManager.OnGameResult += OnGameResult;
+        //Gamemanager.OnGameOver += OnGameOver;
+        //Gamemanager.OnGameResult += OnGameResult;
         myPlayerIndex = SessionId.None;
         SetPlayerAttribute();
         OnGameStart();
@@ -81,7 +88,7 @@ public class WorldManager : MonoBehaviour
             statringPoints.Add(point);
         }
 
-        dieEvent += PlayerDieEvent;
+        //dieEvent += PlayerDieEvent;
     }
 
     private void PlayerDieEvent(SessionId index) // 캐릭터 죽음 이벤트를 종료 이벤트로 바꿔야하나? <<
@@ -161,12 +168,14 @@ public class WorldManager : MonoBehaviour
 
     public void SetPlayerInfo()
     {
+        Debug.Log("SetPlayerInfo");
         if (BackEndMatchManager.GetInstance().sessionIdList == null)
         {
             // 현재 세션ID 리스트가 존재하지 않으면, 0.5초 후 다시 실행
             Invoke("SetPlayerInfo", 0.5f);
             return;
         }
+        Debug.Log("세션 리스트 존재");
         var gamers = BackEndMatchManager.GetInstance().sessionIdList;
         int size = gamers.Count;
         if (size <= 0)
@@ -180,25 +189,43 @@ public class WorldManager : MonoBehaviour
             return;
         }
 
-        players = new Dictionary<SessionId, PlayerController>();
+        //players = new Dictionary<SessionId, PlayerController>();
+        players = new Dictionary<SessionId, Player>();
+        playersList = new Dictionary<int, string>();
+        playerSessionId = new Dictionary<SessionId, int>();
+        playerProfiles = new Dictionary<int, GameSceneManager>();
         BackEndMatchManager.GetInstance().SetPlayerSessionList(gamers);
 
         int index = 0;
+        int modelNum = BackendGameData.Inst.UserGameData.character;
         foreach (var sessionId in gamers)
         {
+            Debug.Log($"sessionId: {index} : {sessionId}");
             GameObject player = Instantiate(playerPrefeb, new Vector3(statringPoints[index].x, statringPoints[index].y, statringPoints[index].z), Quaternion.identity, playerPool.transform);
-            players.Add(sessionId, player.GetComponent<PlayerController>());
+            //players.Add(sessionId, player.GetComponent<PlayerController>());
+            players.Add(sessionId, player.GetComponent<Player>());
 
             if (BackEndMatchManager.GetInstance().IsMySessionId(sessionId))
             {
+                Debug.Log($"IsMySessionId: {sessionId}");
                 myPlayerIndex = sessionId;
                 //players[sessionId].Initialize(true, myPlayerIndex, BackEndMatchManager.GetInstance().GetNickNameBySessionId(sessionId), statringPoints[index].w);
             }
             else
             {
-                //players[sessionId].Initialize(false, sessionId, BackEndMatchManager.GetInstance().GetNickNameBySessionId(sessionId), statringPoints[index].w);
+                Debug.Log($"JustSessionId: {sessionId}");
+                players[sessionId].Initialize(false, sessionId, BackEndMatchManager.GetInstance().GetNickNameBySessionId(sessionId), statringPoints[index].w);
             }
             index += 1;
+            PlayerModelIdMessage playerModelIdMessage = new PlayerModelIdMessage(sessionId, index);
+            BackEndMatchManager.GetInstance().SendDataToInGame<PlayerModelIdMessage>(playerModelIdMessage);
+
+            playersList[index] = BackEndMatchManager.GetInstance().GetNickNameBySessionId(sessionId);
+            playerSessionId[sessionId] = index;
+            Debug.Log($"playerSessionId[{sessionId}]: {index} - {playersList[index]}");
+
+            Debug.Log($"playersList[{index}]: {playersList[index]}");
+            //Debug.Log($"playerProfiles[{index - 1}]: {playerProfiles[index - 1]}");
         }
         Debug.Log("Num Of Current Player : " + size);
 
@@ -311,6 +338,10 @@ public class WorldManager : MonoBehaviour
         }
         switch (msg.type)
         {
+            case Protocol.Type.PlayerModelId:
+                PlayerModelIdMessage modelIdMessage = DataParser.ReadJsonData<PlayerModelIdMessage>(args.BinaryUserData);
+                ProcessPlayerData(modelIdMessage);
+                break;
             case Protocol.Type.StartCount:
                 StartCountMessage startCount = DataParser.ReadJsonData<StartCountMessage>(args.BinaryUserData);
                 Debug.Log("wait second : " + (startCount.time));
@@ -318,7 +349,7 @@ public class WorldManager : MonoBehaviour
                 break;
             case Protocol.Type.GameStart:
                 //InGameUiManager.GetInstance().SetStartCount(0, false);
-                //GameManager.GetInstance().ChangeState(GameManager.GameState.InGame);
+                Gamemanager.GetInstance().ChangeState(Gamemanager.GameState.InGame);
                 break;
             case Protocol.Type.GameEnd:
                 GameEndMessage endMessage = DataParser.ReadJsonData<GameEndMessage>(args.BinaryUserData);
@@ -411,11 +442,11 @@ public class WorldManager : MonoBehaviour
             PlayerNoMoveMessage msg = new PlayerNoMoveMessage(index, playerPos);
             BackEndMatchManager.GetInstance().SendDataToInGame<PlayerNoMoveMessage>(msg);
         }
-        if (isAttack)
-        {
-            PlayerAttackMessage msg = new PlayerAttackMessage(index, attackPos);
-            BackEndMatchManager.GetInstance().SendDataToInGame<PlayerAttackMessage>(msg);
-        }
+        //if (isAttack)
+        //{
+        //    PlayerAttackMessage msg = new PlayerAttackMessage(index, attackPos);
+        //    BackEndMatchManager.GetInstance().SendDataToInGame<PlayerAttackMessage>(msg);
+        //}
     }
 
     private void ProcessAttackKeyData(SessionId session, Vector3 pos)
@@ -460,6 +491,18 @@ public class WorldManager : MonoBehaviour
         //EffectManager.instance.EnableEffect(data.hit_x, data.hit_y, data.hit_z);
     }
 
+    private void ProcessPlayerData(PlayerModelIdMessage data)
+    {
+        Debug.Log("Process Player Data");
+        int index = playerSessionId[data.playerSession];
+        Debug.Log($"!! index: with playerSessionId {index}");
+        Debug.Log($"!! playerSessionId: {data.playerSession}");
+        Debug.Log($"!! playerModelId: {data.modelId}");
+        Debug.Log($"!! playerList {playersList[index]}");
+
+        //playerProfiles[index].SetPlayerProfile(index, playersList[index], data.modelId);
+    }
+
     private void ProcessSyncData(GameSyncMessage syncMessage)
     {
         // 플레이어 데이터 동기화
@@ -473,7 +516,7 @@ public class WorldManager : MonoBehaviour
         {
             var y = player.Value.GetPosition().y;
             player.Value.SetPosition(new Vector3(syncMessage.xPos[index], y, syncMessage.zPos[index]));
-            player.Value.SetHp(syncMessage.hpValue[index]);
+            //player.Value.SetHP(syncMessage.hpValue[index]);
             index++;
         }
         BackEndMatchManager.GetInstance().SetHostSession(syncMessage.host);
@@ -518,12 +561,12 @@ public class WorldManager : MonoBehaviour
             index++;
         }
         return new GameSyncMessage(hostSession, numOfClient, xPos, zPos, hp, online);
-        return null;
     }
 
     public Vector3 GetMyPlayerPos()
     {
         return players[myPlayerIndex].GetPosition();
-        return Vector3.zero;
     }
+
+
 }
