@@ -22,6 +22,14 @@ public class TeamBlock : BlockObject
         base.Update();
     }
 
-
+    public void SetTeam(Team team)
+    {
+        if(team == Team.NotSetting)
+        {
+            // 재설정할수있게 루틴만들기
+            return;
+        }
+        myTeam = team;
+    }
 
 }

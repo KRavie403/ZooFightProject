@@ -15,7 +15,7 @@ public class Character_Recovery : BaseState
     {
 
         base.Initate();
-        //ableFuncs.Add(PlayerController.pFunc.Move, player.CurAxisMove);
+        //ableFuncs.Add(PlayerController.pFunc.PlayersMove, player.CurAxisMove);
         player.SetState(PlayerController.pState.Recovery);
 
     }

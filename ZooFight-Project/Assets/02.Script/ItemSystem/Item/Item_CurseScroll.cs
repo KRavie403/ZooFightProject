@@ -4,8 +4,8 @@ using UnityEngine;
 
 
 /// <summary>
-/// ¾ÆÀÌÅÛ¸í : ÀúÁÖ ½ºÅ©·Ñ
-/// Value 1 Áö¼Ó½Ã°£
+/// ì•„ì´í…œëª… : ì €ì£¼ ìŠ¤í¬ë¡¤
+/// Value 1 ì§€ì†ì‹œê°„
 /// 
 /// </summary>
 
@@ -20,7 +20,7 @@ public class Item_CurseScroll : Items
 
     public EffectPlayer effectPlayer;
 
-    HitScanner.Team TargetTeam = 0;
+    Team TargetTeam = 0;
 
     List<PlayerController> myTargets = new List<PlayerController>();
 
@@ -59,23 +59,23 @@ public class Item_CurseScroll : Items
 
         float duringTime = 0.0f;
 
-        // ´ë»ó Ä³¸¯ÅÍ È®Á¤
+        // ëŒ€ìƒ ìºë¦­í„° í™•ì •
         //myPlayer.myTeam
         PlayerController[] TargetCharcaters = new PlayerController[] { };
 
 
-        // ´ë»ó Ä³¸¯ÅÍ Å° ¹İÀü
+        // ëŒ€ìƒ ìºë¦­í„° í‚¤ ë°˜ì „
         foreach (PlayerController c in TargetCharcaters)
         {
             c.isKeyReverse = true;
         }
 
-        // Å°¹İÀü Å×½ºÆ®¿ë ÀÚÃ¼ ¹İÀüÄÚµå(»èÁ¦¿¹Á¤)
+        // í‚¤ë°˜ì „ í…ŒìŠ¤íŠ¸ìš© ìì²´ ë°˜ì „ì½”ë“œ(ì‚­ì œì˜ˆì •)
         myPlayer.isKeyReverse = true;
 
-        // ÀúÁÖ ÀÌÆåÆ® Ãâ·Â ´ë±â
+        // ì €ì£¼ ì´í™íŠ¸ ì¶œë ¥ ëŒ€ê¸°
         //CuresEffectSetting();
-        // ÀúÁÖ »ç¿îµå Àç»ı ´ë±â
+        // ì €ì£¼ ì‚¬ìš´ë“œ ì¬ìƒ ëŒ€ê¸°
         //CurseSoundSetting();
 
         myPlayer.ItemUseEnd();
@@ -92,24 +92,24 @@ public class Item_CurseScroll : Items
 
         }
 
-        // ´ë»ó Ä³¸¯ÅÍ Å° ¹İÀü ÇØÁ¦
+        // ëŒ€ìƒ ìºë¦­í„° í‚¤ ë°˜ì „ í•´ì œ
         foreach (PlayerController c in TargetCharcaters)
         {
             c.isKeyReverse = false;
         }
 
-        // Å×½ºÆ® ÄÚµå
+        // í…ŒìŠ¤íŠ¸ ì½”ë“œ
         myPlayer.isKeyReverse = false;
-        // ¾ÆÀÌÅÛ ¹İÈ¯
+        // ì•„ì´í…œ ë°˜í™˜
         ReturnItem();
     }
 
     public void CuresTargetSetting()
     {
-        if(myPlayer.myTeam != HitScanner.Team.NotSetting)
+        if(myPlayer.myTeam != Team.NotSetting)
         {
-            TargetTeam = (HitScanner.Team)((int)myPlayer.myTeam * -1);
-            // Å¸°ÙÆÀÀÇ ÆÀ¿øµé ÀÎÃâÇØ¿À±â
+            TargetTeam = (Team)((int)myPlayer.myTeam * -1);
+            // íƒ€ê²ŸíŒ€ì˜ íŒ€ì›ë“¤ ì¸ì¶œí•´ì˜¤ê¸°
 
         }
     }
@@ -118,17 +118,17 @@ public class Item_CurseScroll : Items
     {
         for (int i = 0; i < myTargets.Count; i++)
         {
-            // ÃßÈÄ ÀÌÆåÆ® ¸Å´ÏÀú¸¦ ÅëÇØ¼­ ¹ßµ¿ÇÒ¼öÀÖµµ·Ï ¼öÁ¤¿¹Á¤
+            // ì¶”í›„ ì´í™íŠ¸ ë§¤ë‹ˆì €ë¥¼ í†µí•´ì„œ ë°œë™í• ìˆ˜ìˆë„ë¡ ìˆ˜ì •ì˜ˆì •
             effectPlayer.EffectPlay(0, myTargets[i].transform);
         }
     }
 
     public void CurseSoundSetting()
     {
-        // »ç¿îµå¹öÀü Á¦ÀÛ ÇÊ¿ä
+        // ì‚¬ìš´ë“œë²„ì „ ì œì‘ í•„ìš”
         for (int i = 0; i < myTargets.Count; i++)
         {
-            // ÃßÈÄ »ç¿îµå ¸Å´ÏÀú¸¦ ÅëÇØ¼­ ¹ßµ¿ÇÒ¼öÀÖµµ·Ï ¼öÁ¤¿¹Á¤
+            // ì¶”í›„ ì‚¬ìš´ë“œ ë§¤ë‹ˆì €ë¥¼ í†µí•´ì„œ ë°œë™í• ìˆ˜ìˆë„ë¡ ìˆ˜ì •ì˜ˆì •
 
         }
     }

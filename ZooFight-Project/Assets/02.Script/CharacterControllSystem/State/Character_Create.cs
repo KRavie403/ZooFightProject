@@ -17,7 +17,7 @@ public class Character_Create : BaseState
     public override void Initate()
     {
         base.Initate();
-        //ableFuncs.Add(PlayerController.pFunc.Move,player.CurAxisMove); 
+        //ableFuncs.Add(PlayerController.pFunc.PlayersMove,player.CurAxisMove); 
 
     }
 

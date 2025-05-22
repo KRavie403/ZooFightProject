@@ -6,6 +6,17 @@ using System.Security;
 using UnityEngine;
 
 
+public enum Team { RedTeam = -1, NotSetting, BlueTeam, AllTarget }
+
+public enum EntityType
+{
+    Player,
+    Block,
+    Wall,
+    Ground,
+    TypeCount
+}
+
 public enum ScanType
 {
     Sphere, //구체형
@@ -17,7 +28,7 @@ public enum ScanType
     Type
 }
 
-public enum ScanTarget
+public enum ScanTarget : sbyte
 {
     Player,
     Block,
@@ -27,7 +38,7 @@ public enum ScanTarget
     TypeCount
 }
 
-public enum PlayerTeam
+public enum PlayerTeam : sbyte
 { 
     RedTeam = -1,
     NotSetting = 0, 

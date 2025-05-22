@@ -5,10 +5,12 @@ using UnityEngine.Events;
 
 public class CharacterProperty : MonoBehaviour
 {
+    public ObjectType myObjType = ObjectType.Character;
+    public int myObjectNum = -1;
 
     public int SessionId = new();
     public int CharacterID = -1;
-    public HitScanner.Team myTeam = HitScanner.Team.NotSetting;
+    public Team myTeam = Team.NotSetting;
 
     [Range(0f, 10f)]
     public float BaseSpeedRate;

@@ -5,11 +5,7 @@ using UnityEngine;
 using UnityEngine.Events;
 
 
-
-
-
-
-public class PlayerController : MovementController, IHitScanTarget , IHitScanner
+public class PlayerController : MovementController, IHitScanTarget , IHitScanner , IObjectId
 {
     
     #region 참조 변수 목록
@@ -25,11 +21,6 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
         Down,
         Recovery,
 
-        S_Idle,
-        S_Move,
-        S_Jump,
-        S_ItemReady,
-        S_ItemUse,
 
         GameReady,
         GameEnd,
@@ -67,7 +58,7 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
     public float AxisX, AxisY = 0;
     public Vector3 DenialPos = Vector3.zero;
     public Vector3 Dir => Vector3.right * AxisX + Vector3.forward * AxisY;
-    
+    public Vector3 curNetPos = Vector3.zero;
 
     public CharacterCamera TargetCamera;
     public LayerMask groundMask;
@@ -80,10 +71,40 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
     public Items curItems;
 
     CharacterData myData;
+    CharacterData_Class C_myData;
 
-    
-   
-    //bool IsMoving = false;
+
+    public bool isPlayersConrtol = false;
+    bool isMoving 
+    {
+        get
+        {
+            if (isPlayersConrtol)
+            {
+                if (AxisX == 0 && AxisY == 0)
+                {
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                if (curNetPos == transform.position)
+                {
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+        }
+    }
+
+
     bool isSuperArmor = false;
     bool isUIOpen = false;
     bool IsRunning = false;
@@ -114,6 +135,14 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
 
 
     #region 히트스캔코드
+
+    #region Object ID
+
+    int IObjectId.ObjectId => myObjectNum;
+
+    ObjectType IObjectId.ObjectType => myObjType;
+
+    #endregion
 
     Component IHitScanner.myComp => this as Component;
     Component IHitScanTarget.myComp => this as Component;
@@ -223,22 +252,6 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
         p_States.Add(pState.Recovery, new Character_Recovery(this, PlayerSM));
 
 
-        p_States.Add(pState.S_Idle,new Character_SIdle(this, PlayerSM));
-        p_States.Add(pState.S_Move,new Character_SMove(this, PlayerSM));
-        p_States.Add(pState.S_Jump,new Character_Jump(this, PlayerSM));
-
-        p_States.Add(pState.S_ItemReady, new Character_SItemReady(this, PlayerSM));
-        p_States.Add(pState.S_ItemUse,new Character_SItemUse(this, PlayerSM));
-
-        // 테스트
-        S_States.Add(pState.S_Idle, new Character_SIdle(this, PlayerSM));
-        S_States.Add(pState.S_Move, new Character_SMove(this, PlayerSM));
-        S_States.Add(pState.S_Jump, new Character_Jump(this, PlayerSM));
-
-        S_States.Add(pState.S_ItemReady, new Character_SItemReady(this, PlayerSM));
-        S_States.Add(pState.S_ItemUse, new Character_SItemUse(this, PlayerSM));
-
-
         //CharacterInitalize(myTeam, SessionId, CharacterID);
 
         StateInitiate();
@@ -309,7 +322,7 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
     /// <param name="PlayerTeam"></param>
     /// <param name="SessionID"></param>
     /// <param name="PlayerID"></param>
-    public void CharacterInitalize(HitScanner.Team PlayerTeam,int SessionID,int PlayerID)
+    public void CharacterInitalize(Team PlayerTeam,int SessionID,int PlayerID)
     {
         myTeam = PlayerTeam;
         SessionId = SessionID;
@@ -342,10 +355,11 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
     {
         myData.isMoving = isMoving;
     }
-    public bool GetIsmoving()
+    public bool GetIsMoving()
     {
         return myData.isMoving;
     }
+
 
     public void SetRunning(bool isRunning)
     {
@@ -359,22 +373,21 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
     public void MoveStateCheck()
     {
         
+        // ismove로 전환 필요
         if(AxisX == 0 && AxisY == 0)
         {
             if (isShield)
             {
                 //if(PlayerSM.CurrentState == p_States[p])
-                if(PlayerSM.CurrentState != p_States[pState.S_Idle])
+                if(isSuperArmor)
                 {
-                    PlayerSM.ChangeState(p_States[pState.S_Idle]);
                     SetIsMoving(false);
                 }
             }
             else
             {
-                if (PlayerSM.CurrentState != p_States[pState.Idle])
+                if (isSuperArmor)
                 {
-                    PlayerSM.ChangeState(p_States[pState.Idle]);
                     SetIsMoving(false);
                 }
             }
@@ -383,14 +396,15 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
         {
             if (isShield)
             {
-                if (PlayerSM.CurrentState != p_States[pState.S_Move])
-                    PlayerSM.ChangeState(p_States[pState.S_Move]);
+                if (isSuperArmor)
+                    ;
                 SetIsMoving(true);
             }
             else
             {
-                if(PlayerSM.CurrentState != p_States[pState.Move])
-                    PlayerSM.ChangeState(p_States[pState.Move]);
+                if (isSuperArmor) 
+                    ;
+
                 SetIsMoving(true);
             }
         }
@@ -485,7 +499,12 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
         }
     }
 
-    public void Move(float AxisX , float AxisY)
+    /// <summary>
+    /// 사용자의 직접 조작에 의한 이동함수
+    /// </summary>
+    /// <param name="AxisX"></param>
+    /// <param name="AxisY"></param>
+    public void PlayersMove(float AxisX , float AxisY)
     {
 
 
@@ -540,7 +559,7 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
     {
         if (!denial)
         {
-            Move(AxisX, AxisY);
+            PlayersMove(AxisX, AxisY);
         }
         else
         {
@@ -550,6 +569,42 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
             DenialPos = Vector3.zero;
         }
     }
+
+    /// <summary>
+    /// 패킷의 명령전달로 인한 이동 함수
+    /// </summary>
+    /// <param name="pos"></param>
+    public void NetworkMove(Vector3 pos)
+    {
+        curNetPos = pos;
+        // 현재위치 입력시
+        if(pos == transform.position)
+        {
+            //정지상태 모션으로 전환
+            return;
+        }
+        
+        //이동상태 모션으로 전환 & 상태 이동상태로 변환
+
+
+
+
+
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="Dir"></param>
+    public void SetPosition(Vector3 Dir)
+    {
+
+    }
+    public void SetPosition(float x, float y, float z)
+    {
+        SetPosition(new Vector3(x,y,z)); 
+    }
+
 
     /// <summary>
     /// 캐릭터를 특정 방향(dir)으로 일정 거리(dist)만큼 speed 만큼의 속도로 미끄러지게 하는 함수
@@ -727,10 +782,10 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
 
 
 
-    public void SetPosition(Vector3 pos)
-    {
-        transform.position = pos;
-    }
+    //public void SetPosition(Vector3 pos)
+    //{
+    //    //transform.position = pos;
+    //}
     public Vector3 GetPosition()
     {
         return transform.position;
@@ -861,7 +916,6 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
         if (PlayerSM.CurrentState == p_States[pState.Down]) return;
         if (PlayerSM.CurrentState == p_States[pState.Recovery]) return;
         if (PlayerSM.CurrentState == p_States[pState.Jump]) return;
-        if (PlayerSM.CurrentState == p_States[pState.S_Jump]) return;
 
         if (PlayerSM.CurrentState == p_States[pState.ItemReady])
         {
@@ -1072,14 +1126,24 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
         PlayerSM.ChangeState(p_States[pState.Idle]);
     }
 
-    // 공격 판정 함수
+    /// <summary>
+    /// 플레이어의 공격 명령
+    /// </summary>
     public void PlayerAttack()
     {
         HitScan.Inst.HitScans(AttackPoint.gameObject, 0.2f, ScanTarget.Player, ScanType.Cube);
 
+    }
 
+    /// <summary>
+    /// 패킷에서 전달받은 공격명령
+    /// </summary>
+    /// <param name="Pos"></param>
+    public void Attack(Vector3 Pos)
+    {
 
     }
+
 
     // 플레이어의 크기를 입력받은 사이즈로 변경, 변경완료후 입력 받은 명령이 있다면 처리
     public void PlayerSizeChange(float ChangeRate, UnityAction e = null)
@@ -1170,12 +1234,12 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
 
     #region 데이터인출&수정
 
-    public HitScanner.Team GetEnemyTeam()
+    public Team GetEnemyTeam()
     {
-        return (HitScanner.Team)((int)myTeam * -1);
+        return (Team)((int)myTeam * -1);
     }
     // isSet True = 해당값으로 설정 , False = 해당값만큼 증가
-    public void SetHp(float Value,bool isSet)
+    public void SetHp(float Value,bool isSet = false)
     {
         if (Value > MaxHP)
         {

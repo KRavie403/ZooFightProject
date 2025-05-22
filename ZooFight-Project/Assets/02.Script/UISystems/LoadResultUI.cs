@@ -31,8 +31,8 @@ public class LoadResultUI : MonoBehaviour
 
     private void LoadResultImg(/*myHitScanner.Team BeaconTeam*/)
     {
-        HitScanner.Team playerTeam = Gamemanager.Inst.currentPlayer.myTeam;      // 플레이어의 팀 정보 가져오기
-        HitScanner.Team winningTeam = Gamemanager.Inst.VictoryTeam; // 승리팀 정보 가져오기
+        Team playerTeam = Gamemanager.Inst.currentPlayer.myTeam;      // 플레이어의 팀 정보 가져오기
+        Team winningTeam = Gamemanager.Inst.VictoryTeam; // 승리팀 정보 가져오기
 
         // 승리
         if (winningTeam == playerTeam)
@@ -44,7 +44,7 @@ public class LoadResultUI : MonoBehaviour
             BGImage2.color = new Color(41 / 255f, 44 / 255f, 60 / 255f, 1);
         }
         // 무승부
-        else if (winningTeam == HitScanner.Team.NotSetting)
+        else if (winningTeam == Team.NotSetting)
         {
             _textSprite = Resources.Load<Sprite>("DRAW");
             _t1Sprite = Resources.Load<Sprite>("DRAW(2)");
@@ -91,8 +91,8 @@ public class LoadResultUI : MonoBehaviour
         }
 
         // Field of View 값을 변경
-        HitScanner.Team playerTeam = Gamemanager.Inst.currentPlayer.myTeam;      // 플레이어의 팀 정보 가져오기
-        HitScanner.Team winningTeam = Gamemanager.Inst.VictoryTeam;                  // 승리팀 정보 가져오기
+        Team playerTeam = Gamemanager.Inst.currentPlayer.myTeam;      // 플레이어의 팀 정보 가져오기
+        Team winningTeam = Gamemanager.Inst.VictoryTeam;                  // 승리팀 정보 가져오기
 
         // 승리
         if (winningTeam == playerTeam)
@@ -100,7 +100,7 @@ public class LoadResultUI : MonoBehaviour
             EFFCamera.fieldOfView = _winFOV;
         }
         // 무승부
-        else if (winningTeam == HitScanner.Team.NotSetting)
+        else if (winningTeam == Team.NotSetting)
         {
             EFFCamera.fieldOfView = _winFOV;
         }
