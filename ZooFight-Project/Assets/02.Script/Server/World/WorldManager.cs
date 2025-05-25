@@ -524,7 +524,7 @@ public class WorldManager : MonoBehaviour
 
     public bool IsMyPlayerMove()
     {
-        return players[myPlayerIndex].GetIsMoving();
+        //return players[myPlayerIndex].GetIsMoving();
         return true;
     }
 
@@ -557,7 +557,7 @@ public class WorldManager : MonoBehaviour
         {
             xPos[index] = player.Value.GetPosition().x;
             zPos[index] = player.Value.GetPosition().z;
-            hp[index] = player.Value.CurHP;
+            //hp[index] = player.Value.CurHP;
             index++;
         }
         return new GameSyncMessage(hostSession, numOfClient, xPos, zPos, hp, online);
