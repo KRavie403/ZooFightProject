@@ -6,6 +6,7 @@ using BackEnd.Tcp;
 using Protocol;
 using Battlehub.Dispatcher;
 using System.Linq;
+using System.Collections;
 
 /*
  * 매치매니저
@@ -52,6 +53,8 @@ public partial class BackEndMatchManager : MonoBehaviour
 
     private int numOfClient = 2;                    // 매치에 참가한 유저의 총 수
 
+    private Coroutine pollRoutine;
+
     #region Host
     private bool isHost = false;                    // 호스트 여부 (서버에서 설정한 SuperGamer 정보를 가져옴)
     private Queue<KeyMessage> localQueue = null;    // 호스트에서 로컬로 처리하는 패킷을 쌓아두는 큐 (로컬처리하는 데이터는 서버로 발송 안함)
@@ -95,8 +98,32 @@ public partial class BackEndMatchManager : MonoBehaviour
         MatchMakingHandler();
         GameHandler();
         ExceptionHandler();
+
+        if (pollRoutine == null)
+            pollRoutine = StartCoroutine(PollingCoroutine());
     }
 
+    IEnumerator PollingCoroutine()
+    {
+        while (true)
+        {
+            if (isConnectInGameServer || isConnectMatchServer)
+            {
+                Backend.Match.Poll();
+
+                if (localQueue != null)
+                {
+                    while (localQueue.Count > 0)
+                    {
+                        var msg = localQueue.Dequeue();
+                        WorldManager.instance.OnRecieveForLocal(msg);
+                    }
+                }
+            }
+
+            yield return new WaitForSeconds(0.01f); // 10ms 간격 추천
+        }
+    }
 
     public bool IsHost()
     {

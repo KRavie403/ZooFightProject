@@ -1,25 +1,38 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+
+public enum BlockType
+{
+    Red = 0,
+    Blue = 1,
+    Block2x1_0 = 2,
+    Block2x1_1,
+    Block2x1_2,
+    Block1x2_0,
+    Block1x2_1,
+    Block1x2_2,
+    Block1x1_0,
+    Block1x1_1,
+    Block1x1_2
+}
+
 
 public class BlockPlacement : MonoBehaviour
 {
     // 맵 정보
-    private float mapWidth = 60.0f;
-    private float mapHeight = 40.0f;
+    private float mapWidth = 60.0f, mapHeight = 40.0f;
 
     // 블록 정보
-    public GameObject[] block1x1;
-    public GameObject[] block1x2;
-    public GameObject[] block2x1;
-    public GameObject redBlock;
-    public GameObject blueBlock;
+    public GameObject[] block1x1, block1x2, block2x1;
+    public GameObject redBlock, blueBlock;
 
     // 블록 위치 
-    public Dictionary<int, int> blockType = new Dictionary<int, int>();
+    public List<BlockData> blocks = new List<BlockData>();
+    private HashSet<Vector3> occupied = new HashSet<Vector3>();
     public Dictionary<int, Vector3> mapCoordinates = new Dictionary<int, Vector3>();
     private Dictionary<int, Vector3> placedBlockPositions = new Dictionary<int, Vector3>();
-    public List<BlockData> blocks;
 
     public MapManager mapManager; // MapManager를 참조
 
@@ -39,55 +52,248 @@ public class BlockPlacement : MonoBehaviour
     private int blockNum3 = 0;
 
 
-    void Start()
+    private void Start()
     {
-        SelectSeed(42);   // 테스트
+        // 랜덤 고정 (seed)
+        SelectSeed(42);
+        Random.InitState(rnd);
 
         // 맵 좌표 생성(40x60)
-        GenerateMapCoordiantes();
+        //InitializeGrid();
 
         // 블록 배치
+        //PlaceBlocks();
+
+        // 레드, 블루 고정 위치에 배치
         PlaceTeamBlocks();
-        PlaceBlocks();
+
+        // 블록 랜덤 배치 (그리드 + 확률 기반)
+        GridBasedWeightedPlacement();
+
+        // 맵 결과 저장
+        SaveMapData();
+
+#if UNITY_EDITOR
+        // -> JSON으로 추출 (index 예: 0, 1, 2, 3 중 하나)
+        mapManager.ExportMapDataToJson(0);
+#endif
 
         // 저장된 맵 불러오기
         //mapManager.LoadMapData();
     }
 
-    void SelectSeed(int seed)
+    private void SelectSeed(int seed)
     {
         rnd = seed;
     }
 
-    void GenerateMapCoordiantes()
+    /*private void InitializeGrid()
     {
-        for (float y = 0.5f; y < mapHeight + 0.5f; y++)
+        //for (float y = 0.5f; y < mapHeight + 0.5f; y++)
+        //{
+        //    for (float x = 0.5f; x < mapWidth + 0.5; x++)
+        //    {
+        //        mapCoordinates.Add(mapNum, new Vector3(x, 0.5f, y));
+        //        mapNum++;
+        //    }
+        //}
+    }
+    */
+
+    private void PlaceTeamBlocks()
+    {
+        //mapCoordinates[0] = new Vector3(0, 0, 0);
+
+        Vector3 redBlockPosition = new Vector3(20.5f, 0.5f, 10.5f);
+        Vector3 blueBlockPosition = new Vector3(40.5f, 0.5f, 10.5f);
+
+        Instantiate(redBlock, redBlockPosition, Quaternion.identity);
+        Instantiate(blueBlock, blueBlockPosition, Quaternion.identity);
+
+        //mapCoordinates[FindMapCoordinatesKey(mapCoordinates, redBlockPosition)] = new Vector3(0, 0, 0);
+        //mapCoordinates[FindMapCoordinatesKey(mapCoordinates, blueBlockPosition)] = new Vector3(0, 0, 0);
+        //MarkPositionAsOccupied(blockCount++, redBlockPosition);
+        //MarkPositionAsOccupied(blockCount++, blueBlockPosition);
+
+        AddBlockData(redBlockPosition, BlockType.Red);
+        AddBlockData(blueBlockPosition, BlockType.Blue);
+    }
+
+    private void GridBasedWeightedPlacement()
+    {
+        int perQuadrant = 300;
+        int totalBlocks = 0;
+
+        float midX = mapWidth / 2;
+        float midZ = mapHeight / 2;
+
+        Vector2[] xRanges = new Vector2[]
         {
-            for (float x = 0.5f; x < mapWidth + 0.5; x++)
+        new Vector2(0, midX),         // 좌상
+        new Vector2(midX, mapWidth),  // 우상
+        new Vector2(0, midX),         // 좌하
+        new Vector2(midX, mapWidth)   // 우하
+        };
+
+        Vector2[] zRanges = new Vector2[]
+        {
+        new Vector2(midZ, mapHeight), // 좌상
+        new Vector2(midZ, mapHeight), // 우상
+        new Vector2(0, midZ),         // 좌하
+        new Vector2(0, midZ)          // 우하
+        };
+
+        for (int q = 0; q < 4; q++)
+        {
+            List<Vector3> candidates = new();
+
+            for (float z = zRanges[q].x + 0.5f; z < zRanges[q].y; z++)
             {
-                mapCoordinates.Add(mapNum, new Vector3(x, 0.5f, y));
-                mapNum++;
+                for (float x = xRanges[q].x + 0.5f; x < xRanges[q].y; x++)
+                {
+                    candidates.Add(new Vector3(x, 0.5f, z));
+                }
+            }
+
+            // 무작위로 섞기
+            candidates = candidates.OrderBy(_ => Random.value).ToList();
+
+            int count = 0;
+            foreach (var cell in candidates)
+            {
+                if (count >= perQuadrant) break;
+                if (occupied.Contains(cell)) continue;
+                if (!HasFreeAdjacent(cell)) continue;
+
+                float roll = Random.value;
+
+                if (roll < 0.3f)
+                    TryPlace1x1(cell);
+                else if (roll < 0.65f)
+                    TryPlace1x2(cell);
+                else
+                    TryPlace2x1(cell);
+
+                blockCount++;
+                count++;
             }
         }
     }
 
-    void PlaceTeamBlocks()
+
+    private bool HasFreeAdjacent(Vector3 cell)
     {
-        mapCoordinates[0] = new Vector3(0, 0, 0);
-        // 탈출 블록 배치
-        Vector3 pinkBlockPosition = new Vector3(20.5f, 0.5f, 10.5f);
-        Vector3 blueBlockPosition = new Vector3(40.5f, 0.5f, 10.5f);
-        Instantiate(redBlock, pinkBlockPosition, Quaternion.identity);
-        Instantiate(blueBlock, blueBlockPosition, Quaternion.identity);
-        blockType[0] = 0;
-        blockType[1] = 1;
-        mapCoordinates[FindMapCoordinatesKey(mapCoordinates, pinkBlockPosition)] = new Vector3(0, 0, 0);
-        mapCoordinates[FindMapCoordinatesKey(mapCoordinates, blueBlockPosition)] = new Vector3(0, 0, 0);
-        MarkPositionAsOccupied(blockCount++, pinkBlockPosition);
-        MarkPositionAsOccupied(blockCount++, blueBlockPosition);
+        Vector3[] directions = {
+        Vector3.forward, Vector3.back,
+        Vector3.left, Vector3.right
+    };
+
+        int freeCount = 0;
+
+        foreach (var dir in directions)
+        {
+            Vector3 adjacent = cell + dir;
+            if (!occupied.Contains(adjacent))
+            {
+                freeCount++;
+                if (freeCount >= 2)
+                    return true;
+            }
+        }
+
+        return false;
     }
 
-    void PlaceBlocks()
+    private void TryPlace1x1(Vector3 basePos)
+    {
+        if (occupied.Contains(basePos)) return;
+
+        blockNum1 %= block1x1.Length;
+
+        Instantiate(block1x1[blockNum1++], basePos, Quaternion.identity);
+
+        Logger.Log($"blockCount: {blockCount}");
+
+        AddBlockData(basePos, BlockType.Block1x1_0 + blockNum1);
+    }
+
+    private void TryPlace1x2(Vector3 basePos)
+    {
+        Vector3 next = basePos + new Vector3(0, 0, 1);
+
+        if (occupied.Contains(basePos) || occupied.Contains(next)) return;
+
+        blockNum2 %= block1x2.Length;
+
+        Vector3 mid = basePos + new Vector3(0, 0, 0.5f);
+
+        Instantiate(block1x2[blockNum2++], mid, Quaternion.identity);
+
+        Logger.Log($"blockCount: {blockCount}");
+
+        AddBlockData(basePos, BlockType.Block1x2_0 + blockNum1);
+        AddBlockData(next, BlockType.Block1x2_0 + blockNum1);
+    }
+
+    private void TryPlace2x1(Vector3 basePos)
+    {
+        Vector3 next = basePos + new Vector3(1, 0, 0);
+
+        if (occupied.Contains(basePos) || occupied.Contains(next)) return;
+
+        blockNum3 %= block2x1.Length;
+        Vector3 mid = basePos + new Vector3(0.5f, 0, 0);
+
+        Instantiate(block2x1[blockNum3++], mid, Quaternion.Euler(0, 90, 0));
+
+        Logger.Log($"blockCount: {blockCount}");
+
+        AddBlockData(basePos, BlockType.Block2x1_0 + blockNum3);
+        AddBlockData(next, BlockType.Block2x1_0 + blockNum3);
+    }
+
+    void AddBlockData(Vector3 pos, BlockType type)
+    {
+        // 새로운 블록 데이터 생성
+
+        occupied.Add(pos);
+
+        blocks.Add(new BlockData
+        {
+            blockNum = blockCount,
+            type = (int)type,
+            x = pos.x,
+            y = pos.y,
+            z = pos.z
+        });
+    }
+
+    public void SaveMapData()
+    {
+        mapManager.SaveMapData(blocks);
+    }
+
+    public void SetSpawnUsers(List<Vector3> spawnUsers)
+    {
+        if (receivedSpawnUsers == null)
+        {
+            receivedSpawnUsers = new List<Vector3>();
+        }
+        receivedSpawnUsers.Clear();
+        receivedSpawnUsers.AddRange(spawnUsers);
+    }
+
+    public void SetSpawnItems(List<Vector3> spawnItems)
+    {
+        if (receivedSpawnItems == null)
+        {
+            receivedSpawnItems = new List<Vector3>();
+        }
+        receivedSpawnItems.Clear();
+        receivedSpawnItems.AddRange(spawnItems);
+    }
+
+    /*private void PlaceBlocks()
     {
 
         //// 랜덤으로 캐릭터 배치
@@ -98,8 +304,9 @@ public class BlockPlacement : MonoBehaviour
         //}
 
         // 랜덤으로 블록 장애물 배치
-        Random.InitState(rnd);
-        while (blockCount < 800/* & maxCount < 400*/)
+        
+        while (blockCount < 800
+    // & maxCount < 400)
         {
             float x = UnityEngine.Random.Range(0f, mapWidth + 1.0f);
             float y = UnityEngine.Random.Range(0f, mapHeight + 1.0f);
@@ -130,7 +337,6 @@ public class BlockPlacement : MonoBehaviour
 
                                 blockNum1 %= block1x2.Length;
                                 //Debug.Log("blockNum1: " + blockNum1);
-                                blockType[blockCount] = blockNum1;
                                 AddBlockData(blockCount, blockNum1, blockPosition.x, blockPosition.y, blockPosition.z);
                                 Instantiate(block1x2[blockNum1++], blockPosition, Quaternion.identity);
                                 MarkPositionAsOccupied(blockCount, blockPosition);
@@ -153,7 +359,6 @@ public class BlockPlacement : MonoBehaviour
 
                                 blockNum2 %= block2x1.Length;
                                 //Debug.Log($"blockNum2: {blockNum2 + 3}");
-                                blockType[blockCount] = blockNum2 + 3;
                                 AddBlockData(blockCount, blockNum2 + 3, blockPosition.x, blockPosition.y, blockPosition.z);
                                 Instantiate(block2x1[blockNum2++], blockPosition, Quaternion.Euler(0, 90, 0)); //Y 축으로 90도 회전 => Quaternion.identity나중에 수정
                                 MarkPositionAsOccupied(blockCount, blockPosition);
@@ -171,7 +376,6 @@ public class BlockPlacement : MonoBehaviour
 
                         blockNum3 %= block1x1.Length;
                         //Debug.Log($"blockNum3: {blockNum3 + 6}");
-                        blockType[blockCount] = blockNum3 + 6;
                         AddBlockData(blockCount, blockNum3 + 6, blockPosition.x, blockPosition.y, blockPosition.z);
                         Instantiate(block1x1[blockNum3++], blockPosition, Quaternion.identity);
                         MarkPositionAsOccupied(blockCount, blockPosition);
@@ -196,6 +400,7 @@ public class BlockPlacement : MonoBehaviour
         //    }
         //}
     }
+
 
     public static int FindMapCoordinatesKey(Dictionary<int, Vector3> mapCoordinates, Vector3 position)
     {
@@ -270,35 +475,5 @@ public class BlockPlacement : MonoBehaviour
             return block2x1[id - block1x1.Length - block1x2.Length];
         }
     }
-
-    public void AddBlockData(int blockNum, int type, float x, float y, float z)
-    {
-        // 새로운 블록 데이터 생성
-        BlockData blockData = new BlockData
-        {
-            blockNum = blockNum,
-            type = type,
-            x = x,
-            y = y,
-            z = z
-        };
-
-        // 리스트에 추가
-        blocks.Add(blockData);
-
-        // 여기에 서버로 바로 보낼 수 있나
-    }
-
-    public void UpdateMapData(int num, int type, float x, float y, float z)
-    {
-        BackendMapData.Inst.MapGameData.blockNum = num;
-        BackendMapData.Inst.MapGameData.type = type;
-        BackendMapData.Inst.MapGameData.x = x;
-        BackendMapData.Inst.MapGameData.x = y;
-        BackendMapData.Inst.MapGameData.x = z;
-        BackendMapData.Inst.GameDataInsert();  // 4번만 하고 주석처리
-        BackendMapData.Inst.GameDataUpdate();
-
-        Debug.Log($"저장 후 맵 데이터: {BackendMapData.Inst.MapGameData.blockNum}, {BackendMapData.Inst.MapGameData.type}, {BackendMapData.Inst.MapGameData.x}, {BackendMapData.Inst.MapGameData.y}, {BackendMapData.Inst.MapGameData.z}");
-    }
+*/
 }
