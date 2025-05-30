@@ -7,20 +7,20 @@ public class SpawnItem : MonoBehaviour
     private float mapWidth = 60.0f;
     private float mapHeight = 40.0f;
 
-    // ì•„ì´í…œ ìƒì„± ìœ„ì¹˜
+    // ¾ÆÀÌÅÛ »ı¼º À§Ä¡
     //public Transform[] points;
     public List<Vector3> spawnItems = new List<Vector3>();
 
-    // ì•„ì´í…œ prefab ì €ì¥í•  ë³€ìˆ˜
+    // ¾ÆÀÌÅÛ prefab ÀúÀåÇÒ º¯¼ö
     public GameObject[] items;
 
-    // ì•„ì´í…œ ìƒì„±í•  ì£¼ê¸°
+    // ¾ÆÀÌÅÛ »ı¼ºÇÒ ÁÖ±â
     public float createTime = 2.0f;
 
-    // ì  ì•„ì´í…œì˜ ìµœëŒ€ ìƒì„± ê°œìˆ˜
+    // Àû ¾ÆÀÌÅÛÀÇ ÃÖ´ë »ı¼º °³¼ö
     public int maxItems = 40;
 
-    // ê²Œì„ ì¢…ë£Œ ì—¬ë¶€ íŒë‹¨
+    // °ÔÀÓ Á¾·á ¿©ºÎ ÆÇ´Ü
     public bool isGameOver = false;
 
     private BlockPlacement blockPlacement = null;
@@ -95,7 +95,7 @@ public class SpawnItem : MonoBehaviour
                     //    }
                     //}
                     Instantiate(items[idx], itemPosition, Quaternion.identity);
-                    //blockPlacement.SetSpawnItems(spawnItems);
+                    blockPlacement.SetSpawnItems(spawnItems);
                     itemCount++;
                 }
                 else yield return null;
