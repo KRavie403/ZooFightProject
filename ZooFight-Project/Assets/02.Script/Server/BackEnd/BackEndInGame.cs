@@ -384,6 +384,10 @@ public partial class BackEndMatchManager : MonoBehaviour
             aiRecord.m_numberOfWin = 0;
             aiRecord.m_numberOfDefeats = 0;
             aiRecord.m_numberOfDraw = 0;
+            Debug.Log($"?? aiRecord.m_nickname: {aiRecord.m_nickname}");
+            Debug.Log($"?? aiRecord.m_sessionId: {aiRecord.m_sessionId}");
+            Debug.Log($"?? aiRecord.m_numberOfMatches: {aiRecord.m_numberOfMatches}");
+
             if (nowMatchType == MatchType.MMR)
             {
                 aiRecord.m_mmr = 1000;
