@@ -192,7 +192,8 @@ public enum DataTypes
     BlockData,
     PlayerData,
     PlayerBasicData,
-    PlayerState,
+    PlayerStateData,
+    LobbyData,
     Types
 }
 
@@ -213,7 +214,9 @@ public class BasicData
 
 public class GameData_Class : BasicData
 {
-    public PlayerInfo playerInfo;
+
+    public PlayerInfo[] playerInfo;
+
 
     public SessionId SessionId;
     public GameData_Class(SessionId SessionId) : base(DataTypes.GameData)
@@ -223,7 +226,9 @@ public class GameData_Class : BasicData
 
     public int GameId;
 
-    public CharacterData[] PlayerInfo;
+    public PlayerInfo myPlayer;
+
+    //public CharacterData[] PlayerInfo;
     public int myPlayerNum;
 
 
@@ -271,7 +276,9 @@ public class PlayerProfiles_Class : BasicData
     }
 }
 
-
+/// <summary>
+/// 
+/// </summary>
 public class PlayerInfo_Class
 {
     public string PlayerName;
@@ -316,7 +323,7 @@ public class CharacterBasicSetting : BasicData
 public class CharacterState : BasicData
 {
 
-    public CharacterState() : base(DataTypes.PlayerState)
+    public CharacterState() : base(DataTypes.PlayerStateData)
     {
 
     }
