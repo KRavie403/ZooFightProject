@@ -27,6 +27,8 @@ public class BlockPlacement : MonoBehaviour
     // 블록 정보
     public GameObject[] block1x1, block1x2, block2x1;
     public GameObject redBlock, blueBlock;
+    private Dictionary<int, GameObject> blockDict = new Dictionary<int, GameObject>();
+    public Dictionary<int, GameObject> GetBlockDict() => blockDict;
 
     // 블록 위치 
     public List<BlockData> blocks = new List<BlockData>();
@@ -44,9 +46,7 @@ public class BlockPlacement : MonoBehaviour
     public int rnd = 0;
 
     // 로그 확인
-    private int blockCount = 2;     // pinkBlock:0 blueBlock:1
-    private int maxCount = 0;
-    private int mapNum = 1;
+    private int blockCount = 0;     // pinkBlock:0 blueBlock:1
     private int blockNum1 = 0;
     private int blockNum2 = 0;
     private int blockNum3 = 0;
@@ -116,7 +116,9 @@ public class BlockPlacement : MonoBehaviour
         //MarkPositionAsOccupied(blockCount++, blueBlockPosition);
 
         AddBlockData(redBlockPosition, BlockType.Red);
+        blockCount++;
         AddBlockData(blueBlockPosition, BlockType.Blue);
+        blockCount++;
     }
 
     private void GridBasedWeightedPlacement()
@@ -214,6 +216,8 @@ public class BlockPlacement : MonoBehaviour
 
         Logger.Log($"blockCount: {blockCount}");
 
+        occupied.Add(basePos);
+
         AddBlockData(basePos, BlockType.Block1x1_0 + blockNum1);
     }
 
@@ -231,8 +235,10 @@ public class BlockPlacement : MonoBehaviour
 
         Logger.Log($"blockCount: {blockCount}");
 
-        AddBlockData(basePos, BlockType.Block1x2_0 + blockNum1);
-        AddBlockData(next, BlockType.Block1x2_0 + blockNum1);
+        occupied.Add(basePos);
+        occupied.Add(next);
+
+        AddBlockData(mid, BlockType.Block1x2_0 + blockNum1);
     }
 
     private void TryPlace2x1(Vector3 basePos)
@@ -248,16 +254,17 @@ public class BlockPlacement : MonoBehaviour
 
         Logger.Log($"blockCount: {blockCount}");
 
-        AddBlockData(basePos, BlockType.Block2x1_0 + blockNum3);
-        AddBlockData(next, BlockType.Block2x1_0 + blockNum3);
+        occupied.Add(basePos);
+
+        occupied.Add(basePos);
+        occupied.Add(next);
+
+        AddBlockData(mid, BlockType.Block2x1_0 + blockNum3);
     }
 
     void AddBlockData(Vector3 pos, BlockType type)
     {
         // 새로운 블록 데이터 생성
-
-        occupied.Add(pos);
-
         blocks.Add(new BlockData
         {
             blockNum = blockCount,
@@ -271,6 +278,36 @@ public class BlockPlacement : MonoBehaviour
     public void SaveMapData()
     {
         mapManager.SaveMapData(blocks);
+    }
+
+    public void LoadAndPlaceBlocks(int mapIndex)
+    {
+        MapData mapData = mapManager.LoadMapData(mapIndex); // 데이터만 가져옴
+
+        if (mapData == null || mapData.blocks == null)
+        {
+            Debug.LogError("MapData is null or empty.");
+            return;
+        }
+
+        Debug.Log($"[BlockPlacement] 맵 데이터 로딩 및 배치 시작 - 블록 수: {mapData.blocks.Count}");
+
+        foreach (var block in mapData.blocks)
+        {
+            Vector3 blockPosition = new Vector3(block.x, block.y, block.z);
+            GameObject blockPrefab = block.type < 5 ? block2x1[block.type - 2] : block.type < 8 ? block1x2[block.type - 5] : block1x1[block.type - 8];
+
+            GameObject blockInstance;
+            if (block.type == 5 || block.type == 6 || block.type == 7)
+                blockInstance = Instantiate(blockPrefab, blockPosition, Quaternion.Euler(0, 90, 0));
+            else
+                blockInstance = Instantiate(blockPrefab, blockPosition, Quaternion.identity);
+
+            // blockNum 등록
+            blockDict[block.blockNum] = blockInstance;
+
+            Debug.Log($"블록 생성 - 번호: {block.blockNum}, 타입: {block.type}, 위치: {blockPosition}");
+        }
     }
 
     public void SetSpawnUsers(List<Vector3> spawnUsers)
