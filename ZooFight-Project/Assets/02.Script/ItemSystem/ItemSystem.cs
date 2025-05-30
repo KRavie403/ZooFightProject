@@ -77,7 +77,7 @@ public class ItemSystem : Singleton<ItemSystem>
         //for(int i = 0; i < ItemList.Count; i++)
         //{
         //    GameObject obj = Instantiate(ItemList[i],transform);
-        //    Items item = obj.GetComponent<Items>();
+        //    Item item = obj.GetComponent<Item>();
         //    ItemKeys.Add(item.myCode, item);
         //}
         for (int i = 0; i < ItemBase.Count; i++)
@@ -125,7 +125,7 @@ public class ItemSystem : Singleton<ItemSystem>
     public Items GiveItem(PlayerController player,Items item)
     {
         if (player.curItems != null) return null;
-        //Items item = RandomItemSelect();
+        //Item item = RandomItemSelect();
 
         return ObjectPoolingManager.instance.GetObject<Items>(item.name, Vector3.zero, Quaternion.identity, player.ItemPoint,false);
     }

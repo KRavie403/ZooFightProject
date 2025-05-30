@@ -14,7 +14,7 @@ public class Character_Down : BaseState
     {
 
         base.Initate();
-        //ableFuncs.Add(PlayerController.pFunc.Move, player.CurAxisMove);
+        //ableFuncs.Add(PlayerController.pFunc.PlayersMove, player.CurAxisMove);
 
     }
 

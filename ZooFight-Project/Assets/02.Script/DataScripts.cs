@@ -149,7 +149,7 @@ public struct ItemData
     /// Zero = 비 이동형 아이템
     /// </summary>
     public Vector3 dirPos;
-    public HitScanner.Team curTeam;
+    public Team curTeam;
     public PlayerController ItemOwner;
 
 }
@@ -167,7 +167,7 @@ public struct ItemData
 
     public struct NormalBlockdata
     {
-        public HitScanner.Team curTeam;
+        public Team curTeam;
 
         public Vector3 curPos;
 
@@ -191,27 +191,11 @@ public enum DataTypes
     ItemData,
     BlockData,
     PlayerData,
+    PlayerBasicData,
+    PlayerState,
     Types
 }
 
-public class PlayerInfo_Class
-{
-    public string PlayerName;
-    public int PlayerId;
-
-    public string PlayerIP;
-    public bool isSeverConnect;
-
-    /// <summary>
-    /// 생성된 게임 내의 플레이어 번호
-    /// -1 = 게임밖 , 0 = 호스트 , 1 ~ N = 플레이어 넘버
-    /// </summary>
-    public int PlayerNum;
-    public void InsertPlayerInfo()
-    {
-
-    }
-}
 
 /// <summary>
 /// 데이터의 형식을 담는 클래스
@@ -251,13 +235,90 @@ public class GameData_Class : BasicData
 }
 
 
-public class PlayerData_Class : BasicData
-{
-    public PlayerInfo myPlayer;
 
-    public PlayerData_Class(PlayerInfo playerInfo) : base(DataTypes.PlayerData)
+
+
+/// <summary>
+/// 사용자의 정보를 담는 클래스
+/// 사용자의 id , 대기실 , 인게임 정보를 담음
+/// </summary>
+public class PlayerProfiles_Class : BasicData
+{
+    public PlayerInfo_Class myPlayer;
+
+
+    bool isGameStart = false;
+
+
+    public CharacterData_Class mycharacter
+    {
+        get
+        {
+            if (isGameStart)
+            {
+                return mycharacter;
+            }
+            else
+            {
+                return null;
+            }
+        }
+    }
+
+    public PlayerProfiles_Class(PlayerInfo_Class playerInfo) : base(DataTypes.PlayerData)
     {
         this.myPlayer = playerInfo;
+    }
+}
+
+
+public class PlayerInfo_Class
+{
+    public string PlayerName;
+    public int PlayerId;
+
+    public string PlayerIP;
+    public bool isSeverConnect;
+
+    public SessionId sessionId;
+
+    /// <summary>
+    /// 생성된 게임 내의 플레이어 번호
+    /// -1 = 게임밖 , 0 = 호스트 , 1 ~ N = 플레이어 넘버
+    /// </summary>
+    public int PlayerNum;
+    public void InsertPlayerInfo()
+    {
+
+    }
+}
+
+/// <summary>
+/// 플레이어의 위치, 이동, 회전 등 무브먼트에 관한 정보를 담는 클래스
+/// 
+/// </summary>
+public class CharacterBasicSetting : BasicData
+{
+    public int ModelId;
+
+    public ItemCode curItem;
+
+
+    public CharacterBasicSetting(CharacterBasicSetting setData) : base(DataTypes.PlayerBasicData)
+    {
+
+    }
+}
+
+/// <summary>
+/// 플레이어의 스테이트머신에서의 상태변화 및 각종 상태에 관한 정보를 담는 클래스
+/// </summary>
+public class CharacterState : BasicData
+{
+
+    public CharacterState() : base(DataTypes.PlayerState)
+    {
+
     }
 }
 
@@ -267,18 +328,25 @@ public class PlayerData_Class : BasicData
 /// </summary>
 public class CharacterData_Class : BasicData
 {
-    public CharacterData_Class(PlayerInfo playerinfo): base(DataTypes.CharacterData)
+
+    public CharacterData_Class(CharacterBasicSetting basicData): base(DataTypes.CharacterData)
     {
-        this.myPlayer = playerinfo;
+
+        BasicData = basicData;
+
     }
 
-    public PlayerInfo myPlayer;
+
+    public CharacterBasicSetting BasicData;
+
+    
 
     public int ModelId;
 
     public PlayerController myController;
     // 캐릭터의 상태변화값
     public PlayerController.pState dirState;
+
 
     float curHp;
     public float SetHp(float hp)
@@ -338,21 +406,23 @@ public class ItemData_Class : BasicData
         this.itemCode = itemCode;
     }
 
+
     /// <summary>
     /// 아이템의 목적지
     /// Zero = 비 이동형 아이템
     /// </summary>
     public Vector3 dirPos;
-    public HitScanner.Team curTeam;
+    public Team curTeam;
     public PlayerController ItemOwner;
+
 
 }
 
 public class BlockData_Class : BasicData
 {
-    public HitScanner.Team curTeam;
+    public Team curTeam;
 
-    public BlockData_Class(HitScanner.Team curTeam) : base(DataTypes.BlockData) 
+    public BlockData_Class(Team curTeam) : base(DataTypes.BlockData) 
     {
         this.curTeam = curTeam;
     }

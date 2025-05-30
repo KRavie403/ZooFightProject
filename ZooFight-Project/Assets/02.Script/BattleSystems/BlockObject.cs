@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -19,13 +20,13 @@ interface IBlock
 }
 
 
-public class BlockObject : MonoBehaviour , IBlock
+public class BlockObject : MonoBehaviour , IBlock , IObjectId
 {
 
     protected bool isGrab = false;
     protected PlayerController myPlayer=null;
 
-    public HitScanner.Team myTeam = HitScanner.Team.NotSetting;
+    public Team myTeam = Team.NotSetting;
 
     float BlockMoveSpeed
     {
@@ -36,7 +37,7 @@ public class BlockObject : MonoBehaviour , IBlock
 
     public Vector2 curDir = Vector2.zero;
 
-    //    int BlockId = -1;
+    int BlockId = -1;
 
     #region Blocks 인터페이스 관련
 
@@ -48,7 +49,17 @@ public class BlockObject : MonoBehaviour , IBlock
 
     int IBlock.type => type;
 
-    Vector3 IBlock.position => position;    
+    Vector3 IBlock.position => position;
+
+    #region IObjectId
+    int myObjectId = -1;
+    ObjectType myObjType = ObjectType.Block;
+
+    int IObjectId.ObjectId => myObjectId;
+
+    ObjectType IObjectId.ObjectType => myObjType;
+
+    #endregion
 
     public void Initialize(int blockNum, int type, Vector3 position)
     {
@@ -99,7 +110,7 @@ public class BlockObject : MonoBehaviour , IBlock
         {
                 Gamemanager.Inst.AddBlockObj(this);
         }
-        if(myTeam != HitScanner.Team.NotSetting)
+        if(myTeam != Team.NotSetting)
         {
             Initate(myTeam);
         }
@@ -111,21 +122,32 @@ public class BlockObject : MonoBehaviour , IBlock
         
     }
 
-    public void Initate(HitScanner.Team myteam)
+    public void Initate(Team myteam)
     {
         myTeam = myteam;
-        if (myTeam == HitScanner.Team.BlueTeam)
+        if (myTeam == Team.BlueTeam)
         {
             RedBlock.SetActive(false);
             BlueBlock.SetActive(true);
             Gamemanager.Inst.BlueTeamBlock = this;
         }
-        if (myTeam == HitScanner.Team.RedTeam)
+        if (myTeam == Team.RedTeam)
         {
             RedBlock.SetActive(true);
             BlueBlock.SetActive(false);
             Gamemanager.Inst.RedTeamBlock = this;
         }
+    }
+
+    public int CreateBlockId()
+    {
+
+        while (BlockId != -1)
+        {
+
+        }
+
+        return -1;
     }
 
     //public void IdInsert(int id)
@@ -174,19 +196,19 @@ public class BlockObject : MonoBehaviour , IBlock
         // 블럭의 팀을 변경
         switch (myTeam) 
         {
-            case HitScanner.Team.RedTeam:
-                myTeam = HitScanner.Team.BlueTeam;
+            case Team.RedTeam:
+                myTeam = Team.BlueTeam;
                 Initate(myTeam);
                 Debug.Log($"{this.gameObject.name} ChangeTeam");
                 break;
-            case HitScanner.Team.NotSetting:
+            case Team.NotSetting:
                 return;
-            case HitScanner.Team.BlueTeam:
-                myTeam= HitScanner.Team.RedTeam;
+            case Team.BlueTeam:
+                myTeam= Team.RedTeam;
                 Initate(myTeam);
                 Debug.Log($"{this.gameObject.name} ChangeTeam");
                 break;
-            case HitScanner.Team.AllTarget:
+            case Team.AllTarget:
                 return;
             default:
                 break;
@@ -228,7 +250,7 @@ public class BlockObject : MonoBehaviour , IBlock
 
         while (myBlockData.isGrab)
         {
-            if (myPlayer.GetIsmoving() == true)
+            if (myPlayer.GetIsMoving() == true)
             {
                 myBlockData.isMoving = true;
                 curdir.x = curDir.x;
@@ -308,9 +330,9 @@ public class BlockObject : MonoBehaviour , IBlock
 
     #region 승리판정관련
 
-    public void VictoryDecide(HitScanner.Team BeaconTeam)
+    public void VictoryDecide(Team BeaconTeam)
     {
-        if (BeaconTeam == HitScanner.Team.NotSetting) return;
+        if (BeaconTeam == Team.NotSetting) return;
 
         if(myTeam == BeaconTeam)
         {

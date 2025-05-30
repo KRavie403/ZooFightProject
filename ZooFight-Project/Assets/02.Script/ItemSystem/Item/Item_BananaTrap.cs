@@ -32,11 +32,11 @@ public class Item_BananaTrap : Items , IHitScanner
     [SerializeField]
     EffectPlayer myEffect;
 
-    public Component[] myTarget;
     public HitScanner myHitScanner;
-    bool isHit = false;
 
     #region 히트스캔 코드
+    bool isHit = false;
+    public Component[] myTarget;
 
     Component IHitScanner.myComp => this as Component;
 
@@ -45,19 +45,19 @@ public class Item_BananaTrap : Items , IHitScanner
         get => myTarget;
     }
 
-    void IHitScanner.AddTarget(List<Component> target)
+    void IHitScanner.AddTarget(Component[] target)
     {
-        myTarget = target.ToArray();
+        myTarget = target;
     }
 
-    //void IHitScanner.Hit()
-    //{
-    //    foreach (Component target in myTarget)
-    //    {
-    //        //target.GetComponent<IHitScanTarget>().myComp
-    //    }
-    //    isHit = true;
-    //}
+    void IHitScanner.Hit()
+    {
+        //foreach (Component target in myTarget)
+        //{
+        //    target.GetComponent<IHitScanTarget>().Hit(this as Component);
+        //}
+        isHit = true;
+    }
 
     #endregion
 
@@ -114,6 +114,7 @@ public class Item_BananaTrap : Items , IHitScanner
     protected override void Update()
     {
         base.Update();
+
 
     }
 
@@ -187,36 +188,12 @@ public class Item_BananaTrap : Items , IHitScanner
             duringTime += Time.deltaTime;
             // 유지시간 체크
 
+            HitScan.Inst.HitScans(this.gameObject, 0.5f, ScanTarget.Player, ScanType.Sphere);
 
-            // 동작감지시 효과적용 및 이펙트 , 사운드 출력
-            if (Targets.Count != 0)
+            if(isHit)
             {
-                // 타겟이 잡히면 동작시키고 터트림
-                foreach (var target in Targets)
-                {
-                    if (target.GetComponent<PlayerController>() != null)
-                    {
-                        // 대상이 이동중이면 진행하던 방향으로 일정시간 미끄러짐
-                        // 대상이 정지중일경우 랜덤방향으로 미끄러짐
-                        if (target.GetComponent<PlayerController>().GetIsmoving())
-                        {
-                            target.GetComponent<PlayerController>().Slide(target.transform.forward, Value3, Value1);
-                            Debug.Log("ForwardSlide");
-                        }
-                        else
-                        {
-                            Vector3 rndDir = new Vector3(Random.Range(-1.0f, 1.0f), 0, Random.Range(-1.0f, 1.0f));
-                            target.GetComponent<PlayerController>().Slide(rndDir, Value3, Value1);
-                            Debug.Log("RandomSlide");
-                        }
-                        Debug.Log("BananaHit");
-                        Debug.Log(target.gameObject.name);
-                    }
-                }
-                Debug.Log("HitEnd");
-                //
+                myTarget[0].GetComponent<IHitScanTarget>().Hit(this);
                 break;
-                //duringTime += Value2;
             }
 
             // 발동시 오브젝트 작동 불능처리
@@ -224,7 +201,6 @@ public class Item_BananaTrap : Items , IHitScanner
             if (isItemUse)
             {
                 yield return null;
-
             }
             else
             {
@@ -240,6 +216,9 @@ public class Item_BananaTrap : Items , IHitScanner
     }
 
 
+
+
+
     private void OnCollisionEnter(Collision collision)
     {
 
@@ -247,13 +226,13 @@ public class Item_BananaTrap : Items , IHitScanner
 
 
 
-        PlayerController player = collision.gameObject.GetComponent<PlayerController>();
-        if(player != null)
-        {
+        //PlayerController player = collision.gameObject.GetComponent<PlayerController>();
+        //if(player != null)
+        //{
 
-            Targets.Add(player.gameObject);
+        //    Targets.Add(player.gameObject);
 
-        }
+        //}
     }
 
 

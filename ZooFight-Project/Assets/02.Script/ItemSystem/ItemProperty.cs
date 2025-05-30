@@ -5,7 +5,7 @@ using UnityEngine.Events;
 using UnityEngine.UI;
 
 /// <summary>
-/// ¾ÆÀÌÅÛ¸í : ???
+/// ì•„ì´í…œëª… : ???
 /// Value 1  
 /// Value 2 
 /// Value 3
@@ -16,12 +16,15 @@ using UnityEngine.UI;
 public class ItemProperty : MonoBehaviour
 {
 
-    // ±âº» °ñÀÚ
-    public float Value1; // µ¥¹ÌÁö or È¸º¹·®
-    public float Value2; // µ¿ÀÛ½Ã°£
-    public float Value3; // µ¿ÀÛ¹üÀ§
-    public float Value4; // Åõ»çÃ¼¼Óµµ    
-    public float Value5; // »ç°Å¸®
+    public ObjectType myType = ObjectType.Item;
+    public int myObjectId = -1;
+
+    // ê¸°ë³¸ ê³¨ì
+    public float Value1; // ë°ë¯¸ì§€ or íšŒë³µëŸ‰
+    public float Value2; // ë™ì‘ì‹œê°„
+    public float Value3; // ë™ì‘ë²”ìœ„
+    public float Value4; // íˆ¬ì‚¬ì²´ì†ë„    
+    public float Value5; // ì‚¬ê±°ë¦¬
 
     public ItemCode myCode;
 

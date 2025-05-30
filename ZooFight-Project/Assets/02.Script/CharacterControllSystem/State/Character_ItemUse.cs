@@ -14,7 +14,7 @@ public class Character_ItemUse : BaseState
     {
 
         base.Initate();
-        //ableFuncs.Add(PlayerController.pFunc.Move, player.CurAxisMove);
+        //ableFuncs.Add(PlayerController.pFunc.PlayersMove, player.CurAxisMove);
         ableFuncs.Add(PlayerController.pFunc.ItemUse, player.ItemUse);
 
     }
