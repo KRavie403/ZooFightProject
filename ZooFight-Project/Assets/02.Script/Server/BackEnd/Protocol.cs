@@ -415,6 +415,7 @@ namespace Protocol
         {
             this.playerSession = session;
             this.modelId = num;
+            Debug.Log($"!!PMM-modelId: {num}");
         }
     }
 }
