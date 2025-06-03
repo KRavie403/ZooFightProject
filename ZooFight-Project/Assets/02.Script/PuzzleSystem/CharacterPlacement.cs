@@ -16,12 +16,12 @@ public class CharacterPlacement : MonoBehaviour
     private int redCharacterNum = 0;
     private int blueCharacterNum = 0;
 
-    private BlockPlacement blockPlacement = null;
+    private BlockManager blockPlacement = null;
 
 
     void Start()
     {
-        blockPlacement = GetComponent<BlockPlacement>();
+        blockPlacement = GetComponent<BlockManager>();
         PlaceCharacters();
     }
 

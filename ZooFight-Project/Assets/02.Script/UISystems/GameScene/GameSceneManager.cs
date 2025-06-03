@@ -7,6 +7,8 @@ using Protocol;
 using BackEnd.Tcp;
 using BackEnd;
 using Cysharp.Threading.Tasks;
+using UnityEngine.EventSystems;
+using System;
 
 public class GameSceneManager : MonoBehaviour
 {
@@ -25,7 +27,7 @@ public class GameSceneManager : MonoBehaviour
     //public GameObject[] overlayImage;
     public GameObject matchingImage;
     public Image[] characterImages = new Image[6];                      // 캐릭터 프로필 이미지
-    private Image[] modelImages = new Image[3];                         // 모델 이미지
+    public Sprite[] modelImages = new Sprite[6];                           // 모델 이미지
     public Image[] characterStatImages = new Image[2];                // 게임 시작 후 상태 프로필 이미지
     public TMP_Text[] nameObjects = new TMP_Text[6];                // 유저 닉네임 텍스트
     public GameObject[] characterStats = new GameObject[2];     // 캐릭터 상태 
@@ -36,7 +38,7 @@ public class GameSceneManager : MonoBehaviour
     public GameObject reconnectBoardObject;
 
     //[SerializeField] private Sprite[] _textSprite = new Sprite[2];
-    [SerializeField] private string _character = "";         // 유저 캐릭터 종류
+    [SerializeField] private int _character = 0;         // 유저 캐릭터 종류
 
     private Text startCountText;
     private Text reconnectBoardText;
@@ -58,13 +60,13 @@ public class GameSceneManager : MonoBehaviour
     {
         if (matchingImage == null)
         {
-            //matchingImage = GameObject.Find("matchingImage");
+            matchingImage = GameObject.Find("MatchingImages");
         }
         if (minimapUI == null)
         {
             minimapUI = GameObject.Find("MinimapUI");
         }
-        if(characterStats[0] == null)
+        if (characterStats[0] == null)
         {
             characterStats[0] = GameObject.Find("User0Stat");
         }
@@ -76,7 +78,7 @@ public class GameSceneManager : MonoBehaviour
         startCountText = startCountObject.GetComponentInChildren<Text>();
         startCountObject.SetActive(true);
 
-        GetUser(curUser);
+        //GetUser(curUser);
 
 #if DEBUG || UNITY_EDITOR
         Debug.Log("인게임 UI 설정 완료");
@@ -89,10 +91,13 @@ public class GameSceneManager : MonoBehaviour
         ToggleImagesAsync().Forget();
     }
 
-    private void GetUser(int curUser)
+    public void GetUser(int curUser, int modelNum)
     {
+        Logger.Log($"GetUser");
         // 유저 번호 불러오기
-        UpdateCharacterUI(curUser);
+        //UpdateCharacterUI(curUser);
+        // 유저 모델 번호 불러오기
+        _character = modelNum;
     }
 
     public void SetPlayerProfile(int playerNum, string nickName, int modelNum)
@@ -101,38 +106,46 @@ public class GameSceneManager : MonoBehaviour
         this.modelNum = modelNum;
 
         nameObjects[playerNum - 1].text = nickName;
-        characterImages[playerNum - 1] = modelImages[modelNum];
+
+        int spriteIndex = (playerNum > 3) ? modelNum + 3 : modelNum;
+        characterImages[playerNum - 1].sprite = modelImages[spriteIndex];
+        
+        Logger.Log($"!!playerNum: {playerNum} name: {nickName} modelNum: {modelNum}");
     }
 
-    private void UpdateCharacterUI(int curUser)
+
+    /// <summary>
+    /// 1번 유저 - 맵X / 2번, 3번 유저 - 맵O
+    /// </summary>
+    /// <param name="curUser"></param>
+    public void UpdateCharacterUI(int curUser, Dictionary<int, int> modelNum)
     {
-        switch (curUser)
+        Debug.Log($"!! curUser: {curUser} ModelNum: {modelNum[curUser]}");
+
+        switch (curUser % 3)
         {
-            case 0:
+            case 0:     // 3번 유저
                 minimapUI.SetActive(true);
                 characterStats[0].SetActive(true);
                 characterStats[1].SetActive(false);
-                // Gamemanager에서 유저 1, 2의 캐릭터 종류 받아오는 코드 추가
+                //_textSprite[0] = Resources.Load<Sprite>(_character);
+                characterStatImages[0].sprite = modelImages[modelNum[3]];
+                break;
+            case 1:     // 1번 유저
+                minimapUI.SetActive(false);
+                characterStats[0].SetActive(true);
+                characterStats[1].SetActive(true);
                 //_textSprite[0] = Resources.Load<Sprite>(_character);
                 //_textSprite[1] = Resources.Load<Sprite>(_character);
-                characterStatImages[0].sprite = Resources.Load<Sprite>(_character);
-                characterStatImages[1].sprite = Resources.Load<Sprite>(_character);
+                characterStatImages[0].sprite = modelImages[modelNum[2]];
+                characterStatImages[1].sprite = modelImages[modelNum[3]];
                 break;
-            case 1:
-                minimapUI.SetActive(false);
-                characterStats[0].SetActive(false);
-                characterStats[1].SetActive(true);
-                // Gamemanager에서 유저 1의 캐릭터 종류 받아오는 코드 추가
-                //_textSprite[0] = Resources.Load<Sprite>(_character);
-                characterStatImages[2].sprite = Resources.Load<Sprite>(_character);
-                break;
-            case 2:
-                minimapUI.SetActive(false);
-                characterStats[0].SetActive(false);
-                characterStats[1].SetActive(true);
-                // Gamemanager에서 유저 2의 캐릭터 종류 받아오는 코드 추가
+            case 2:     // 2번 유저
+                minimapUI.SetActive(true);
+                characterStats[0].SetActive(true);
+                characterStats[1].SetActive(false);
                 //_textSprite[1] = Resources.Load<Sprite>(_character);
-                characterStatImages[2].sprite = Resources.Load<Sprite>(_character);
+                characterStatImages[0].sprite = modelImages[modelNum[2]];
                 break;
             default:
                 Debug.LogError("유저 번호가 할당되지 않았습니다.");
@@ -142,17 +155,10 @@ public class GameSceneManager : MonoBehaviour
 
     private async UniTask ToggleImagesAsync()
     {
-        // 게임 오브젝트 활성화
-        //overlayImage[0].SetActive(true);
-        //overlayImage[1].SetActive(true);
         matchingImage.SetActive(true);
 
-        // 10초 대기
-        await UniTask.Delay(10000);
+        await UniTask.Delay(TimeSpan.FromSeconds(10), DelayType.Realtime);
 
-        // 게임 오브젝트 비활성화
-        //overlayImage[0].SetActive(false);
-        //overlayImage[1].SetActive(false);
         matchingImage.SetActive(false);
     }
 

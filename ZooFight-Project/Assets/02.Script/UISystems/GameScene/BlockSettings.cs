@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class BlockManager : Singleton<BlockManager>
+public class BlockSettings : Singleton<BlockSettings>
 {
 
     private GameObject selectedBlock;

@@ -74,14 +74,13 @@ public class MapManager : MonoBehaviour
             return;
         }
 
-        // 맵 데이터가 비어있다면 새로 생성
-        if (mapDatas[index] == null)
-        {
-            Debug.LogWarning($"mapDatas[{index}]가 비어있습니다. 새로운 MapData 인스턴스를 생성합니다.");
-            mapDatas[index] = ScriptableObject.CreateInstance<MapData>();
-        }
+        MapData data = mapDatas[index];
 
-        var data = mapDatas[index];
+        if (data == null)
+        {
+            Debug.LogError($"mapDatas[{index}]가 null입니다.");
+            return;
+        }
 
         if (data.blocks == null || data.blocks.Count == 0)
         {
@@ -93,7 +92,7 @@ public class MapManager : MonoBehaviour
         string json = JsonUtility.ToJson(data, true);
 
         // 디렉터리 생성
-        string dir = Path.Combine(Application.dataPath, "05.Maps/Resources/MapData");
+        string dir = Path.Combine(Application.dataPath, "Resources/MapData");
         if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
 
         // 파일 경로
@@ -105,6 +104,7 @@ public class MapManager : MonoBehaviour
         AssetDatabase.Refresh();
 #endif
     }
+
 
 
     /// <summary>
@@ -130,4 +130,5 @@ public class MapManager : MonoBehaviour
 
         return data;
     }
+
 }

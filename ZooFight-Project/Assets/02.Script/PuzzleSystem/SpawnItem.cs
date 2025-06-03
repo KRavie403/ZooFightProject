@@ -23,7 +23,7 @@ public class SpawnItem : MonoBehaviour
     // 게임 종료 여부 판단
     public bool isGameOver = false;
 
-    private BlockPlacement blockPlacement = null;
+    private BlockManager blockPlacement = null;
 
 
     // Start is called before the first frame update
@@ -32,7 +32,7 @@ public class SpawnItem : MonoBehaviour
         //Debug Start SpawnItem.cs
         Debug.Log("Start SpawnItem.cs");
 
-        blockPlacement = GetComponent<BlockPlacement>();
+        blockPlacement = GetComponent<BlockManager>();
 
         //points = GameObject.Find("SpawnPointGroup").GetComponentsInChildren<Transform>();   
     
