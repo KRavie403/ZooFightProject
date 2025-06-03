@@ -19,6 +19,7 @@ namespace Protocol
         PlayerHoldItem, // 플레이어가 아이템을 들고있는 상태.
         
         PlayerModelId,
+        MapId,
 
         bulletInfo, 
         //ItemInfo,       //플레이어가 가지고 있는 아이템 정보
@@ -415,6 +416,16 @@ namespace Protocol
         {
             this.playerSession = session;
             this.modelId = num;
+        }
+    }
+
+    public class MapIdMessage : Message
+    {
+        public int mapId;
+
+        public MapIdMessage(int num) : base(Type.MapId)
+        {
+            this.mapId = num;
         }
     }
 }

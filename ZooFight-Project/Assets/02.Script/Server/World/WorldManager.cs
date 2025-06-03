@@ -9,6 +9,7 @@ using TMPro;
 public class WorldManager : MonoBehaviour
 {
     static public WorldManager instance;
+    public GameSceneManager sceneManager;
 
     const int START_COUNT = 5;
 
@@ -22,10 +23,10 @@ public class WorldManager : MonoBehaviour
     private const int MAXPLAYER = 6;
     public int alivePlayer { get; set; }
     //private Dictionary<SessionId, PlayerController> players;
-    private Dictionary<SessionId, Player> players;
+    private Dictionary<SessionId, Player> players;  // (수정필요)
     private Dictionary<int, string> playersList;
+    private Dictionary<int, int> playersModelNum;
     private Dictionary<SessionId, int> playerSessionId;
-    private Dictionary<int, GameSceneManager> playerProfiles;
     public GameObject startPointObject;
     private List<Vector4> statringPoints;
 
@@ -192,40 +193,41 @@ public class WorldManager : MonoBehaviour
         //players = new Dictionary<SessionId, PlayerController>();
         players = new Dictionary<SessionId, Player>();
         playersList = new Dictionary<int, string>();
+        playersModelNum = new Dictionary<int, int>();
         playerSessionId = new Dictionary<SessionId, int>();
-        playerProfiles = new Dictionary<int, GameSceneManager>();
         BackEndMatchManager.GetInstance().SetPlayerSessionList(gamers);
 
         int index = 0;
         int modelNum = BackendGameData.Inst.UserGameData.character;
         foreach (var sessionId in gamers)
         {
-            Debug.Log($"sessionId: {index} : {sessionId}");
+            Debug.Log($"!sessionId: {index} : {sessionId}");
             GameObject player = Instantiate(playerPrefeb, new Vector3(statringPoints[index].x, statringPoints[index].y, statringPoints[index].z), Quaternion.identity, playerPool.transform);
             //players.Add(sessionId, player.GetComponent<PlayerController>());
             players.Add(sessionId, player.GetComponent<Player>());
 
             if (BackEndMatchManager.GetInstance().IsMySessionId(sessionId))
             {
-                Debug.Log($"IsMySessionId: {sessionId}");
+                Debug.Log($"!IsMySessionId: {sessionId}");
                 myPlayerIndex = sessionId;
-                //players[sessionId].Initialize(true, myPlayerIndex, BackEndMatchManager.GetInstance().GetNickNameBySessionId(sessionId), statringPoints[index].w);
+                players[sessionId].Initialize(true, myPlayerIndex, BackEndMatchManager.GetInstance().GetNickNameBySessionId(sessionId), statringPoints[index].w);
             }
             else
             {
-                Debug.Log($"JustSessionId: {sessionId}");
+                Debug.Log($"!JustSessionId: {sessionId}");
                 players[sessionId].Initialize(false, sessionId, BackEndMatchManager.GetInstance().GetNickNameBySessionId(sessionId), statringPoints[index].w);
             }
             index += 1;
-            PlayerModelIdMessage playerModelIdMessage = new PlayerModelIdMessage(sessionId, index);
-            BackEndMatchManager.GetInstance().SendDataToInGame<PlayerModelIdMessage>(playerModelIdMessage);
+            Debug.Log($"num: {index} - modelId: {modelNum}");
+            PlayerModelIdMessage msg = new PlayerModelIdMessage(sessionId, modelNum);
+            Debug.Log("!!msg-modelId: " + msg.modelId);
+            BackEndMatchManager.GetInstance().SendDataToInGame<PlayerModelIdMessage>(msg);
 
             playersList[index] = BackEndMatchManager.GetInstance().GetNickNameBySessionId(sessionId);
             playerSessionId[sessionId] = index;
-            Debug.Log($"playerSessionId[{sessionId}]: {index} - {playersList[index]}");
-
-            Debug.Log($"playersList[{index}]: {playersList[index]}");
-            //Debug.Log($"playerProfiles[{index - 1}]: {playerProfiles[index - 1]}");
+            playersModelNum[index] = modelNum;
+            Logger.Log($"playersModelNum[{index}] = {modelNum}");
+            Debug.Log($"playerSessionId[{sessionId}]: index: {index} - nickname: {playersList[index]}");
         }
         Debug.Log("Num Of Current Player : " + size);
 
@@ -289,7 +291,7 @@ public class WorldManager : MonoBehaviour
     {
         foreach (var player in players)
         {
-            //player.Value.SetMoveVector(Vector3.zero);
+            player.Value.SetMoveVector(Vector3.zero);
         }
     }
 
@@ -340,6 +342,7 @@ public class WorldManager : MonoBehaviour
         {
             case Protocol.Type.PlayerModelId:
                 PlayerModelIdMessage modelIdMessage = DataParser.ReadJsonData<PlayerModelIdMessage>(args.BinaryUserData);
+                Debug.Log("!!m" + modelIdMessage.modelId);
                 ProcessPlayerData(modelIdMessage);
                 break;
             case Protocol.Type.StartCount:
@@ -433,7 +436,7 @@ public class WorldManager : MonoBehaviour
 
         if (isMove)
         {
-            //players[index].SetMoveVector(moveVector);
+            players[index].SetMoveVector(moveVector);
             PlayerMoveMessage msg = new PlayerMoveMessage(index, playerPos, moveVector);
             BackEndMatchManager.GetInstance().SendDataToInGame<PlayerMoveMessage>(msg);
         }
@@ -465,16 +468,16 @@ public class WorldManager : MonoBehaviour
         }
         Vector3 moveVector = new Vector3(data.xDir, data.yDir, data.zDir);
         //moveVector가 같으면 방향 & 이동량 같으므로 적용 굳이 안함
-        //if (!moveVector.Equals(players[data.playerSession].moveVector))
-        //{
-        //    players[data.playerSession].SetPosition(data.xPos, data.yPos, data.zPos);
-        //    players[data.playerSession].SetMoveVector(moveVector);
-        //}
+        if (!moveVector.Equals(players[data.playerSession].moveVector))
+        {
+            players[data.playerSession].SetPosition(data.xPos, data.yPos, data.zPos);
+            players[data.playerSession].SetMoveVector(moveVector);
+        }
     }
     private void ProcessPlayerData(PlayerNoMoveMessage data)
     {
         players[data.playerSession].SetPosition(data.xPos, data.yPos, data.zPos);
-        //players[data.playerSession].SetMoveVector(Vector3.zero);
+        players[data.playerSession].SetMoveVector(Vector3.zero);
     }
     private void ProcessPlayerData(PlayerAttackMessage data)
     {
@@ -493,14 +496,11 @@ public class WorldManager : MonoBehaviour
 
     private void ProcessPlayerData(PlayerModelIdMessage data)
     {
-        Debug.Log("Process Player Data");
         int index = playerSessionId[data.playerSession];
-        Debug.Log($"!! index: with playerSessionId {index}");
-        Debug.Log($"!! playerSessionId: {data.playerSession}");
-        Debug.Log($"!! playerModelId: {data.modelId}");
-        Debug.Log($"!! playerList {playersList[index]}");
 
-        //playerProfiles[index].SetPlayerProfile(index, playersList[index], data.modelId);
+        sceneManager.SetPlayerProfile(index, playersList[index], data.modelId);
+        sceneManager.GetUser(index, data.modelId);
+        sceneManager.UpdateCharacterUI(index, playersModelNum);
     }
 
     private void ProcessSyncData(GameSyncMessage syncMessage)
@@ -524,14 +524,12 @@ public class WorldManager : MonoBehaviour
 
     public bool IsMyPlayerMove()
     {
-        //return players[myPlayerIndex].GetIsMoving();
-        return true;
+        return players[myPlayerIndex].isMove;
     }
 
     public bool IsMyPlayerRotate()
     {
-        //return players[myPlayerIndex].isRotate;
-        return true;
+        return players[myPlayerIndex].isRotate;
     }
 
     private void SetGameRecord(int count, int[] arr)
@@ -557,7 +555,7 @@ public class WorldManager : MonoBehaviour
         {
             xPos[index] = player.Value.GetPosition().x;
             zPos[index] = player.Value.GetPosition().z;
-            //hp[index] = player.Value.CurHP;
+            //hp[index] = player.Value.hp;
             index++;
         }
         return new GameSyncMessage(hostSession, numOfClient, xPos, zPos, hp, online);

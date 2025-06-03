@@ -472,10 +472,19 @@ public partial class BackEndMatchManager : MonoBehaviour
             if (WorldManager.instance == null)
             {
                 // 월드 매니저가 존재하지 않으면 바로 리턴
+                Logger.Log($"!!Worldmanager 존재 x");
+                return;
+            }
+
+            if (BlockManager.instance == null)
+            {
+                Logger.Log($"!!BlockManager 존재 x");
+                // 블록 매니저가 존재하지 않으면 바로 리턴
                 return;
             }
 
             WorldManager.instance.OnRecieve(args);
+            BlockManager.instance.OnRecieve(args);
         };
 
         Backend.Match.OnMatchChat += (args) =>

@@ -2,8 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "NewMap", menuName = "Map")]
-public class MapData : ScriptableObject
+[System.Serializable]
+public class MapData
 {
     public List<BlockData> blocks;
 }

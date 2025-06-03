@@ -9393,6 +9393,7 @@ MonoBehaviour:
   MaxTeamMember: 1
   RedTeamId: 
   BlueTeamId: 
+  Players: []
   RedTeamBlock: {fileID: 0}
   BlueTeamBlock: {fileID: 0}
 --- !u!1 &666312970
@@ -9582,7 +9583,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: b83df6a0e768eb941a2acb968345b202, type: 3}
+  m_Sprite: {fileID: 21300000, guid: ca74012f947e66345bb0121d7800beb6, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -11954,10 +11955,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mapDatas:
-  - {fileID: 11400000, guid: b9d181db17dc1c145b7ac905737c7c7f, type: 2}
-  - {fileID: 11400000, guid: fdbd7e8a9ce48d348ac70540097c5a35, type: 2}
-  - {fileID: 11400000, guid: 3688c7b5eb23685489d4437795b6e32b, type: 2}
-  - {fileID: 11400000, guid: f5e156f492ad7154091d0db831da95c8, type: 2}
+  - blocks: []
+  - blocks: []
+  - blocks: []
+  - blocks: []
   blockPrefabs:
   - {fileID: 5958688389797664242, guid: 526be6b45a395c342b4797dcea30cc96, type: 3}
   - {fileID: 6307543612991165401, guid: 29deb7d8eaa1dff4c8e7a3d2e13f4c09, type: 3}
@@ -12000,7 +12001,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &859555610
 RectTransform:
   m_ObjectHideFlags: 0
@@ -29667,7 +29668,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 2097856109}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8c7e20ce260f17f468a7590ef7de50d4, type: 3}
+  m_Script: {fileID: 11500000, guid: fe1d87611a367824e80fe21a5932264a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   block1x1:
@@ -29681,13 +29682,14 @@ MonoBehaviour:
   - {fileID: 6307543612991165401, guid: 29deb7d8eaa1dff4c8e7a3d2e13f4c09, type: 3}
   - {fileID: 6545411402352811661, guid: ac06a6c303538ea41a577e0050aa1967, type: 3}
   block2x1:
+  - {fileID: 3033144475090823999, guid: 08263eb91702e734ca973041aa5b6d05, type: 3}
   - {fileID: 5958688389797664242, guid: 6fdda89f3332fcc4b808619c0a4ef429, type: 3}
   - {fileID: 6307543612991165401, guid: 447f07b8d8f815a49805a71c56d3f46d, type: 3}
-  - {fileID: 3033144475090823999, guid: 08263eb91702e734ca973041aa5b6d05, type: 3}
   redBlock: {fileID: 5366890221545889980, guid: 208f5647ae3e51e46b8656b6cee086e1, type: 3}
   blueBlock: {fileID: 8171142214863514531, guid: 7324000a79706b749b31764a07f5ac33, type: 3}
   blocks: []
   mapManager: {fileID: 852272949}
+  mapId: 0
   rnd: 0
 --- !u!1 &2116957225
 GameObject:
