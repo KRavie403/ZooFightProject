@@ -1,12 +1,18 @@
-using System.Collections;
-using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
+[System.Serializable]
+public class AudioSettings
+{
+    public float masterVol = 0.8f;
+    public float sfxVol = 0.8f;
+    public float musicVol = 0.8f;
+}
+
 public class AudioManager : Singleton<AudioManager>
 {
-
     public Slider masterVolumeSlider;
     public Slider soundEffectVolumeSlider;
     public Slider musicVolumeSlider;
@@ -21,21 +27,28 @@ public class AudioManager : Singleton<AudioManager>
     public AudioClip[] sfxItemUse;
     public AudioClip[] sfxUI;
 
+    private AudioSettings audioSettings;
+    private string settingsPath;
+
 
     private void Start()
     {
-        // 초기화 작업, 기본 BGM을 설정하는 등
+        settingsPath = Path.Combine(Application.persistentDataPath, "audioSettings.json");
+        LoadSettings();
+
         PlayBackgroundMusic(SceneManager.GetActiveScene().name);
 
-        // 저장된 볼륨 설정 로드
-        masterVolumeSlider.value = PlayerPrefs.GetFloat("MasterVolume", 1f);
-        soundEffectVolumeSlider.value = PlayerPrefs.GetFloat("SoundEffectVolume", 0.7f);
-        musicVolumeSlider.value = PlayerPrefs.GetFloat("MusicVolume", 0.7f);
+        // 슬라이더 초기값 설정
+        masterVolumeSlider.value = audioSettings.masterVol;
+        soundEffectVolumeSlider.value = audioSettings.sfxVol;
+        musicVolumeSlider.value = audioSettings.musicVol;
 
-        // 슬라이더 값 변경 시 호출될 메서드 추가
+        // 리스너 연결
         masterVolumeSlider.onValueChanged.AddListener(SetMasterVolume);
         soundEffectVolumeSlider.onValueChanged.AddListener(SetSoundEffectVolume);
         musicVolumeSlider.onValueChanged.AddListener(SetMusicVolume);
+
+        UpdateAllVolumes();
     }
 
     private void OnEnable()
@@ -55,25 +68,21 @@ public class AudioManager : Singleton<AudioManager>
 
     public void PlayBackgroundMusic(string sceneName)
     {
-        // BGM을 설정하는 로직
         AudioClip clip = GetClipForScene(sceneName, bgm);
         if (clip != null)
         {
             BGMSource.clip = clip;
             BGMSource.Play();
         }
-#if DEBUG
         else
         {
             Debug.LogWarning("해당 BGM 클립을 찾을 수 없음: " + sceneName);
         }
-#endif
     }
 
     public void PlayUIEffect(int index)
     {
-        // UI 사운드를 설정
-        if (index >= 0 && index < sfxUI.Length-1)
+        if (index >= 0 && index < sfxUI.Length)
         {
             SFXSource.PlayOneShot(sfxUI[index]);
         }
@@ -83,22 +92,8 @@ public class AudioManager : Singleton<AudioManager>
         }
     }
 
-    //public void PlayMatchingUIEffect(int index)
-    //{
-    //    // UI 사운드를 설정
-    //    if (index >= 0 && index < sfxUI.Length)
-    //    {
-    //        SFXSource.PlayOneShot(sfxUI[index]);
-    //    }
-    //    else
-    //    {
-    //        Debug.LogWarning("UI 사운드 이펙트가 범위를 벗어남: " + index);
-    //    }
-    //}
-
     private AudioClip GetClipForScene(string sceneName, AudioClip[] clips)
     {
-        // 씬 이름에 따라 적절한 오디오 클립을 반환
         foreach (var clip in clips)
         {
             if (clip.name == sceneName)
@@ -111,28 +106,55 @@ public class AudioManager : Singleton<AudioManager>
 
     private void SetMasterVolume(float volume)
     {
-        // 마스터 볼륨 설정
-        AudioListener.volume = volume;
-        PlayerPrefs.SetFloat("MasterVolume", volume); // 설정 저장
-    } 
-
+        audioSettings.masterVol = volume;
+        SaveSettings();
+        UpdateAllVolumes();
+    }
 
     private void SetSoundEffectVolume(float volume)
     {
-        // SFX 볼륨 설정
-        if (SFXSource != null)
-        {
-            SFXSource.volume = volume;
-            PlayerPrefs.SetFloat("SoundEffectVolume", volume); // 설정 저장
-        }
+        audioSettings.sfxVol = volume;
+        SaveSettings();
+        UpdateAllVolumes();
     }
+
     private void SetMusicVolume(float volume)
     {
-        // Music 볼륨 설정
+        audioSettings.musicVol = volume;
+        SaveSettings();
+        UpdateAllVolumes();
+    }
+
+    private void UpdateAllVolumes()
+    {
+        float scaledMaster = audioSettings.masterVol * 0.2f;
+
+        AudioListener.volume = scaledMaster;
+
+        if (SFXSource != null)
+            SFXSource.volume = scaledMaster * audioSettings.sfxVol;
+
         if (BGMSource != null)
+            BGMSource.volume = scaledMaster * audioSettings.musicVol;
+    }
+
+    private void LoadSettings()
+    {
+        if (File.Exists(settingsPath))
         {
-            BGMSource.volume = volume;
-            PlayerPrefs.SetFloat("MusicVolume", volume); // 설정 저장
+            string json = File.ReadAllText(settingsPath);
+            audioSettings = JsonUtility.FromJson<AudioSettings>(json);
         }
+        else
+        {
+            audioSettings = new AudioSettings(); // 기본값으로 초기화
+            SaveSettings();
+        }
+    }
+
+    private void SaveSettings()
+    {
+        string json = JsonUtility.ToJson(audioSettings, true);
+        File.WriteAllText(settingsPath, json);
     }
 }
