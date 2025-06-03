@@ -1,3 +1,7 @@
+using BackEnd.Tcp;
+using BackEnd;
+using Protocol;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,12 +19,16 @@ public enum BlockType
     Block1x2_2,
     Block1x1_0,
     Block1x1_1,
-    Block1x1_2
+    Block1x1_2,
+    Block1x1_3,
+    Block1x1_4
 }
 
 
-public class BlockPlacement : MonoBehaviour
+public class BlockManager : MonoBehaviour
 {
+    static public BlockManager instance;
+
     // 맵 정보
     private float mapWidth = 60.0f, mapHeight = 40.0f;
 
@@ -37,49 +45,78 @@ public class BlockPlacement : MonoBehaviour
     private Dictionary<int, Vector3> placedBlockPositions = new Dictionary<int, Vector3>();
 
     public MapManager mapManager; // MapManager를 참조
+    private MapData loadedMapData;
+    public int mapId = 0;
+    private SessionId myPlayerIndex = SessionId.None;
 
     // CharacterPlacement.cs에서 User Position 값 받음
     private List<Vector3> receivedSpawnUsers = new List<Vector3>();
     private List<Vector3> receivedSpawnItems = new List<Vector3>();
 
-    // 시드 테스트
+    // 시드값
     public int rnd = 0;
-
+  
     // 로그 확인
     private int blockCount = 0;     // pinkBlock:0 blueBlock:1
     private int blockNum1 = 0;
     private int blockNum2 = 0;
     private int blockNum3 = 0;
 
+    private void Awake()
+    {
+        instance = this;
+    }
 
     private void Start()
     {
-        // 랜덤 고정 (seed)
-        SelectSeed(42);
-        Random.InitState(rnd);
-
-        // 맵 좌표 생성(40x60)
-        //InitializeGrid();
-
-        // 블록 배치
-        //PlaceBlocks();
-
-        // 레드, 블루 고정 위치에 배치
-        PlaceTeamBlocks();
-
-        // 블록 랜덤 배치 (그리드 + 확률 기반)
-        GridBasedWeightedPlacement();
-
-        // 맵 결과 저장
-        SaveMapData();
-
 #if UNITY_EDITOR
-        // -> JSON으로 추출 (index 예: 0, 1, 2, 3 중 하나)
-        mapManager.ExportMapDataToJson(0);
+        //// 랜덤 고정 (seed)
+        //SelectSeed(52);
+        //Random.InitState(rnd);
+
+        //// 맵 좌표 생성(40x60)
+        ////InitializeGrid();
+
+        //// 블록 배치
+        ////PlaceBlocks();
+
+        //// 레드, 블루 고정 위치에 배치
+        //PlaceTeamBlocks();
+
+        //// 블록 랜덤 배치 (그리드 + 확률 기반)
+        //GridBasedWeightedPlacement();
+
+        //// 맵 결과 저장
+        //SaveMapData();
+
+        //// -> JSON으로 추출 (index 예: 0, 1, 2, 3 중 하나)
+        //mapManager.ExportMapDataToJson(0);
 #endif
 
+
+        myPlayerIndex = Backend.Match.GetMySessionId();
+
         // 저장된 맵 불러오기
-        //mapManager.LoadMapData();
+        if (BackEndMatchManager.GetInstance().IsHost())
+        {
+            mapId = UnityEngine.Random.Range(1, 5);
+
+            Logger.Log($"호스트가 정한 맵 번호: {mapId}");
+
+            MapIdMessage message = new MapIdMessage(mapId);
+            BackEndMatchManager.GetInstance().SendDataToInGame<MapIdMessage>(message);
+
+            loadedMapData = mapManager.LoadMapData(mapId);
+
+            if (loadedMapData != null)
+                PlaceBlocks(loadedMapData);
+            else
+                Debug.LogError("Map data load failed");
+        }
+        else
+        {
+            Logger.Log($"호스트 아님");
+        }
     }
 
     private void SelectSeed(int seed)
@@ -100,6 +137,37 @@ public class BlockPlacement : MonoBehaviour
     }
     */
 
+    private void PlaceBlocks(MapData mapData)
+    {
+        foreach (BlockData block in mapData.blocks)
+        {
+            Vector3 blockPosition = new Vector3(block.x, block.y, block.z);
+
+            GameObject blockPrefab = GetBlockPrefab(block.type);
+
+            Quaternion rot = (block.type >= 2 && block.type <= 4)
+            ? Quaternion.Euler(0, 90, 0)
+            : Quaternion.identity;
+
+            Instantiate(blockPrefab, blockPosition, rot);
+
+#if UNITY_EDITOR || DEBUG
+            Debug.Log($"블록 생성 - 번호: {block.blockNum}, 타입: {block.type}, 위치: {blockPosition}");
+#endif
+        }
+    }
+
+    private GameObject GetBlockPrefab(int type)
+    {
+        Logger.Log($"block type: {type}");
+        // 타입에 따라 프리팹 리턴 (직접 조정)
+        if (type == 0) return redBlock;
+        if (type == 1) return blueBlock;
+        if (type >= 2 && type <= 4) return block2x1[type - 2];
+        if (type >= 5 && type <= 7) return block1x2[type - 5];
+        else return block1x1[type - 8];
+    }
+
     private void PlaceTeamBlocks()
     {
         //mapCoordinates[0] = new Vector3(0, 0, 0);
@@ -114,6 +182,8 @@ public class BlockPlacement : MonoBehaviour
         //mapCoordinates[FindMapCoordinatesKey(mapCoordinates, blueBlockPosition)] = new Vector3(0, 0, 0);
         //MarkPositionAsOccupied(blockCount++, redBlockPosition);
         //MarkPositionAsOccupied(blockCount++, blueBlockPosition);
+        occupied.Add(redBlockPosition);
+        occupied.Add(blueBlockPosition);
 
         AddBlockData(redBlockPosition, BlockType.Red);
         blockCount++;
@@ -158,7 +228,7 @@ public class BlockPlacement : MonoBehaviour
             }
 
             // 무작위로 섞기
-            candidates = candidates.OrderBy(_ => Random.value).ToList();
+            candidates = candidates.OrderBy(_ => UnityEngine.Random.value).ToList();
 
             int count = 0;
             foreach (var cell in candidates)
@@ -167,7 +237,7 @@ public class BlockPlacement : MonoBehaviour
                 if (occupied.Contains(cell)) continue;
                 if (!HasFreeAdjacent(cell)) continue;
 
-                float roll = Random.value;
+                float roll = UnityEngine.Random.value;
 
                 if (roll < 0.3f)
                     TryPlace1x1(cell);
@@ -212,13 +282,14 @@ public class BlockPlacement : MonoBehaviour
 
         blockNum1 %= block1x1.Length;
 
-        Instantiate(block1x1[blockNum1++], basePos, Quaternion.identity);
+        AddBlockData(basePos, BlockType.Block1x1_0 + blockNum1);
+
 
         Logger.Log($"blockCount: {blockCount}");
 
         occupied.Add(basePos);
 
-        AddBlockData(basePos, BlockType.Block1x1_0 + blockNum1);
+        Instantiate(block1x1[blockNum1++], basePos, Quaternion.identity);
     }
 
     private void TryPlace1x2(Vector3 basePos)
@@ -231,14 +302,15 @@ public class BlockPlacement : MonoBehaviour
 
         Vector3 mid = basePos + new Vector3(0, 0, 0.5f);
 
-        Instantiate(block1x2[blockNum2++], mid, Quaternion.identity);
 
         Logger.Log($"blockCount: {blockCount}");
 
         occupied.Add(basePos);
         occupied.Add(next);
 
-        AddBlockData(mid, BlockType.Block1x2_0 + blockNum1);
+        AddBlockData(mid, BlockType.Block1x2_0 + blockNum2);
+        
+        Instantiate(block1x2[blockNum2++], mid, Quaternion.identity);
     }
 
     private void TryPlace2x1(Vector3 basePos)
@@ -250,16 +322,16 @@ public class BlockPlacement : MonoBehaviour
         blockNum3 %= block2x1.Length;
         Vector3 mid = basePos + new Vector3(0.5f, 0, 0);
 
-        Instantiate(block2x1[blockNum3++], mid, Quaternion.Euler(0, 90, 0));
 
         Logger.Log($"blockCount: {blockCount}");
 
         occupied.Add(basePos);
-
         occupied.Add(basePos);
         occupied.Add(next);
 
         AddBlockData(mid, BlockType.Block2x1_0 + blockNum3);
+
+        Instantiate(block2x1[blockNum3++], mid, Quaternion.Euler(0, 90, 0));
     }
 
     void AddBlockData(Vector3 pos, BlockType type)
@@ -328,6 +400,47 @@ public class BlockPlacement : MonoBehaviour
         }
         receivedSpawnItems.Clear();
         receivedSpawnItems.AddRange(spawnItems);
+    }
+
+    public void OnRecieve(MatchRelayEventArgs args)
+    {
+        if (args.BinaryUserData == null)
+        {
+            Logger.LogWarning(string.Format("빈 데이터가 브로드캐스팅 되었습니다.\n{0} - {1}", args.From, args.ErrInfo));
+            // 데이터가 없으면 그냥 리턴
+            return;
+        }
+        Message msg = DataParser.ReadJsonData<Message>(args.BinaryUserData);
+        if (msg == null)
+        {
+            return;
+        }
+        if (BackEndMatchManager.GetInstance().IsHost() != true && args.From.SessionId == myPlayerIndex)
+        {
+            return;
+        }
+        switch (msg.type)
+        {
+            case Protocol.Type.MapId:
+                MapIdMessage mapIdMessage = DataParser.ReadJsonData<MapIdMessage>(args.BinaryUserData);
+                ProcessMapData(mapIdMessage);
+                break;
+            default:
+                Logger.Log("Unknown protocol type");
+                return;
+        }
+    }
+
+    private void ProcessMapData(MapIdMessage data)
+    {
+        loadedMapData = mapManager.LoadMapData(data.mapId);
+
+        Logger.Log($"호스트로부터 받은 맵 번호: {data.mapId}");
+
+        if (loadedMapData != null)
+            PlaceBlocks(loadedMapData);
+        else
+            Logger.LogError("Map data load failed");
     }
 
     /*private void PlaceBlocks()
