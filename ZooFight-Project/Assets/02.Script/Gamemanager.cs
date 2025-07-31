@@ -17,7 +17,7 @@ interface IObjectId
     ObjectType ObjectType { get; }
 
 
-}
+} 
 
 public enum ObjectType : sbyte
 {

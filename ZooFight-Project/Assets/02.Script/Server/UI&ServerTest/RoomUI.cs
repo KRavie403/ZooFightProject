@@ -22,6 +22,14 @@ public partial class MainMenuManager : MonoBehaviour
     private GameObject friendEmptyObject;
 
     private List<string> readyUserList = null;
+    public void OpenRoomUI()
+    {
+        // 매치 서버에 대기방 생성 요청
+        if (BackEndMatchManager.GetInstance().CreateMatchRoom() == true)
+        {
+            SetLoadingObjectActive(true);   
+        }   
+    }
 
     public void CreateRoomResult(bool isSuccess, List<MatchMakingUserInfo> userList = null)
     {
@@ -51,7 +59,7 @@ public partial class MainMenuManager : MonoBehaviour
 
     public void LeaveReadyRoom()
     {
-        BackEndMatchManager.GetInstance().LeaveMatchRoom();
+        BackEndMatchManager.GetInstance().LeaveMatchLoom();
         // readyRoomObject.SetActive(false);
     }
 

@@ -4,32 +4,22 @@ using UnityEngine;
 using UnityEngine.UI;
 using EasyUI.Progress;
 
-public class LoadingProgress : Singleton<LoadingProgress>
+public class LoadingProgress : MonoBehaviour
 {
     public Animator anim;
     [SerializeField]
     private RawImage _uiRawImage;
 
-    public static LoadingProgress GetInstance()
+    void Start()
     {
-        if (Inst == null)
-        {
-            Logger.LogError("LoadingProgress 인스턴스가 존재하지 않습니다.");
-            return null;
-        }
-
-        return Inst;
+        LoadLoadingImg();
     }
 
     public void LoadLoadingImg()
     {
-        if (anim == null)
-        {
-            Logger.LogError("Animator가 할당되지 않았습니다.");
-            return;
-        }
-
         anim.SetBool("IsRotating", true);
+        //Progress.Show("Loading image. . .", ProgressColor.Orange);
+        //StartCoroutine("LoadImg");
     }
 
     //private IEnumerator LoadImg()

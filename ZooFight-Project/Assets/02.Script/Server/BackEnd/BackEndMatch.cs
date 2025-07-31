@@ -83,7 +83,7 @@ public partial class BackEndMatchManager : MonoBehaviour
     }
 
     // 매칭 대기 방 나가기
-    public void LeaveMatchRoom()
+    public void LeaveMatchLoom()
     {
         Backend.Match.LeaveMatchRoom();
     }
@@ -162,7 +162,7 @@ public partial class BackEndMatchManager : MonoBehaviour
             case ErrorCode.Success:
                 // 매칭 성공했을 때
                 debugLog = string.Format(SUCCESS_MATCHMAKE, args.Reason);
-                MainMenuManager.GetInstance().MatchDoneCallback();
+                //LobbyUI.GetInstance().MatchDoneCallback();
                 ProcessMatchSuccess(args);
                 break;
             case ErrorCode.Match_InProgress:
@@ -173,40 +173,40 @@ public partial class BackEndMatchManager : MonoBehaviour
                 {
                     debugLog = SUCCESS_REGIST_MATCHMAKE;
 
-                    //MainMenuManager.GetInstance().MatchRequestCallback(true);
+                    //LobbyUI.GetInstance().MatchRequestCallback(true);
                 }
                 break;
             case ErrorCode.Match_MatchMakingCanceled:
                 // 매칭 신청이 취소되었을 때
                 debugLog = string.Format(CANCEL_MATCHMAKE, args.Reason);
 
-                MainMenuManager.GetInstance().MatchRequestCallback(false);
+                //LobbyUI.GetInstance().MatchRequestCallback(false);
                 break;
             case ErrorCode.Match_InvalidMatchType:
                 isError = true;
                 // 매치 타입을 잘못 전송했을 때
                 debugLog = string.Format(FAIL_REGIST_MATCHMAKE, INVAILD_MATCHTYPE);
 
-                MainMenuManager.GetInstance().MatchRequestCallback(false);
+                //LobbyUI.GetInstance().MatchRequestCallback(false);
                 break;
             case ErrorCode.Match_InvalidModeType:
                 isError = true;
                 // 매치 모드를 잘못 전송했을 때
                 debugLog = string.Format(FAIL_REGIST_MATCHMAKE, INVALID_MODETYPE);
 
-                MainMenuManager.GetInstance().MatchRequestCallback(false);
+                //LobbyUI.GetInstance().MatchRequestCallback(false);
                 break;
             case ErrorCode.InvalidOperation:
                 isError = true;
                 // 잘못된 요청을 전송했을 때
                 debugLog = string.Format(INVALID_OPERATION, args.Reason);
-                MainMenuManager.GetInstance().MatchRequestCallback(false);
+                //LobbyUI.GetInstance().MatchRequestCallback(false);
                 break;
             case ErrorCode.Match_Making_InvalidRoom:
                 isError = true;
                 // 잘못된 요청을 전송했을 때
                 debugLog = string.Format(INVALID_OPERATION, args.Reason);
-                MainMenuManager.GetInstance().MatchRequestCallback(false);
+                //LobbyUI.GetInstance().MatchRequestCallback(false);
                 break;
             case ErrorCode.Exception:
                 isError = true;
@@ -214,7 +214,7 @@ public partial class BackEndMatchManager : MonoBehaviour
                 // 이 경우 다시 매칭 신청해야 됨
                 debugLog = string.Format(EXCEPTION_OCCUR, args.Reason);
 
-                MainMenuManager.GetInstance().RequestMatch();
+                //LobbyUI.GetInstance().RequestMatch();
                 break;
         }
 
@@ -223,7 +223,7 @@ public partial class BackEndMatchManager : MonoBehaviour
             Debug.Log(debugLog);
             if (isError == true)
             {
-                //MainMenuManager.GetInstance().SetErrorObject(debugLog);
+                //LobbyUI.GetInstance().SetErrorObject(debugLog);
             }
         }
     }
@@ -263,6 +263,7 @@ public partial class BackEndMatchManager : MonoBehaviour
         nowMatchType = info.matchType;
         nowModeType = info.matchModeType;
         numOfClient = int.Parse(info.headCount);
+        MatchingTest.GetInstance().RequestInfo();
     }
 
     public void ProcessReconnect()
