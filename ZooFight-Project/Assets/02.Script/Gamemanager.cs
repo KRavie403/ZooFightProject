@@ -141,7 +141,7 @@ public class Gamemanager : MonoBehaviour
     public BlockObject BlueTeamBlock;
 
     public Dictionary<int, GameObject> SpawnObject;
-    
+
     #endregion
     //public WaitForSeconds BasicPollingRate
 
