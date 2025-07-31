@@ -136,4 +136,20 @@ public class LobbyUI : MonoBehaviour
         }
         return true;
     }
+
+    // 로딩신으로 전환
+    private async UniTaskVoid OnLoadScene()
+    {
+        await UniTask.Yield();
+
+        AsyncOperation loadSceneAsync = SceneManager.LoadSceneAsync("LoadingScene");
+        loadSceneAsync.allowSceneActivation = false;
+
+        while (!loadSceneAsync.isDone)
+        {
+            await UniTask.Yield();
+
+            loadSceneAsync.allowSceneActivation = true;
+        }
+    }
 }

@@ -10,7 +10,7 @@ Material:
   m_Name: Cake_00 Body
   m_Shader: {fileID: 4800000, guid: 60e29b7951f20da47b11861d166b7036, type: 3}
   m_Parent: {fileID: 2100000, guid: 2765cd22ee05909488b6b834b0e1ba34, type: 2}
-  m_ModifiedSerializedProperties: 4
+  m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
   - _OUTLINETYPE_NORMAL
   - _OVERLAYMODE1_NONE
@@ -24,7 +24,7 @@ Material:
   m_InvalidKeywords:
   - _USESHADOWS_ON
   m_LightmapFlags: 4
-  m_EnableInstancingVariants: 1
+  m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
   stringTagMap: {}

@@ -228,9 +228,9 @@ MonoBehaviour:
   t2: {fileID: 1374011050}
   BGImage1: {fileID: 286067279}
   BGImage2: {fileID: 1910235958}
-  _textSprite: {fileID: 21300000, guid: 32318a9592f456c4da3a271af10773c0, type: 3}
-  _t1Sprite: {fileID: 21300000, guid: 48609ecc246fe9a45b96f261508b5f6a, type: 3}
-  _t2Sprite: {fileID: 21300000, guid: 10f421eb36164d54abf4f8468acc9eb6, type: 3}
+  _textSprite: {fileID: 0}
+  _t1Sprite: {fileID: 0}
+  _t2Sprite: {fileID: 0}
 --- !u!1 &286067277
 GameObject:
   m_ObjectHideFlags: 0
@@ -1812,7 +1812,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7097301633664748118, guid: 4f58d1e32f1eb9d418118dad5f41c7e8, type: 3}
       propertyPath: m_Name
-      value: Win
+      value: Lose
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2498,7 +2498,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5235843859088402411, guid: 0d82a44c64eb73e4dbc629b359d2278f, type: 3}
       propertyPath: m_Name
-      value: Lose
+      value: Wine
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

@@ -38,16 +38,11 @@ public partial class MainMenuManager : MonoBehaviour
 
     // 매칭 이미지
     [SerializeField] private GameObject _matchingUI;
-    [SerializeField] private GameObject _matchDoneObject;
-    [SerializeField] private Animator _circleAnim;
-    [SerializeField] private Animator _spinAnim;
-    [SerializeField] private GameObject _uiRawImage;
-    [SerializeField] private TextMeshProUGUI _timerText;
-    [SerializeField] private TextMeshProUGUI _matchingText;
+    [SerializeField] private Animator _anim;
+    [SerializeField] private RawImage _uiRawImage;
+    [SerializeField] private TextMeshProUGUI timerText;
 
     private bool _isMatchmaking;
-    private bool _isMatchDone;
-    private bool _isReconnect;
     private CancellationTokenSource _cts;
 
     private Action<bool, string> loginSuccessFunc = null;
@@ -78,9 +73,6 @@ public partial class MainMenuManager : MonoBehaviour
 
     private void Start()
     {
-        _isReconnect = false;
-        _matchingText.text = "플레이";
-
         _matchingUI.SetActive(false);
         switchBtn.SetActive(true);
         selectBtn.SetActive(false);
@@ -133,14 +125,42 @@ public partial class MainMenuManager : MonoBehaviour
     /// </summary>
     public void ClickPlay()
     {
-        if (_isMatchmaking)
+        // 매치 서버에 대기방 생성 요청
+        if (BackEndMatchManager.GetInstance().CreateMatchRoom() == true)
         {
-            StopMatchmaking();
+            SetLoadingObjectActive(true);
         }
-        else
+
+        var matchManager = BackEndMatchManager.GetInstance();
+        if (matchManager == null)
         {
-            StartMatchmaking();
+            Debug.LogError("BackEndMatchManager instance is null.");
+            return;
         }
+
+        //Enqueue(Backend.BMember.GetUserInfo, callback =>
+        //{
+
+        //    if (!callback.IsSuccess())
+        //    {
+        //        Debug.LogError("유저 정보 불러오기 실패\n" + callback);
+        //        loginSuccessFunc(false, string.Format(BackendError,
+        //        callback.GetStatusCode(), callback.GetErrorCode(), callback.GetMessage()));
+        //        return;
+        //    }
+        //    Debug.Log("유저정보\n" + callback);
+
+        //    var info = callback.GetReturnValuetoJSON()["row"];
+        //    if (loginSuccessFunc == null)
+        //    {
+        //        Debug.Log("loginSuccess is null");
+        //    }
+
+        //    if (loginSuccessFunc != null)
+        //    {
+        //        BackEndMatchManager.GetInstance().GetMatchList(loginSuccessFunc);
+        //    }
+        //});
     }
 
     /// <summary>
@@ -175,40 +195,10 @@ public partial class MainMenuManager : MonoBehaviour
         foreach (var btn in arrowBtns) btn.SetActive(false);
     }
 
-    public async void StartMatchmaking()
-    {
-        _isMatchmaking = true;
-
-        var matchManager = BackEndMatchManager.GetInstance();
-        if (matchManager == null)
-        {
-            Debug.LogError("BackEndMatchManager instance is null.");
-            return;
-        }
-
-        playBtn.GetComponent<Button>().interactable = false;
-
-        if (matchManager.CreateMatchRoom())
-        {
-            SetLoadingObjectActive(true);
-            _matchingText.text = "매칭 취소";
-        }
-
-        await UniTask.Delay(200);
-
-        RequestMatch();
-
-        await UniTask.Delay(1500);
-        playBtn.GetComponent<Button>().interactable = true;
-    }
-
-
     private async UniTask StartMatchmakingTimer()
     {
+        _isMatchmaking = true;
         _cts = new CancellationTokenSource();
-
-        _uiRawImage.SetActive(true);
-        _matchDoneObject.SetActive(false);
 
         int elapsedTime = 0;
 
@@ -219,102 +209,38 @@ public partial class MainMenuManager : MonoBehaviour
                 int minutes = elapsedTime / 60;
                 int seconds = elapsedTime % 60;
 
-                _timerText.text = $"{minutes:00}:{seconds:00}";
+                timerText.text = $"{minutes:00}:{seconds:00}";
 
-                await UniTask.Delay(TimeSpan.FromSeconds(1), DelayType.Realtime, PlayerLoopTiming.Update, _cts.Token);
-
+                await UniTask.Delay(TimeSpan.FromSeconds(1), cancellationToken: _cts.Token);
                 elapsedTime++;
             }
         }
         catch (OperationCanceledException)
         {
-            Logger.Log("매칭 종료");
+            Debug.Log("매칭 종료");
         }
-    }
-
-    // 매칭 실패
-    public void MatchRequestCallback(bool result)
-    {
-        if (!result)
-        {
-            _uiRawImage.SetActive(true);
-            _matchDoneObject.SetActive(false);
-            _matchingText.text = "플레이";
-            return; 
-        }
-    }
-
-    // 매칭 잡힐 때 호출
-    public void MatchDoneCallback()
-    {
-        _isMatchDone = true;
-        _uiRawImage.SetActive(false);
-        _matchDoneObject.SetActive(true);
     }
 
 
     // 매칭을 종료할 때 호출
-    public async void StopMatchmaking()
+    public void StopMatchmaking()
     {
-        if (!_isMatchmaking)
-            return;
-
-        _cts.Cancel();
-        _cts?.Dispose();
-        _cts = null;
-
-        playBtn.GetComponent<Button>().interactable = false;
-
-        if (_isMatchmaking && !_isMatchDone) {
-            BackEndMatchManager.GetInstance().CancelRegistMatchMaking();
-            BackEndMatchManager.GetInstance().LeaveMatchRoom();
-        }
-            
-        else if (_isMatchmaking && _isMatchDone)
-            BackEndMatchManager.GetInstance().LeaveInGameRoom();
-
         _isMatchmaking = false;
-        _isMatchDone = false;
-
-
-        SetLoadingObjectActive(false);
-        _matchingText.text = "플레이";
-
-        await UniTask.Delay(1500);
-        playBtn.GetComponent<Button>().interactable = true;
+        _cts.Cancel();
     }
 
     public void SetLoadingObjectActive(bool isActive)
     {
         _matchingUI.SetActive(isActive);
-        LoadCircleImg();
-
-        if (isActive)
-        {
-            StartMatchmakingTimer().Forget();   
-        }
+        LoadLoadingImg();       // 매칭 큐
+        StartMatchmakingTimer().Forget();
     }
 
     // 원형 로딩 이미지
-    public void LoadCircleImg()
+    public void LoadLoadingImg()
     {
-        _circleAnim.updateMode = AnimatorUpdateMode.UnscaledTime;
-        if (!_circleAnim.GetBool("IsRotating"))
-        {
-            _circleAnim.SetBool("IsRotating", true);
-        }
+        _anim.SetBool("IsRotating", true);
     }
-
-    // 회오리 로딩 이미지
-    public void LoadSpinImg()
-    {
-        _circleAnim.updateMode = AnimatorUpdateMode.UnscaledTime;
-        if (!_circleAnim.GetBool("IsRotating"))
-        {
-            _circleAnim.SetBool("IsRotating", true);
-        }
-    }
-
 
     public void OpenGameRecord()
     {
@@ -412,27 +338,25 @@ public partial class MainMenuManager : MonoBehaviour
     {
         Dispatcher.Current.BeginInvoke(() =>
         {
-            SetReconnectObject().Forget();
+            //loadingObject.SetActive(true);
+            Invoke("SetReconnectObject", 1.0f);
         });
     }
 
-    private async UniTaskVoid SetReconnectObject()
+    private void SetReconnectObject()
     {
-        await UniTask.Delay(1000); // 1초 대기
-
-        _isReconnect = true;
-        _matchingText.text = "경기 재접속하기";
+        //loadingObject.SetActive(false);
+        //reconnectObject.SetActive(true);
     }
 
     public void ReconnectInGameProcess()
     {
-        if (_isReconnect)
-        {
-            MatchDoneCallback();
-            BackEndMatchManager.GetInstance().ProcessReconnect();
+        //var tmp = matchDoneObject.GetComponentInChildren<Text>();
+        //tmp.text = "재접속 중...";
+        //modelObject.SetActive(false);
+        //MatchDoneCallback();
 
-            _isReconnect = false;
-        }
+        BackEndMatchManager.GetInstance().ProcessReconnect();
     }
 
     public void JoinMatchProcess()
@@ -456,36 +380,87 @@ public partial class MainMenuManager : MonoBehaviour
             //matchInfo.matchType, matchInfo.matchModeType);
     }
 
+    public async UniTask LoadLoadingScene()
+    {
+        // 현재 로딩 씬이 이미 로드되어 있는 경우 언로드
+        if (SceneManager.GetSceneByName("LoadingScene").isLoaded)
+        {
+            await SceneManager.UnloadSceneAsync("LoadingScene");
+        }
+
+        // 로딩 씬을 비동기적으로 로드
+        AsyncOperation loadingSceneOp = SceneManager.LoadSceneAsync("LoadingScene");
+        loadingSceneOp.allowSceneActivation = true; // 씬 활성화를 제어
+
+        // 로딩 씬이 로드될 때까지 기다림
+        while (!loadingSceneOp.isDone)
+        {
+            await UniTask.Yield(); // 프레임마다 대기하여 로딩 진행 상황을 체크
+        }
+
+        // 게임 씬을 비동기적으로 로드
+        await LoadGameSceneAsync();
+    }
+
+    private async UniTask LoadGameSceneAsync()
+    {
+        AsyncOperation op = SceneManager.LoadSceneAsync("GameScene");
+        op.allowSceneActivation = false;
+
+        while (!op.isDone)
+        {
+            await UniTask.Yield();
+            if (op.progress >= 0.9f)
+            {
+                op.allowSceneActivation = true;
+                return;
+            }
+        }
+    }
+
+    //public void CreateRoomResult(bool isSuccess, List<MatchMakingUserInfo> userList = null)
+    //{
+    //    // 대기 방 생성에 성공 시 대기방 UI를 활성화 시키고,
+    //    // 친구목록을 조회
+    //    if (isSuccess == true)
+    //    {
+    //        readyRoomObject.SetActive(true);
+    //        SetFriendList();
+    //        if (userList == null)
+    //        {
+    //            SetReadyUserList(BackEndServerManager.GetInstance().myNickName);
+    //        }
+    //        else
+    //        {
+    //            SetReadyUserList(userList);
+    //        }
+    //    }
+    //    // 대기 방 생성에 실패 시 에러를 띄움
+    //    else
+    //    {
+    //        SetLoadingObjectActive(false);
+    //        SetErrorObject("대기방 생성에 실패했습니다.\n\n잠시 후 다시 시도해주세요.");
+    //    }
+    //}
+
+    //public void LeaveReadyRoom()
+    //{
+    //    BackEndMatchManager.GetInstance().LeaveMatchLoom();
+    //    // readyRoomObject.SetActive(false);
+    //}
+
+    //public void CloseRoomUIOnly()
+    //{
+    //    readyRoomObject.SetActive(false);
+    //}
+
     public void RequestMatch(int index)
     {
         //if (loadingObject.activeSelf || recordObject.activeSelf || errorObject.activeSelf || requestProgressObject.activeSelf || matchDoneObject.activeSelf)
         //{
         //    return;
         //}
-
-        // 매칭 요청 보내기
-        foreach (var tab in matchInfotabList)
-        {
-            if (tab.IsOn() == true)
-            {
-                BackEndMatchManager.GetInstance().RequestMatchMaking(tab.index);
-                return;
-            }
-        }
-
-        Logger.Log("활성화된 탭이 존재하지 않습니다.");
-
-        // 로딩 씬을 비동기적으로 로드하고, 이후 게임 씬을 로드
-        //LoadLoadingScene().Forget();
-    }
-
-    public void RequestGroupMatch(int index)
-    {
-        //if (loadingObject.activeSelf || recordObject.activeSelf || errorObject.activeSelf || requestProgressObject.activeSelf || matchDoneObject.activeSelf)
-        //{
-        //    return;
-        //}
-
+        
         //// 현재 매칭 인원 확인 (예: 그룹 매칭 필요)
         //int requiredPlayers = int.Parse(matchInfos[index].headCount);
         //int currentPlayers = GetCurrentMatchPlayers(matchInfos[index].matchType);
@@ -506,7 +481,7 @@ public partial class MainMenuManager : MonoBehaviour
             }
         }
 
-        Logger.Log("활성화된 탭이 존재하지 않습니다.");
+        Debug.Log("활성화된 탭이 존재하지 않습니다.");
 
         // 로딩 씬을 비동기적으로 로드하고, 이후 게임 씬을 로드
         //LoadLoadingScene().Forget();
@@ -523,27 +498,4 @@ public partial class MainMenuManager : MonoBehaviour
     //        GameObject.DestroyImmediate(child.gameObject);
     //    }
     //}
-
-    public void OnMatchLeave(string reason)
-    {
-        Logger.Log($"매칭 이탈 감지: {reason}");
-
-        StopMatchmaking();
-
-        // 자동 재매칭 조건
-        if (reason == "상대방 나감" || reason.Contains("disconnect"))
-        {
-            RetryMatchmaking(); // 자동 재매칭 시도
-        }
-    }
-
-    private async void RetryMatchmaking()
-    {
-        Logger.Log("자동 재매칭 시도 중...");
-
-        await UniTask.Delay(TimeSpan.FromSeconds(1)); // 약간의 딜레이 후 재시도
-
-        StartMatchmaking();
-    }
-
 }

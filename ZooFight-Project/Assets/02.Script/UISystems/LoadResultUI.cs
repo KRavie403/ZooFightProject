@@ -23,7 +23,6 @@ public class LoadResultUI : MonoBehaviour
 
     private void Start()
     {
-        AudioManager.Inst.PlayBackgroundMusic("GameResultScene");
         // 승/패/무승부
         LoadResultImg();
         //LoadUserName();

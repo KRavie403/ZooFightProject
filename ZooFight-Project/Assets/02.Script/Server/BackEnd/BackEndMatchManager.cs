@@ -48,7 +48,6 @@ public partial class BackEndMatchManager : MonoBehaviour
     public bool isConnectMatchServer { get; private set; } = false;
     private bool isConnectInGameServer = false;
     private bool isJoinGameRoom = false;
-    private bool isFirstEnter = true;
     public bool isReconnectProcess { get; private set; } = false;
     public bool isSandBoxGame { get; private set; } = false;
 
@@ -255,11 +254,13 @@ public partial class BackEndMatchManager : MonoBehaviour
             if (args.ErrInfo.Category.Equals(ErrorCode.DisconnectFromRemote) || args.ErrInfo.Category.Equals(ErrorCode.Exception)
                 || args.ErrInfo.Category.Equals(ErrorCode.NetworkTimeout))
             {
-                // 서버에서 강제로 끊은 경우
-                if (MainMenuManager.GetInstance())
-                {
-                    MainMenuManager.GetInstance().MatchRequestCallback(false);
-                }
+                //// 서버에서 강제로 끊은 경우
+                //if (LobbyUI.GetInstance())
+                //{
+                //    LobbyUI.GetInstance().MatchRequestCallback(false);
+                //    LobbyUI.GetInstance().CloseRoomUIOnly();
+                //    LobbyUI.GetInstance().SetErrorObject("매칭서버와 연결이 끊어졌습니다.\n\n" + args.ErrInfo.Reason);
+                //}
             }
         };
 
@@ -267,7 +268,8 @@ public partial class BackEndMatchManager : MonoBehaviour
         Backend.Match.OnMatchMakingRoomCreate += (args) =>
         {
             Debug.Log("OnMatchMakingRoomCreate : " + args.ErrInfo + " : " + args.Reason);
-            MainMenuManager.GetInstance().CreateRoomResult(args.ErrInfo.Equals(ErrorCode.Success) == true);
+            MatchingTest.GetInstance().CreateRoomResult(args.ErrInfo.Equals(ErrorCode.Success) == true);
+            //LobbyUI.GetInstance().CreateRoomResult(args.ErrInfo.Equals(ErrorCode.Success) == true);
         };
 
         // 대기방에 유저 입장 메시지
@@ -277,6 +279,7 @@ public partial class BackEndMatchManager : MonoBehaviour
             if (args.ErrInfo.Equals(ErrorCode.Success))
             {
                 Debug.Log("user join in loom : " + args.UserInfo.m_nickName);
+                //LobbyUI.GetInstance().InsertReadyUserPrefab(args.UserInfo.m_nickName);        // UI 없이 진행
             }
         };
 
@@ -290,7 +293,8 @@ public partial class BackEndMatchManager : MonoBehaviour
                 userList = args.UserInfos;
                 Debug.Log("ready room user count : " + userList.Count);
             }
-            MainMenuManager.GetInstance().CreateRoomResult(args.ErrInfo.Equals(ErrorCode.Success) == true, userList);
+            //LobbyUI.GetInstance().CreateRoomResult(args.ErrInfo.Equals(ErrorCode.Success) == true, userList);
+            MatchingTest.GetInstance().CreateRoomResult(args.ErrInfo.Equals(ErrorCode.Success) == true, userList);
         };
 
         // 대기방에 유저 퇴장 메시지
@@ -381,7 +385,7 @@ public partial class BackEndMatchManager : MonoBehaviour
                     if (args.ErrInfo.Reason.Equals("Reconnect Success"))
                     {
                         //재접속 성공
-                        Gamemanager.GetInstance().ChangeState(Gamemanager.GameState.Reconnect);
+                        // GameManager.GetInstance().ChangeState(GameManager.GameState.Reconnect); 게임매니저에서 고쳐야함.
                         Debug.Log("재접속 성공");
                     }
                     else if (args.ErrInfo.Reason.Equals("Fail To Reconnect"))
@@ -509,12 +513,11 @@ public partial class BackEndMatchManager : MonoBehaviour
         Backend.Match.OnSessionOffline += (args) =>
         {
             // 다른 유저 혹은 자기자신이 접속이 끊어졌을 때 호출
-            var nickName = string.Format(args.GameRecord.m_nickname);
             Debug.Log(string.Format("[{0}] 오프라인되었습니다. - {1} : {2}", args.GameRecord.m_nickname, args.ErrInfo, args.Reason));
             // 인증 오류가 아니면 오프라인 프로세스 실행
             if (args.ErrInfo != ErrorCode.AuthenticationFailed)
             {
-                ProcessSessionOffline(args.GameRecord.m_sessionId, nickName);
+                ProcessSessionOffline(args.GameRecord.m_sessionId);
             }
             else
             {
@@ -671,45 +674,7 @@ public partial class BackEndMatchManager : MonoBehaviour
         roomInfo = null;
         isReconnectEnable = false;
 
-        //JoinMatchServer();
-
-        // 재접속
-        SendQueue.Enqueue(Backend.Match.IsGameRoomActivate, isGameProgress =>
-        {
-            if (isGameProgress.IsSuccess())
-            {
-                if (!isFirstEnter)
-                {
-                    roomInfo = new ServerInfo();
-                    isReconnectEnable = true;
-
-                    var result = isGameProgress.GetReturnValuetoJSON();
-                    roomInfo.host = result["serverPublicHostName"].ToString();
-                    roomInfo.port = Convert.ToUInt16(result["serverPort"].ToString());
-                    nowMatchType = (MatchType)Convert.ToByte(result["matchType"].ToString());
-                    nowModeType = (MatchModeType)Convert.ToByte(result["matchModeType"].ToString());
-                    inGameRoomToken = result["roomToken"].ToString();
-                    Debug.Log(string.Format("진행중인 게임이 존재합니다. 매치타입 : {0}, 모드타입 : {1}", nowMatchType, nowModeType));
-
-                    if (MainMenuManager.GetInstance() != null)
-                    {
-                        MainMenuManager.GetInstance().EnableReconnectObject();
-                    }
-                }
-                else
-                {
-                    isReconnectEnable = false;
-                    JoinMatchServer();
-                }
-            }
-            else
-            {
-                isReconnectEnable = false;
-                Debug.Log(string.Format("진행중인 게임이 없습니다. {0}", isGameProgress));
-                JoinMatchServer();
-            }
-                isFirstEnter = false;
-        });
+        JoinMatchServer();
     }
 
     //public void GetMatchList(Action<bool, string> func)
