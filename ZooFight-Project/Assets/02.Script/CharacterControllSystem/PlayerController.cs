@@ -71,9 +71,7 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
     public Items curItems;
 
     CharacterData myData;
-
-    [SerializeField]
-    CharacterDatas C_myData;
+    CharacterData_Class C_myData;
 
 
     public bool isPlayersConrtol = false;
@@ -973,11 +971,6 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
         {
             items.ReturnItem();
         }
-    }
-
-    public void ItemRemove()
-    {
-
     }
 
     #endregion

@@ -60,7 +60,7 @@ public class Item_CurseScroll : Items
         float duringTime = 0.0f;
 
         // 대상 캐릭터 확정
-        //myCharacter.myTeam
+        //myPlayer.myTeam
         PlayerController[] TargetCharcaters = new PlayerController[] { };
 
 

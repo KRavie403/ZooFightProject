@@ -4,9 +4,6 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-    /// <summary>
-    /// 시간내 승리팀이 없을 시 거리에 따른 승패판정 추가예정
-    /// </summary>
 public class VictoryDecision : MonoBehaviour
 {
     [SerializeField]
@@ -16,7 +13,6 @@ public class VictoryDecision : MonoBehaviour
 
     private Coroutine movingNextSceneCoroutine;
 
-    //
     private void Update()
     {
         if (Gamemanager.Inst.IsGameEnd) return;

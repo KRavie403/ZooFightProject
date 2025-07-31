@@ -24,7 +24,7 @@ interface IObjectId
 
     ObjectType ObjectType { get; }
 
-} 
+}
 
 public enum ObjectType : sbyte
 {
@@ -105,9 +105,9 @@ public class Gamemanager : MonoBehaviour
     public List<int> BlueTeamid;
 
 
-    public Dictionary<int,GameObject> SearchObjectType(ObjectType type)
+    public Dictionary<int, GameObject> SearchObjectType(ObjectType type)
     {
-        Dictionary<int,GameObject> temps = new Dictionary<int,GameObject>();
+        Dictionary<int, GameObject> temps = new Dictionary<int, GameObject>();
         switch (type)
         {
             case ObjectType.Character:
@@ -408,7 +408,7 @@ public class Gamemanager : MonoBehaviour
                 break;
             case Team.BlueTeam:
                 RefreshBlueTeam();
-                foreach(var item in BlueTeamPlayers)
+                foreach (var item in BlueTeamPlayers)
                 {
                     teams.Add(item.Value.GetComponent<GameObject>());
                 }
@@ -428,7 +428,7 @@ public class Gamemanager : MonoBehaviour
         Players.Clear();
         foreach (var item in ActiveObjects)
         {
-            if((item.Key >= 100 )&&(item.Key <= 999))
+            if ((item.Key >= 100) && (item.Key <= 999))
             {
                 Players.Add(item.Value);
             }
@@ -449,7 +449,7 @@ public class Gamemanager : MonoBehaviour
             }
         }
         SpawnRedTeam.Clear();
-        SpawnRedTeam = SpawnObject.Where(x=> x.Key >=100 && x.Key < 1000).ToDictionary(x => x.Key, x => x.Value);
+        SpawnRedTeam = SpawnObject.Where(x => x.Key >= 100 && x.Key < 1000).ToDictionary(x => x.Key, x => x.Value);
     }
 
     public void RefreshBlueTeam()
@@ -548,11 +548,11 @@ public class Gamemanager : MonoBehaviour
         switch (VictoryTeam)
         {
             case Team.RedTeam:
-                //return BlueTeamId;
+            //return BlueTeamId;
             case Team.NotSetting:
                 return null;
             case Team.BlueTeam:
-                //return RedTeamId;
+            //return RedTeamId;
             default:
                 return null;
         }

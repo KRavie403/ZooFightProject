@@ -26,7 +26,7 @@ interface IHitBox
 // 타격을 주는 객채가 가지고 잇는 클래스
 public class HitScanner : MonoBehaviour
 {
-    //public enum Team { SpawnRedTeam = -1,NotSetting,BlueTeam,AllTarget}
+    //public enum Team { RedTeam = -1,NotSetting,BlueTeam,AllTarget}
 
     // 타격 대상
     Team targetTeam = Team.NotSetting;

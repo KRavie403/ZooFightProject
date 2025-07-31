@@ -319,22 +319,23 @@ public partial class BackEndMatchManager : MonoBehaviour
         Backend.Match.SendDataToInGameRoom(byteArray);
     }
 
-    private void ProcessSessionOffline(SessionId sessionId)
+    private void ProcessSessionOffline(SessionId sessionId, string nickName)
     {
         if (hostSession.Equals(sessionId))
         {
             // 호스트 연결 대기를 띄움
-            //InGameUiManager.GetInstance().SetHostWaitBoard();
+            GameSceneManager.GetInstance().SetHostWaitBoard();
         }
         else
         {
-            // 호스트가 아니면 단순히 UI 만 띄운다.
+            // 호스트가 아니면 단순히 UI 만 띄움
+            GameSceneManager.GetInstance().SetExitBoard(nickName);
         }
     }
 
     private void ProcessSessionOnline(SessionId sessionId, string nickName)
     {
-        //InGameUiManager.GetInstance().SetReconnectBoard(nickName);
+        GameSceneManager.GetInstance().SetReconnectBoard(nickName);
         // 호스트가 아니면 아무 작업 안함 (호스트가 해줌)
         if (isHost)
         {

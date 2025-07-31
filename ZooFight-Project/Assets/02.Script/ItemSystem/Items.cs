@@ -10,9 +10,7 @@ interface IItems
     public void ItemUse();
 }
 
-/// <summary>
-/// 
-/// </summary>
+
 public class Items : ItemProperty , IItems , IEffect ,IObjectId
 {
     public Items(PlayerController curPlayer)
@@ -137,7 +135,7 @@ public class Items : ItemProperty , IItems , IEffect ,IObjectId
     // 아이템을 오브젝트 풀에 반납할때
     public virtual void ReturnItem()
     {
-        //myCharacter = null;
+        //myPlayer = null;
         //GetComponent<myHitScanner>()?.SetMyTeam(myHitScanner.Team.NotSetting);
         ItemEnd();
         Debug.Log($"{gameObject.name} ObjectReturn");
