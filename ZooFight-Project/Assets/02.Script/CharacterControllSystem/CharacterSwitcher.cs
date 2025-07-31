@@ -57,6 +57,8 @@ public class CharacterSwitcher : MonoBehaviour
 
     private void SpawnCharacter(int index)
     {
+        Logger.Log($"캐릭터 변경: {index}");
+
         // 기존 캐릭터 삭제
         if (currentCharacter != null)
         {

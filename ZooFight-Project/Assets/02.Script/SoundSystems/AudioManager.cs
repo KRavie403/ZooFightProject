@@ -23,9 +23,10 @@ public class AudioManager : Singleton<AudioManager>
 
     [Header("---------- Audio Clip ----------")]
     public AudioClip[] bgm;
-    public AudioClip[] sfxBasic;
+    public AudioClip[] sfxCharacter;
     public AudioClip[] sfxItemUse;
     public AudioClip[] sfxUI;
+    public AudioClip[] sfxBasic;
 
     private AudioSettings audioSettings;
     private string settingsPath;
@@ -92,6 +93,43 @@ public class AudioManager : Singleton<AudioManager>
         }
     }
 
+    public void PlayBasicEffect(int index)
+    {
+        if (index >= 0 && index < sfxUI.Length)
+        {
+            SFXSource.PlayOneShot(sfxBasic[index]);
+        }
+        else
+        {
+            Debug.LogWarning("Basic 사운드 이펙트가 범위를 벗어남: " + index);
+        }
+    }
+
+    public void PlayCharacterEffect(int index)
+    {
+        if (index >= 0 && index < sfxUI.Length)
+        {
+            SFXSource.PlayOneShot(sfxCharacter[index]);
+        }
+        else
+        {
+            Debug.LogWarning("Character 사운드 이펙트가 범위를 벗어남: " + index);
+        }
+    }
+
+    public void PlayItemUseEffect(int index)
+    {
+        if (index >= 0 && index < sfxItemUse.Length)
+        {
+            SFXSource.PlayOneShot(sfxBasic[index]);
+        }
+        else
+        {
+            Debug.LogWarning("ItemUse 사운드 이펙트가 범위를 벗어남: " + index);
+        }
+    }
+
+
     private AudioClip GetClipForScene(string sceneName, AudioClip[] clips)
     {
         foreach (var clip in clips)
@@ -127,7 +165,7 @@ public class AudioManager : Singleton<AudioManager>
 
     private void UpdateAllVolumes()
     {
-        float scaledMaster = audioSettings.masterVol * 0.2f;
+        float scaledMaster = audioSettings.masterVol * 0.3f;
 
         AudioListener.volume = scaledMaster;
 
