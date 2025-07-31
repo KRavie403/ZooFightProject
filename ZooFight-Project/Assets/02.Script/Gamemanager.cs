@@ -2,11 +2,19 @@ using BackEnd.Tcp;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-
+/// <summary>
+/// 아이템코드 부여 규칙
+/// 1~9
+/// 10~99
+/// 100~999 플레이어
+/// 1000~9999 아이템
+/// 10000~99999 블럭
+/// </summary>
 interface IObjectId
 {
     int ObjectId
@@ -16,8 +24,7 @@ interface IObjectId
 
     ObjectType ObjectType { get; }
 
-
-}
+} 
 
 public enum ObjectType : sbyte
 {
@@ -77,16 +84,58 @@ public class Gamemanager : MonoBehaviour
     public bool IsGameEnd = false;
     public Team VictoryTeam = Team.NotSetting;
 
+
+
     // 팀멤버 <Id,컴포넌트> 조합 
-    public int MaxTeamMember = 1;
+    public int MaxTeamMember = 3;
     public List<int> RedTeamId;
     public Dictionary<int, PlayerController> RedTeamPlayers;
     public List<int> BlueTeamId;
     public Dictionary<int, PlayerController> BlueTeamPlayers;
 
+    public Dictionary<int, GameObject> SpawnPlayers;
+    public Dictionary<int, GameObject> SpawnRedTeam;
+    public Dictionary<int, GameObject> BlueTeam;
+    public Dictionary<int, GameObject> SpawnItems;
+    public Dictionary<int, GameObject> SpawnBlocks;
+    /// <summary>
+    /// 
+    /// </summary>
+    public List<int> RedTeamid;
+    public List<int> BlueTeamid;
+
+
+    public Dictionary<int,GameObject> SearchObjectType(ObjectType type)
+    {
+        Dictionary<int,GameObject> temps = new Dictionary<int,GameObject>();
+        switch (type)
+        {
+            case ObjectType.Character:
+                foreach (GameObject item in Players)
+                {
+                    temps.Add(item.GetComponent<IObjectId>().ObjectId, item);
+                }
+                break;
+            case ObjectType.Item:
+                break;
+            case ObjectType.Effect:
+                break;
+            case ObjectType.Block:
+                break;
+            case ObjectType.ObjectDir:
+                break;
+            case ObjectType.TypeCount:
+                break;
+            default:
+                break;
+        }
+
+        return null;
+    }
+
     public Dictionary<int, GameObject> ActiveObjects;
 
-    public List<PlayerController> Players;
+    public List<GameObject> Players;
 
     public BlockObject RedTeamBlock;
     public BlockObject BlueTeamBlock;
@@ -338,6 +387,109 @@ public class Gamemanager : MonoBehaviour
     }
     #endregion
 
+
+    #region 정보인출(개선)
+
+    public List<GameObject> GetTeams(Team team)
+    {
+        List<GameObject> teams = new List<GameObject>();
+        switch (team)
+        {
+            case Team.RedTeam:
+                RefreshRedTeam();
+                foreach (var item in RedTeamPlayers)
+                {
+                    teams.Add(item.Value.GetComponent<GameObject>());
+                }
+                return teams;
+
+                break;
+            case Team.NotSetting:
+                break;
+            case Team.BlueTeam:
+                RefreshBlueTeam();
+                foreach(var item in BlueTeamPlayers)
+                {
+                    teams.Add(item.Value.GetComponent<GameObject>());
+                }
+                return teams;
+                break;
+            case Team.AllTarget:
+                break;
+            default:
+                break;
+        }
+
+        return null;
+    }
+
+    public void RefreshPlayer()
+    {
+        Players.Clear();
+        foreach (var item in ActiveObjects)
+        {
+            if((item.Key >= 100 )&&(item.Key <= 999))
+            {
+                Players.Add(item.Value);
+            }
+        }
+
+        SpawnPlayers = SpawnObject.Where(x => x.Key >= 100 && x.Key < 1000).ToDictionary(x => x.Key, x => x.Value);
+    }
+
+    public void RefreshRedTeam()
+    {
+        RedTeamPlayers.Clear();
+        foreach (var item in Players)
+        {
+            PlayerController temp = item.GetComponent<PlayerController>();
+            if (temp.myTeam == Team.RedTeam)
+            {
+                RedTeamPlayers.Add(item.GetComponent<IObjectId>().ObjectId, temp);
+            }
+        }
+        SpawnRedTeam.Clear();
+        SpawnRedTeam = SpawnObject.Where(x=> x.Key >=100 && x.Key < 1000).ToDictionary(x => x.Key, x => x.Value);
+    }
+
+    public void RefreshBlueTeam()
+    {
+        BlueTeamPlayers.Clear();
+        foreach (var item in Players)
+        {
+            PlayerController temp = item.GetComponent<PlayerController>();
+            if (temp.myTeam == Team.BlueTeam)
+            {
+                BlueTeamPlayers.Add(item.GetComponent<IObjectId>().ObjectId, temp);
+            }
+        }
+
+        BlueTeam.Clear();
+        BlueTeam = SpawnObject.Where(x => x.Key >= 100 && x.Key < 1000).ToDictionary(x => x.Key, x => x.Value);
+
+    }
+
+    public List<int> RedTeamIds()
+    {
+        return null;
+        //return SpawnRedTeam.Where(); 
+    }
+    //public void Refresh
+
+    public void RefreshItems()
+    {
+        SpawnItems.Clear();
+        SpawnItems = SpawnObject.Where(x => (x.Key >= 1000) && (x.Key < 10000)).ToDictionary(x => x.Key, x => x.Value);
+    }
+
+    public void RefreshBlocks()
+    {
+        SpawnBlocks.Clear();
+        SpawnBlocks = SpawnObject.Where(x => (x.Key >= 10000) && x.Key < 100000).ToDictionary(x => x.Key, x => x.Value);
+    }
+
+    #endregion
+
     #region  정보인출
 
     // 각 팀원 목록
@@ -383,9 +535,8 @@ public class Gamemanager : MonoBehaviour
         switch (VictoryTeam)
         {
             case Team.RedTeam:
-                return RedTeamId;
+
             case Team.NotSetting:
-                return null;
             case Team.BlueTeam:
                 return BlueTeamId;
             default:
@@ -397,11 +548,11 @@ public class Gamemanager : MonoBehaviour
         switch (VictoryTeam)
         {
             case Team.RedTeam:
-                return BlueTeamId;
+                //return BlueTeamId;
             case Team.NotSetting:
                 return null;
             case Team.BlueTeam:
-                return RedTeamId;
+                //return RedTeamId;
             default:
                 return null;
         }

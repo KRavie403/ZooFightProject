@@ -105,7 +105,7 @@ public class Item_Bomb : Items ,IHitScanner
             {
                 //NonActiveObj.SetActive(false);
                 //ActivedObj.SetActive(true);
-                //myHitScanner.Initiate(this, myPlayer.GetEnemyTeam());
+                //myHitScanner.Initiate(this, myCharacter.GetEnemyTeam());
                 isMoveEnd = true;
                 myPlayer.ItemUseEnd();
             });

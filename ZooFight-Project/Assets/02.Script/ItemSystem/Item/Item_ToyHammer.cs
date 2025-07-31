@@ -73,7 +73,7 @@ public class Item_ToyHammer : Items
         // 해머 사운드 재생대기
         HammerSoundSetting();
 
-        //myPlayer.
+        //myCharacter.
         // 해머 휘두르기
         while (!isItemUseEnd)
         {

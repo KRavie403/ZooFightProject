@@ -61,7 +61,7 @@ public struct PlayerInfo
 /// </summary>
 public struct SeverData 
 {
-    //public PlayerInfo myPlayer;
+    //public PlayerInfo MyCharacter;
 
     public PlayerInfo[] GamePlayerList;
   
@@ -93,6 +93,7 @@ public struct CharacterData
     public bool isShield;
 
     public BlockObject myBlock;
+
     public bool isGrab;
 
     public bool isGameStart;
@@ -192,7 +193,8 @@ public enum DataTypes
     BlockData,
     PlayerData,
     PlayerBasicData,
-    PlayerState,
+    PlayerStateData,
+    LobbyData,
     Types
 }
 
@@ -213,7 +215,9 @@ public class BasicData
 
 public class GameData_Class : BasicData
 {
-    public PlayerInfo playerInfo;
+
+    public PlayerInfo[] playerInfo;
+
 
     public SessionId SessionId;
     public GameData_Class(SessionId SessionId) : base(DataTypes.GameData)
@@ -223,34 +227,32 @@ public class GameData_Class : BasicData
 
     public int GameId;
 
-    public CharacterData[] PlayerInfo;
+    public PlayerInfo myPlayer;
+
+    //public CharacterData[] PlayerInfo;
     public int myPlayerNum;
 
 
     public bool isHost;
     public float PlayTIme;
 
-
-
 }
-
-
-
 
 
 /// <summary>
 /// 사용자의 정보를 담는 클래스
 /// 사용자의 id , 대기실 , 인게임 정보를 담음
 /// </summary>
-public class PlayerProfiles_Class : BasicData
+public class PlayerProfiles : BasicData
 {
-    public PlayerInfo_Class myPlayer;
+
+    public PlayerInfomation myPlayer;
 
 
     bool isGameStart = false;
 
 
-    public CharacterData_Class mycharacter
+    public CharacterDatas mycharacter
     {
         get
         {
@@ -265,14 +267,16 @@ public class PlayerProfiles_Class : BasicData
         }
     }
 
-    public PlayerProfiles_Class(PlayerInfo_Class playerInfo) : base(DataTypes.PlayerData)
+    public PlayerProfiles() : base(DataTypes.PlayerData)
     {
-        this.myPlayer = playerInfo;
+        //this.myPlayer = playerInfo;
     }
 }
 
-
-public class PlayerInfo_Class
+/// <summary>
+/// 
+/// </summary>
+public class PlayerInfomation
 {
     public string PlayerName;
     public int PlayerId;
@@ -297,16 +301,28 @@ public class PlayerInfo_Class
 /// 플레이어의 위치, 이동, 회전 등 무브먼트에 관한 정보를 담는 클래스
 /// 
 /// </summary>
-public class CharacterBasicSetting : BasicData
+public class CharacterMovements : BasicData
 {
+    public CharacterDatas myPlayer;
+
     public int ModelId;
 
+    // 가지고있는 아이템
     public ItemCode curItem;
 
+    //
+    public BlockObject myBlock;
 
-    public CharacterBasicSetting(CharacterBasicSetting setData) : base(DataTypes.PlayerBasicData)
+    // 캐릭터의 목표지점
+    public Vector3 dirPos;
+    public bool isStatic;
+    // 캐릭터의 목표회전값
+    public Vector3 dirRot;
+
+
+    public CharacterMovements(CharacterDatas MyCharacter) : base(DataTypes.PlayerBasicData)
     {
-
+        this.myPlayer = MyCharacter;
     }
 }
 
@@ -316,9 +332,31 @@ public class CharacterBasicSetting : BasicData
 public class CharacterState : BasicData
 {
 
-    public CharacterState() : base(DataTypes.PlayerState)
-    {
+    public CharacterDatas myCharacter;
 
+    public PlayerController.pState myState;
+
+
+    public bool isShield;
+
+    public bool isGrab;
+
+    public bool isGameStart;
+    public bool isSuperArmor;
+    public bool isAbleMove;
+    public bool isCrashed;
+    public bool isKeyReverse;
+    public bool isDenial;
+
+
+    public bool isMoving;
+    public bool isRunning;
+    public bool isJump;
+
+
+    public CharacterState(CharacterDatas MyCharacter) : base(DataTypes.PlayerStateData)
+    {
+        myCharacter = MyCharacter;
     }
 }
 
@@ -326,26 +364,27 @@ public class CharacterState : BasicData
 /// 게임 내부에서 호스트와 교환할 정보
 /// 
 /// </summary>
-public class CharacterData_Class : BasicData
+public class CharacterDatas : BasicData
 {
 
-    public CharacterData_Class(CharacterBasicSetting basicData): base(DataTypes.CharacterData)
+    PlayerProfiles myPlayer;
+
+    public CharacterDatas(PlayerProfiles MyPlayer): base(DataTypes.CharacterData)
     {
 
-        BasicData = basicData;
+        myPlayer = MyPlayer;
 
     }
 
 
-    public CharacterBasicSetting BasicData;
+    public CharacterMovements movementData;
 
-    
+    public CharacterState myStates;
 
     public int ModelId;
 
     public PlayerController myController;
     // 캐릭터의 상태변화값
-    public PlayerController.pState dirState;
 
 
     float curHp;
@@ -356,6 +395,7 @@ public class CharacterData_Class : BasicData
     }
 
     float curStamina;
+
     public float SetStamina(float stamina) 
     {
         curStamina = stamina;
@@ -363,37 +403,27 @@ public class CharacterData_Class : BasicData
     }
 
     public float CurSp;
-    public bool isShield;
 
     public BlockObject myBlock;
-    public bool isGrab;
-
-    public bool isGameStart;
-    public bool isSuperArmor;
-    public bool isAbleMove;
-    public bool isCrashed;
-    public bool isKeyReverse;
-    public bool isDenial;
 
     public ItemCode curItem;
 
-    public bool isMoving;
-    public bool isRunning;
-    public bool isJump;
-
-
-
-    // 캐릭터의 목표지점
-    public Vector3 dirPos;
-    public bool isStatic;
-    // 캐릭터의 목표회전값
-    public Vector3 dirRot;
-
     public void SetDir(Vector3 pos,Vector3 rot,bool isStatic= true)
     {
-        this.dirPos = pos;
-        this.dirRot = rot;
+        this.movementData.dirPos = pos;
+        this.movementData.dirRot = rot;
     }
+
+    public void InitateMovementdata()
+    {
+        movementData = new CharacterMovements(this);
+    }
+
+    public void InitateState()
+    {
+        myStates = new CharacterState(this);
+    }
+
 
 }
 
@@ -432,6 +462,8 @@ public class BlockData_Class : BasicData
     public bool isMoving;
     public bool isGrab;
     public Vector3 dirPos;
+
+
 }
 
 #endregion
