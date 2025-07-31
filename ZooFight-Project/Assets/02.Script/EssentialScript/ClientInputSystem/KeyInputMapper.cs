@@ -10,13 +10,24 @@ using System.Linq;
 
 public enum KeyAction
 {
-    Forward=0,Backward,Left,Right,
-    Jump,Attack,Selectskill,Usingskill,Grab,
-    Menu,Run,
+    Forward = 0, Backward, Left, Right,
+    Jump, Attack, Selectskill, Usingskill, Grab,
+    Menu, Run,
     ItemCreate,
+    Drop,
     // 맵열기 = M
     KeyCount
 }
+
+//public enum KeyAction
+//{
+//    Forward = 0, Backward, Left, Right,
+//    Jump, Attack, Selectskill, Usingskill, Grab,
+//    Menu, Run,
+//    ItemCreate, PickupOrHold, Equip, Drop,
+//    // 맵열기 = M
+//    KeyCount
+//}
 
 public static class KeySetting
 {
@@ -29,10 +40,10 @@ public class KeyInputMapper : MonoBehaviour
     KeyCode[] defaultKeys = new KeyCode[]
     {
         KeyCode.W, KeyCode.S, KeyCode.A, KeyCode.D,
-        KeyCode.Space, KeyCode.Mouse0, KeyCode.E, KeyCode.F,KeyCode.Mouse1,
+        KeyCode.Space, KeyCode.Mouse0, KeyCode.E, KeyCode.F, KeyCode.R, KeyCode.X, KeyCode.Mouse1,
         KeyCode.Escape ,KeyCode.LeftShift,
-        KeyCode.Q
-
+        KeyCode.Q, KeyCode.Z,
+        KeyCode.None
     };
 
     private void Awake()
