@@ -118,7 +118,7 @@ public class Anim_Character : MonoBehaviour
     // 타격대상 추출
     public void ItemHitAction()
     {
-        //myCharacter.AttackPoint
+        //myPlayer.AttackPoint
     }
 
     #endregion

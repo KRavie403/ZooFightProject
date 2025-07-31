@@ -114,11 +114,11 @@ public class LoadResultUI : MonoBehaviour
     //myHitScanner.Team FindPlayerTeam()
     //{
     //    // 플레이어의 팀 정보 가져오기
-    //    foreach (var player in Gamemanager.Inst.GetTeam(HitScanner.Team.SpawnRedTeam).Values)
+    //    foreach (var player in Gamemanager.Inst.GetTeam(HitScanner.Team.RedTeam).Values)
     //    {
     //        if (player.gameObject == Gamemanager.Inst.currentPlayer.gameObject)
     //        {
-    //            return myHitScanner.Team.SpawnRedTeam;
+    //            return myHitScanner.Team.RedTeam;
     //        }
     //    }
     //    return myHitScanner.Team.BlueTeam;

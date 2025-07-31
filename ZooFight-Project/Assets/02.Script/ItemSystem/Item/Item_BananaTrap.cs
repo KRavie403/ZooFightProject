@@ -12,6 +12,7 @@ using UnityEngine.Events;
 /// Value 4 투사체 속도 
 /// Value 5 투척 사거리
 /// </summary>
+
 public class Item_BananaTrap : Items , IHitScanner
 {
     public Item_BananaTrap(PlayerController player) : base(player) 
@@ -171,7 +172,7 @@ public class Item_BananaTrap : Items , IHitScanner
                 isMoveEnd = true;
                 myPlayer.ItemUseEnd();
             });
-        //myCharacter.SetState()
+        //myPlayer.SetState()
         float duringTime = 0;
         myHitScanner.SetScanActive(true);
         // 바나나 지속시간동안 동작
