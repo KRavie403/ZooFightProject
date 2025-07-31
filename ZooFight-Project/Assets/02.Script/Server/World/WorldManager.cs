@@ -9,15 +9,14 @@ using TMPro;
 public class WorldManager : MonoBehaviour
 {
     static public WorldManager instance;
-    public GameSceneManager sceneManager;
 
-    const int START_COUNT = 5;
+    const int START_COUNT = 10;
 
     private SessionId myPlayerIndex = SessionId.None;
 
     #region 플레이어
     public GameObject playerPool;
-    public GameObject playerPrefeb;
+    public GameObject[] playerPrefeb;
     public int numOfPlayer = 0;
     //public GameObject particle;               // (수정)
     private const int MAXPLAYER = 6;
@@ -49,8 +48,8 @@ public class WorldManager : MonoBehaviour
         }
         if (matchInstance.isReconnectProcess)
         {
-            InGameUiManager.GetInstance().SetStartCount(0, false);
-            InGameUiManager.GetInstance().SetReconnectBoard(BackEndServerManager.GetInstance().myNickName);
+            GameSceneManager.GetInstance().SetStartCount(0, false);
+            //GameSceneManager.GetInstance().SetReconnectBoard(BackEndServerManager.GetInstance().myNickName);
         }
     }
 
@@ -150,7 +149,7 @@ public class WorldManager : MonoBehaviour
     private void SendGameEndOrder()
     {
         // 게임 종료 전환 메시지는 호스트에서만 보냄
-        Debug.Log("Make GameResult & Send Game End Order");
+        Logger.Log("Make GameResult & Send Game End Order");
         foreach (SessionId session in BackEndMatchManager.GetInstance().sessionIdList)
         {
             if (!gameRecord.Contains(session))
@@ -169,24 +168,24 @@ public class WorldManager : MonoBehaviour
 
     public void SetPlayerInfo()
     {
-        Debug.Log("SetPlayerInfo");
+        Logger.Log("SetPlayerInfo");
         if (BackEndMatchManager.GetInstance().sessionIdList == null)
         {
             // 현재 세션ID 리스트가 존재하지 않으면, 0.5초 후 다시 실행
             Invoke("SetPlayerInfo", 0.5f);
             return;
         }
-        Debug.Log("세션 리스트 존재");
+        Logger.Log("세션 리스트 존재");
         var gamers = BackEndMatchManager.GetInstance().sessionIdList;
         int size = gamers.Count;
         if (size <= 0)
         {
-            Debug.Log("No Player Exist!");
+            Logger.Log("No Player Exist!");
             return;
         }
         if (size > MAXPLAYER)
         {
-            Debug.Log("Player Pool Exceed!");
+            Logger.Log("Player Pool Exceed!");
             return;
         }
 
@@ -201,44 +200,50 @@ public class WorldManager : MonoBehaviour
         int modelNum = BackendGameData.Inst.UserGameData.character;
         foreach (var sessionId in gamers)
         {
-            Debug.Log($"!sessionId: {index} : {sessionId}");
-            GameObject player = Instantiate(playerPrefeb, new Vector3(statringPoints[index].x, statringPoints[index].y, statringPoints[index].z), Quaternion.identity, playerPool.transform);
-            //players.Add(sessionId, player.GetComponent<PlayerController>());
-            players.Add(sessionId, player.GetComponent<Player>());
+            Logger.Log($"!sessionId: {index} : {sessionId}");
+            Logger.Log($"!sessionId startingPoint: {statringPoints.Count}");
 
-            if (BackEndMatchManager.GetInstance().IsMySessionId(sessionId))
-            {
-                Debug.Log($"!IsMySessionId: {sessionId}");
-                myPlayerIndex = sessionId;
-                players[sessionId].Initialize(true, myPlayerIndex, BackEndMatchManager.GetInstance().GetNickNameBySessionId(sessionId), statringPoints[index].w);
-            }
-            else
-            {
-                Debug.Log($"!JustSessionId: {sessionId}");
-                players[sessionId].Initialize(false, sessionId, BackEndMatchManager.GetInstance().GetNickNameBySessionId(sessionId), statringPoints[index].w);
+            if (index >= statringPoints.Count) break;
+            else {
+                //if (index == 0 || index == 3)
+                //{
+                //    index += 1;
+                //    continue;
+                //}
+                GameObject player = Instantiate(playerPrefeb[modelNum], new Vector3(statringPoints[index].x, statringPoints[index].y, statringPoints[index].z), Quaternion.identity, playerPool.transform);
+                //players.Add(sessionId, player.GetComponent<PlayerController>());
+                players.Add(sessionId, player.GetComponent<Player>());
+
+                if (BackEndMatchManager.GetInstance().IsMySessionId(sessionId))
+                {
+                    Logger.Log($"!IsMySessionId: {sessionId}");
+                    myPlayerIndex = sessionId;
+                    players[sessionId].Initialize(true, myPlayerIndex, BackEndMatchManager.GetInstance().GetNickNameBySessionId(sessionId), statringPoints[index].w);
+                }
+                else
+                {
+                    Logger.Log($"!JustSessionId: {sessionId}");
+                    players[sessionId].Initialize(false, sessionId, BackEndMatchManager.GetInstance().GetNickNameBySessionId(sessionId), statringPoints[index].w);
+                }
+
             }
             index += 1;
-            Debug.Log($"num: {index} - modelId: {modelNum}");
+            Logger.Log($"num: {index} - modelId: {modelNum}");
             PlayerModelIdMessage msg = new PlayerModelIdMessage(sessionId, modelNum);
-            Debug.Log("!!msg-modelId: " + msg.modelId);
+            Logger.Log("!!msg-modelId: " + msg.modelId);
             BackEndMatchManager.GetInstance().SendDataToInGame<PlayerModelIdMessage>(msg);
 
             playersList[index] = BackEndMatchManager.GetInstance().GetNickNameBySessionId(sessionId);
             playerSessionId[sessionId] = index;
             playersModelNum[index] = modelNum;
             Logger.Log($"playersModelNum[{index}] = {modelNum}");
-            Debug.Log($"playerSessionId[{sessionId}]: index: {index} - nickname: {playersList[index]}");
+            Logger.Log($"playerSessionId[{sessionId}]: index: {index} - nickname: {playersList[index]}");
         }
-        Debug.Log("Num Of Current Player : " + size);
+        Logger.Log("Num Of Current Player : " + size);
 
         // 스코어 보드 설정
         alivePlayer = size;
         //InGameUiManager.GetInstance().SetScoreBoard(alivePlayer);
-
-        if (BackEndMatchManager.GetInstance().IsHost())
-        {
-            StartCoroutine("StartCount");
-        }
     }
 
     public void OnGameStart()
@@ -251,11 +256,11 @@ public class WorldManager : MonoBehaviour
         }
         if (BackEndMatchManager.GetInstance().IsHost())
         {
-            Debug.Log("플레이어 세션정보 확인");
+            Logger.Log("플레이어 세션정보 확인");
 
             if (BackEndMatchManager.GetInstance().IsSessionListNull())
             {
-                Debug.Log("Player Index Not Exist!");
+                Logger.Log("Player Index Not Exist!");
                 // 호스트 기준 세션데이터가 없으면 게임을 바로 종료한다.
                 foreach (var session in BackEndMatchManager.GetInstance().sessionIdList)
                 {
@@ -270,7 +275,7 @@ public class WorldManager : MonoBehaviour
         SetPlayerInfo();
     }
 
-    IEnumerator StartCount()
+    public IEnumerator StartCount()
     {
         StartCountMessage msg = new StartCountMessage(START_COUNT);
 
@@ -348,10 +353,10 @@ public class WorldManager : MonoBehaviour
             case Protocol.Type.StartCount:
                 StartCountMessage startCount = DataParser.ReadJsonData<StartCountMessage>(args.BinaryUserData);
                 Debug.Log("wait second : " + (startCount.time));
-                //InGameUiManager.GetInstance().SetStartCount(startCount.time);
+                GameSceneManager.GetInstance().SetStartCount(startCount.time);
                 break;
             case Protocol.Type.GameStart:
-                //InGameUiManager.GetInstance().SetStartCount(0, false);
+                GameSceneManager.GetInstance().SetStartCount(0, false);
                 Gamemanager.GetInstance().ChangeState(Gamemanager.GameState.InGame);
                 break;
             case Protocol.Type.GameEnd:
@@ -498,9 +503,9 @@ public class WorldManager : MonoBehaviour
     {
         int index = playerSessionId[data.playerSession];
 
-        sceneManager.SetPlayerProfile(index, playersList[index], data.modelId);
-        sceneManager.GetUser(index, data.modelId);
-        sceneManager.UpdateCharacterUI(index, playersModelNum);
+        GameSceneManager.GetInstance().SetPlayerProfile(index, playersList[index], data.modelId);
+        GameSceneManager.GetInstance().GetUser(index, data.modelId);
+        GameSceneManager.GetInstance().UpdateCharacterUI(index, playersModelNum);
     }
 
     private void ProcessSyncData(GameSyncMessage syncMessage)

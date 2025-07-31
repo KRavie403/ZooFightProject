@@ -17,7 +17,7 @@ interface IObjectId
     ObjectType ObjectType { get; }
 
 
-} 
+}
 
 public enum ObjectType : sbyte
 {
@@ -92,7 +92,7 @@ public class Gamemanager : MonoBehaviour
     public BlockObject BlueTeamBlock;
 
     public Dictionary<int, GameObject> SpawnObject;
-    
+
     #endregion
     //public WaitForSeconds BasicPollingRate
 
