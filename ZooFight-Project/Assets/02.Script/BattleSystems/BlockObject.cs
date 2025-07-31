@@ -330,6 +330,7 @@ public class BlockObject : MonoBehaviour , IBlock , IObjectId
 
     #region 승리판정관련
 
+    //미사용 테스트용코드
     public void VictoryDecide(Team BeaconTeam)
     {
         if (BeaconTeam == Team.NotSetting) return;

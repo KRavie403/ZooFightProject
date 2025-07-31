@@ -8,6 +8,8 @@ using TMPro;
 using UnityEngine.Events;
 using System.Linq;
 
+
+// SelectSkill
 public enum KeyAction
 {
     Forward=0,Backward,Left,Right,
@@ -42,7 +44,6 @@ public class KeyInputMapper : MonoBehaviour
             KeySetting.keys.Add((KeyAction)i, defaultKeys[i]);
             Debug.Log("keys" + KeySetting.keys);
         }
-
 
     }
 

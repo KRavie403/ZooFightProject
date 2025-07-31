@@ -35,6 +35,8 @@ public class ItemProperty : MonoBehaviour
 
     public GameObject myPrefab;
 
+    public Sprite myIcon;
+
 
     protected List<GameObject> _targets = new();
     public List<GameObject> Targets = new();
