@@ -1,5 +1,4 @@
 using BackEnd.Tcp;
-using Cysharp.Threading.Tasks;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -255,7 +254,8 @@ public class Gamemanager : MonoBehaviour
 
     private void GameReady()
     {
-        Logger.Log("게임 레디 상태 돌입");
+        Debug.Log("게임 레디 상태 돌입");
+        ChangeScene(READY);
         OnGameReady();
     }
 
@@ -268,6 +268,7 @@ public class Gamemanager : MonoBehaviour
         OnGameResult = delegate { };
 
         //OnGameStart();
+        // 게임씬이 로드되면 Start에서 OnGameStart 호출
         ChangeScene(INGAME);
     }
 
@@ -341,43 +342,14 @@ public class Gamemanager : MonoBehaviour
         return SceneManager.GetActiveScene().name == LOBBY;
     }
 
-    public async UniTask ChangeScene(string scene)
+    private void ChangeScene(string scene)
     {
         if (scene != LOGIN && scene != INGAME && scene != LOBBY && scene != READY)
         {
             Debug.Log("알수없는 씬 입니다.");
             return;
         }
-
-        if (scene == INGAME)
-        {
-            await LoadSceneAsync(scene);
-        }
-        else
-        {
-            SceneManager.LoadScene(scene);
-        }
-    }
-
-    public async UniTask LoadSceneAsync(string scene)
-    {
-        LoadingProgressManager.Inst?.Show();
-
-        var op = SceneManager.LoadSceneAsync(scene);
-        op.allowSceneActivation = false;
-
-        while (op.progress < 0.9f)
-        {
-            await UniTask.Yield();
-        }
-        await UniTask.Delay(5000); // 약간 대기
-
-        op.allowSceneActivation = true;
-
-        while (!op.isDone)
-            await UniTask.Yield();
-
-        LoadingProgressManager.Inst?.Hide();
+        SceneManager.LoadScene(scene);
     }
 
     private void ChangeSceneAsync(string scene, Action<bool> func)
