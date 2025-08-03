@@ -38,6 +38,7 @@ namespace Protocol
         LoadRoomScene,      // 룸 씬으로 전환
         LoadGameScene,      // 인게임 씬으로 전환
         StartCount,     // 시작 카운트
+        GameTimer,      // 본 게임 타이머
         GameStart,      // 게임 시작
         GameEnd,        // 게임 종료
         GameSync,       // 플레이어 재접속 시 게임 현재 상황 싱크
@@ -354,6 +355,15 @@ namespace Protocol
     {
         public int time;
         public StartCountMessage(int time) : base(Type.StartCount)
+        {
+            this.time = time;
+        }
+    }
+
+    public class GameTimerMessage : Message
+    {
+        public int time;
+        public GameTimerMessage(int time) : base(Type.GameTimer)
         {
             this.time = time;
         }
