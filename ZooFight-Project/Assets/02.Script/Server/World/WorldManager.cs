@@ -11,6 +11,7 @@ public class WorldManager : MonoBehaviour
     static public WorldManager instance;
 
     const int START_COUNT = 10;
+    const int GAME_TIMER = 12;    //1200
 
     private SessionId myPlayerIndex = SessionId.None;
 
@@ -146,6 +147,11 @@ public class WorldManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 게임 종료 조건
+    ///  1) 팀 블록이 먼저 탈출한 경우
+    ///  2) 탈출구에 더 가까운 경우
+    /// </summary>
     private void SendGameEndOrder()
     {
         // 게임 종료 전환 메시지는 호스트에서만 보냄
@@ -275,6 +281,7 @@ public class WorldManager : MonoBehaviour
         SetPlayerInfo();
     }
 
+    #region 타이머 설정
     public IEnumerator StartCount()
     {
         StartCountMessage msg = new StartCountMessage(START_COUNT);
@@ -292,6 +299,26 @@ public class WorldManager : MonoBehaviour
         BackEndMatchManager.GetInstance().SendDataToInGame<GameStartMessage>(gameStartMessage);
     }
 
+    public IEnumerator GameTimer()
+    {
+        GameTimerMessage msg = new GameTimerMessage(GAME_TIMER);
+
+        // 카운트 다운
+        for (int i = 0; i < GAME_TIMER + 1; ++i)
+        {
+            msg.time = GAME_TIMER - i;
+            BackEndMatchManager.GetInstance().SendDataToInGame<GameTimerMessage>(msg);
+            yield return new WaitForSeconds(1); //1초 단위
+        }
+
+        // 게임 종료 메시지를 전송
+        GameStartMessage gameTimerMessage = new GameStartMessage();
+        BackEndMatchManager.GetInstance().SendDataToInGame<GameStartMessage>(gameTimerMessage);
+    }
+
+    #endregion
+
+
     public void PreInGame()
     {
         foreach (var player in players)
@@ -302,10 +329,10 @@ public class WorldManager : MonoBehaviour
 
     public void OnGameOver()
     {
-        Debug.Log("Game End");
+        Logger.Log("Game End");
         if (BackEndMatchManager.GetInstance() == null)
         {
-            Debug.LogError("매치매니저가 null 입니다.");
+            Logger.LogError("매치매니저가 null 입니다.");
             return;
         }
         BackEndMatchManager.GetInstance().MatchGameOver(gameRecord);
@@ -352,8 +379,12 @@ public class WorldManager : MonoBehaviour
                 break;
             case Protocol.Type.StartCount:
                 StartCountMessage startCount = DataParser.ReadJsonData<StartCountMessage>(args.BinaryUserData);
-                Debug.Log("wait second : " + (startCount.time));
+                Logger.Log("wait second : " + (startCount.time));
                 GameSceneManager.GetInstance().SetStartCount(startCount.time);
+                break;
+            case Protocol.Type.GameTimer:
+                GameTimerMessage gameTimer = DataParser.ReadJsonData<GameTimerMessage>(args.BinaryUserData);
+                GameSceneManager.GetInstance().SetGameTimer(gameTimer.time);
                 break;
             case Protocol.Type.GameStart:
                 GameSceneManager.GetInstance().SetStartCount(0, false);

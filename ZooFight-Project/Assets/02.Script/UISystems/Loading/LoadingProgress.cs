@@ -23,6 +23,7 @@ public class LoadingProgress : Singleton<LoadingProgress>
 
     public void LoadLoadingImg()
     {
+        Logger.Log("LoadLoadingImg");
         if (anim == null)
         {
             Logger.LogError("Animator가 할당되지 않았습니다.");

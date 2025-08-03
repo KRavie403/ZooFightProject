@@ -14,7 +14,7 @@ public class ResultUI : MonoBehaviour
         Q();
     }
 
-    // ¸ŞÀÎ È­¸éÀ¸·Î ³ª°¡±â
+    // ë©”ì¸ í™”ë©´ìœ¼ë¡œ ë‚˜ê°€ê¸°
     public void ESC()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
@@ -22,13 +22,23 @@ public class ResultUI : MonoBehaviour
             SceneManager.LoadScene("MainMenuScene");
         }
     }
+    
+    public void clickESC()
+    {
+            SceneManager.LoadScene("MainMenuScene");
+    }
+    
 
-    // Àç¸ÅÄªÇÏ±â
+    // ì¬ë§¤ì¹­í•˜ê¸°
     public void Q()
     {
         if (Input.GetKeyDown(KeyCode.Q))
         {
-            SceneManager.LoadScene("LoadingScene");
+            SceneManager.LoadScene("MainMenuScene");
         }
+    }
+    public void clickQ()
+    {
+            SceneManager.LoadScene("MainMenuScene");
     }
 }

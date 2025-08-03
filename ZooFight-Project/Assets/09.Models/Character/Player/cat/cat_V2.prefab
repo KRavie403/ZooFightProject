@@ -80,6 +80,14 @@ PrefabInstance:
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: d1ddbe441f3c10a489b96e5a91ee5fb7, type: 2}
+    - target: {fileID: 5866666021909216657, guid: 8d372d6464c19564f878415495dcc79f, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: 5c3b46db1ccdfd143850e675c4b8e34a, type: 2}
+    - target: {fileID: 5866666021909216657, guid: 8d372d6464c19564f878415495dcc79f, type: 3}
+      propertyPath: m_CullingMode
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
