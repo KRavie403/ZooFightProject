@@ -5701,6 +5701,7 @@ GameObject:
   - component: {fileID: 374406015}
   - component: {fileID: 374406009}
   - component: {fileID: 374406016}
+  - component: {fileID: 374406017}
   m_Layer: 0
   m_Name: GameSceneManager
   m_TagString: Untagged
@@ -5766,6 +5767,8 @@ MonoBehaviour:
   - {fileID: 1950116086}
   minimapUI: {fileID: 1038074273}
   startCountObject: {fileID: 434932010}
+  gameTimerObject: {fileID: 1414030073}
+  gameResultObject: {fileID: 1502277702}
   reconnectBoardObject: {fileID: 1658841267}
   _character: 0
 --- !u!114 &374406009
@@ -5854,14 +5857,38 @@ MonoBehaviour:
   EFFCamera: {fileID: 525462546}
   _winFOV: 50
   _loseFOV: 111
-  text: {fileID: 0}
-  t1: {fileID: 0}
-  t2: {fileID: 0}
-  BGImage1: {fileID: 0}
-  BGImage2: {fileID: 0}
-  _textSprite: {fileID: 0}
-  _t1Sprite: {fileID: 0}
-  _t2Sprite: {fileID: 0}
+  text: {fileID: 1729388398}
+  t1: {fileID: 275045815}
+  t2: {fileID: 2084178417}
+  BGImage1: {fileID: 750492028}
+  BGImage2: {fileID: 1761686914}
+  textSprite:
+  - {fileID: 21300000, guid: 5cb4b0b52a7671742a80fed7c92d1571, type: 3}
+  - {fileID: 21300000, guid: 8ec94a76a9284c04bb709fab59221baa, type: 3}
+  - {fileID: 21300000, guid: 32318a9592f456c4da3a271af10773c0, type: 3}
+  t1Sprite:
+  - {fileID: 21300000, guid: 48609ecc246fe9a45b96f261508b5f6a, type: 3}
+  - {fileID: 21300000, guid: 63073bc982becce4ebed8052ae125736, type: 3}
+  - {fileID: 21300000, guid: 1cacbc2fdce479f4087ec38e7759675c, type: 3}
+  t2Sprite:
+  - {fileID: 21300000, guid: 844e0282f6c60a9428d19e0758d1e266, type: 3}
+  - {fileID: 21300000, guid: 63073bc982becce4ebed8052ae125736, type: 3}
+  - {fileID: 21300000, guid: 10f421eb36164d54abf4f8468acc9eb6, type: 3}
+--- !u!114 &374406017
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 374406005}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c8fac74a47f4d03498fee0a10d688c0e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttons:
+  - {fileID: 1041198614}
+  - {fileID: 1229025851}
 --- !u!1 &382232068
 GameObject:
   m_ObjectHideFlags: 0
@@ -10436,6 +10463,8 @@ MonoBehaviour:
   MaxTeamMember: 1
   RedTeamId: 
   BlueTeamId: 
+  RedTeamid: 
+  BlueTeamid: 
   Players: []
   RedTeamBlock: {fileID: 0}
   BlueTeamBlock: {fileID: 0}
@@ -12183,7 +12212,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 00:00
+  m_text: 00:12
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -16165,7 +16194,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 374406015}
         m_TargetAssemblyTypeName: ResultUI, Assembly-CSharp
-        m_MethodName: ESC
+        m_MethodName: clickESC
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -19211,7 +19240,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 374406015}
         m_TargetAssemblyTypeName: ResultUI, Assembly-CSharp
-        m_MethodName: Q
+        m_MethodName: clickQ
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -22177,14 +22206,13 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1414030074}
-  - component: {fileID: 1414030075}
   m_Layer: 5
-  m_Name: TimeSetting
+  m_Name: GameTimer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1414030074
 RectTransform:
   m_ObjectHideFlags: 0
@@ -22206,20 +22234,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: -30}
   m_SizeDelta: {x: 300, y: 60}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1414030075
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1414030073}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6ec00ab49d9c3254aae20ec81e40a61b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  timerText: {fileID: 742291412}
-  remainingTime: 60
 --- !u!1 &1414751292
 GameObject:
   m_ObjectHideFlags: 0
@@ -23603,77 +23617,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1536486341}
   m_CullTransparentMesh: 1
---- !u!1 &1551289321
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1551289323}
-  - component: {fileID: 1551289322}
-  - component: {fileID: 1551289324}
-  m_Layer: 0
-  m_Name: GameResultSceneManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!114 &1551289322
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1551289321}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c8fac74a47f4d03498fee0a10d688c0e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  buttons:
-  - {fileID: 1041198614}
-  - {fileID: 1229025851}
---- !u!4 &1551289323
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1551289321}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1206.2336, y: 879.85297, z: -13.036163}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1551289324
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1551289321}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa48e09b7cac39e4fbb908f50a1ca963, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  EFFCamera: {fileID: 2074339705}
-  _winFOV: 50
-  _loseFOV: 111
-  text: {fileID: 1729388398}
-  t1: {fileID: 275045815}
-  t2: {fileID: 2084178417}
-  BGImage1: {fileID: 750492028}
-  BGImage2: {fileID: 1761686914}
-  _textSprite: {fileID: 0}
-  _t1Sprite: {fileID: 0}
-  _t2Sprite: {fileID: 0}
 --- !u!1 &1553537395
 GameObject:
   m_ObjectHideFlags: 0
@@ -34366,7 +34309,6 @@ SceneRoots:
   - {fileID: 1392355830}
   - {fileID: 516019993}
   - {fileID: 374406006}
-  - {fileID: 1551289323}
   - {fileID: 690375200}
   - {fileID: 1277924443}
   - {fileID: 1134367912}

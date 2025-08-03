@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using System;
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -7,7 +8,7 @@ using UnityEngine.SceneManagement;
 public class TimeSetting : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI timerText;
-    [SerializeField] float remainingTime;
+    [SerializeField] private float remainingTime = 30;
 
 
     void Update()
@@ -23,7 +24,6 @@ public class TimeSetting : MonoBehaviour
 
             timerText.color = Color.red;
 
-            OnLoadResultScene().Forget();
         }
         int minutes = Mathf.FloorToInt(remainingTime / 60);
         int seconds = Mathf.FloorToInt(remainingTime % 60);
@@ -31,23 +31,4 @@ public class TimeSetting : MonoBehaviour
         timerText.text = string.Format("{0:00}:{1:00}", minutes, seconds);
     }
 
-    private async UniTaskVoid OnLoadResultScene()
-    {
-        await UniTask.Yield();
-
-        AsyncOperation loadSceneAsync = SceneManager.LoadSceneAsync("GameResultScene");
-        loadSceneAsync.allowSceneActivation = false;
-
-        while (!loadSceneAsync.isDone)
-        {
-            await UniTask.Yield();
-
-            if (loadSceneAsync.progress >= 0.9f)
-            {
-                await UniTask.Delay(TimeSpan.FromSeconds(1));
-
-                loadSceneAsync.allowSceneActivation = true;
-            }
-        }
-    }
 }
