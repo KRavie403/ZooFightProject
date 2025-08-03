@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 public class LoadResultUI : MonoBehaviour
 {
-
+    private static LoadResultUI inst;
     // Eff-카메라 조정
     [SerializeField] private Camera EFFCamera;
     [SerializeField] private float _winFOV = 50f;
@@ -16,21 +16,44 @@ public class LoadResultUI : MonoBehaviour
     public Image BGImage1;
     public Image BGImage2;
 
-    [SerializeField] private Sprite _textSprite;
-    [SerializeField] private Sprite _t1Sprite;
-    [SerializeField] private Sprite _t2Sprite;
+    public Sprite[] textSprite;
+    public Sprite[] t1Sprite;
+    public Sprite[] t2Sprite;
 
+    private void Awake()
+    {
+        if (inst != null)
+        {
+            Destroy(inst);
+        }
+        inst = this;
+    }
+
+    public static LoadResultUI GetInstance()
+    {
+        if (inst == null)
+        {
+            Logger.LogError("LoadResultUI 인스턴스가 존재하지 않습니다.");
+            return null;
+        }
+
+        return inst;
+    }
+
+    public void LoadResultBGM()
+    {
+        AudioManager.Inst.PlayBackgroundMusic("GameResultScene");
+    }
 
     private void Start()
     {
-        AudioManager.Inst.PlayBackgroundMusic("GameResultScene");
         // 승/패/무승부
         LoadResultImg();
         //LoadUserName();
         LoadEff();
     }
 
-    private void LoadResultImg(/*myHitScanner.Team BeaconTeam*/)
+    public void LoadResultImg(/*myHitScanner.Team BeaconTeam*/)
     {
         Team playerTeam = Gamemanager.Inst.currentPlayer.myTeam;      // 플레이어의 팀 정보 가져오기
         Team winningTeam = Gamemanager.Inst.VictoryTeam; // 승리팀 정보 가져오기
@@ -38,33 +61,30 @@ public class LoadResultUI : MonoBehaviour
         // 승리
         if (winningTeam == playerTeam)
         {
-            _textSprite = Resources.Load<Sprite>("WIN");
-            _t1Sprite = Resources.Load<Sprite>("WIN(2)");
-            _t2Sprite = Resources.Load<Sprite>("LOSE(2)");
+            text.sprite = textSprite[0];
+            t1.sprite = t1Sprite[0];
+            t2.sprite = t2Sprite[0];
             BGImage1.color = new Color(51 / 255f, 63 / 255f, 94 / 255f, 1);
             BGImage2.color = new Color(41 / 255f, 44 / 255f, 60 / 255f, 1);
         }
         // 무승부
         else if (winningTeam == Team.NotSetting)
         {
-            _textSprite = Resources.Load<Sprite>("DRAW");
-            _t1Sprite = Resources.Load<Sprite>("DRAW(2)");
-            _t2Sprite = Resources.Load<Sprite>("DRAW(2)");
+            text.sprite = textSprite[1];
+            t1.sprite = t1Sprite[1];
+            t2.sprite = t2Sprite[1];
             BGImage1.color = new Color(51 / 255f, 63 / 255f, 94 / 255f, 1);
             BGImage2.color = new Color(41 / 255f, 44 / 255f, 60 / 255f, 1);
         }
         // 패배
         else  
         {
-            _textSprite = Resources.Load<Sprite>("LOSE");
-            _t1Sprite = Resources.Load<Sprite>("WIN(3)");
-            _t2Sprite = Resources.Load<Sprite>("LOSE(3)");
+            text.sprite = textSprite[2];
+            t1.sprite = t1Sprite[2];
+            t2.sprite = t2Sprite[2];
             BGImage1.color = new Color(94 / 255f, 51 / 255f, 52 / 255f, 1);
             BGImage2.color = new Color(60 / 255f, 41 / 255f, 42 / 255f, 1);
         }
-        text.sprite = _textSprite;
-        t1.sprite = _t1Sprite;
-        t2.sprite = _t2Sprite;
     }
 
     private void LoadUserName()
@@ -124,4 +144,23 @@ public class LoadResultUI : MonoBehaviour
     //    }
     //    return myHitScanner.Team.BlueTeam;
     //}
+
+
+    /// <summary>
+    /// 10초 후 로비
+    /// </summary>
+    public void ReturnToMatchRobby()
+    {
+        //if (fadeObject != null)
+        //{
+        //    fadeObject.ProcessFadeOut(() =>
+        //    {
+        //        GameManager.GetInstance().ChangeState(GameManager.GameState.MatchLobby);
+        //    });
+        //}
+        //else
+        //{
+        //    GameManager.GetInstance().ChangeState(GameManager.GameState.MatchLobby);
+        //}
+    }
 }
