@@ -1,4 +1,5 @@
 using BackEnd.Tcp;
+using Cysharp.Threading.Tasks;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -254,8 +255,8 @@ public class Gamemanager : MonoBehaviour
 
     private void GameReady()
     {
-        Debug.Log("게임 레디 상태 돌입");
-        ChangeScene(READY);
+        Logger.Log("게임 레디 상태 돌입");
+        //ChangeScene(READY);
         OnGameReady();
     }
 
@@ -267,7 +268,6 @@ public class Gamemanager : MonoBehaviour
         OnGameOver = delegate { };
         OnGameResult = delegate { };
 
-        //OnGameStart();
         // 게임씬이 로드되면 Start에서 OnGameStart 호출
         ChangeScene(INGAME);
     }
@@ -342,15 +342,54 @@ public class Gamemanager : MonoBehaviour
         return SceneManager.GetActiveScene().name == LOBBY;
     }
 
-    private void ChangeScene(string scene)
+    //private void ChangeScene(string scene)
+    //{
+    //    if (scene != LOGIN && scene != INGAME && scene != LOBBY && scene != READY)
+    //    {
+    //        Debug.Log("알수없는 씬 입니다.");
+    //        return;
+    //    }
+    //    SceneManager.LoadScene(scene);
+    //}
+    public async UniTask ChangeScene(string scene)
     {
         if (scene != LOGIN && scene != INGAME && scene != LOBBY && scene != READY)
         {
             Debug.Log("알수없는 씬 입니다.");
             return;
         }
-        SceneManager.LoadScene(scene);
+
+        if (scene == INGAME)
+        {
+            await LoadSceneAsync(scene);
+        }
+        else
+        {
+            SceneManager.LoadScene(scene);
+        }
     }
+
+    public async UniTask LoadSceneAsync(string scene)
+    {
+        LoadingProgressManager.Inst?.Show();
+
+        var op = SceneManager.LoadSceneAsync(scene);
+        op.allowSceneActivation = false;
+
+        while (op.progress < 0.9f)
+        {
+            await UniTask.Yield();
+        }
+        await UniTask.Delay(5000); // 약간 대기
+
+        op.allowSceneActivation = true;
+
+        while (!op.isDone)
+            await UniTask.Yield();
+
+        LoadingProgressManager.Inst?.Hide();
+    }
+
 
     private void ChangeSceneAsync(string scene, Action<bool> func)
     {
@@ -368,23 +407,28 @@ public class Gamemanager : MonoBehaviour
     private IEnumerator LoadScene(Action<bool> func)
     {
         var asyncScene = SceneManager.LoadSceneAsync(asyncSceneName);
-        asyncScene.allowSceneActivation = true;
+        asyncScene.allowSceneActivation = false;
 
-        bool isCallFunc = false;
-        while (asyncScene.isDone == false)
+        bool hasInvoked = false;
+
+        while (asyncScene.progress < 0.9f)
         {
-            if (asyncScene.progress <= 0.9f)
-            {
-                func(false);
-            }
-            else if (isCallFunc == false)
-            {
-                isCallFunc = true;
-                func(true);
-            }
+            func?.Invoke(false); // 로딩 중
             yield return null;
         }
+
+        // progress가 0.9f 이상 도달한 후 (로드 완료)
+        if (!hasInvoked)
+        {
+            hasInvoked = true;
+            func?.Invoke(true);  // 로딩 완료 시점에 호출
+
+            yield return new WaitForSeconds(20f);  // 5초 대기
+
+            asyncScene.allowSceneActivation = true; // 씬 전환
+        }
     }
+
     #endregion
 
 
