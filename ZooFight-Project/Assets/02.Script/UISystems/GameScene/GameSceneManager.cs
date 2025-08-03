@@ -21,6 +21,7 @@ public class GameSceneManager : MonoBehaviour
     private int modelNum = 0;
     private int characterNum = 0;
     private bool isMe = false;
+    private bool _isGameStart = false;
 
 
     // UI
@@ -35,12 +36,15 @@ public class GameSceneManager : MonoBehaviour
 
     //public GameObject hpObject;
     public GameObject startCountObject;
+    public GameObject gameTimerObject;
+    public GameObject gameResultObject;
     public GameObject reconnectBoardObject;
 
     //[SerializeField] private Sprite[] _textSprite = new Sprite[2];
     [SerializeField] private int _character = 0;         // 유저 캐릭터 종류
 
     private TMP_Text startCountText;
+    private TMP_Text gameTimerText;
     private TMP_Text reconnectBoardText;
     const string HostOfflineMsg = "호스트와의 연결이 끊어졌습니다.\n연결 대기중";
     const string PlayerReconnectMsg = "{0} 플레이어 재접속중...";
@@ -73,7 +77,9 @@ public class GameSceneManager : MonoBehaviour
         }
 
         startCountText = startCountObject.GetComponentInChildren<TMP_Text>();
+        gameTimerText = gameTimerObject.GetComponentInChildren<TMP_Text>();
         startCountObject.SetActive(true);
+        gameTimerObject.SetActive(true);
         reconnectBoardText = reconnectBoardObject.GetComponentInChildren<TMP_Text>();
 
         Logger.Log($"인게임 UI 설정 완료");
@@ -85,7 +91,7 @@ public class GameSceneManager : MonoBehaviour
     {
         if (instance == null)
         {
-            Debug.LogError("GameSceneManager 인스턴스가 존재하지 않습니다.");
+            Logger.LogError("GameSceneManager 인스턴스가 존재하지 않습니다.");
             return null;
         }
 
@@ -95,6 +101,7 @@ public class GameSceneManager : MonoBehaviour
     private void Start()
     {
         ToggleImagesAsync().Forget();
+
     }
 
     public void GetUser(int curUser, int modelNum)
@@ -170,6 +177,8 @@ public class GameSceneManager : MonoBehaviour
         if (BackEndMatchManager.GetInstance().IsHost())
         {
             StartCoroutine(WorldManager.instance.StartCount());
+            await UniTask.Delay(TimeSpan.FromSeconds(10));
+            StartCoroutine(WorldManager.instance.GameTimer());
         }
     }
 
@@ -192,12 +201,51 @@ public class GameSceneManager : MonoBehaviour
         }
     }
 
+    public void SetGameTimer(float time, bool isEnable = true)
+    {
+        Logger.Log($"남은 시간: {time}초");
+        gameTimerObject.SetActive(isEnable);
+
+        if (!isEnable) return;
+
+        int minutes = Mathf.FloorToInt(time / 60);
+        int seconds = Mathf.FloorToInt(time % 60);
+
+        // 0초일 경우 강제로 0 처리
+        if (Mathf.Approximately(time, 0f) || time <= 0f)
+        {
+            minutes = 0;
+            seconds = 0;
+            gameTimerText.text = string.Format("{0:00}:{1:00}", minutes, seconds);
+
+            ShowResultBase();
+            LoadResultUI.GetInstance().LoadResultBGM();
+            LoadResultUI.GetInstance().LoadResultImg();
+        }
+        else if (time == 3)
+        {
+            // 촉박한 BGM 처리
+            // AudioManager.Inst.PlayBasicEffect(0);
+            gameTimerText.text = string.Format("{0:00}:{1:00}", minutes, seconds);
+        }
+        else
+        {
+            gameTimerText.text = string.Format("{0:00}:{1:00}", minutes, seconds);
+
+        }
+    }
+
     public void SetHostWaitBoard()
     {
         reconnectBoardText.text = HostOfflineMsg;
         reconnectBoardObject.SetActive(true);
         // 5초 후 재접속 메시지 닫음
         ReconnectBoardClose().Forget();
+    }
+
+    private void ShowResultBase()
+    {
+        gameResultObject.SetActive(true);
     }
 
     public void SetExitBoard(string playerName)
