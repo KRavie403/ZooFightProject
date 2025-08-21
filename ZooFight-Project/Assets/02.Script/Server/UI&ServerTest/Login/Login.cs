@@ -70,7 +70,7 @@ public class Login : LoginBase
                 switch (int.Parse(callback.GetStatusCode()))
                 {
                     case 401:
-                        message = callback.GetMessage().Contains("CustomID") ? "존재하지 않는 아이디입니다." : "잘못된 비밀번호 입니다.";
+                        message = callback.GetMessage().Contains("customId") ? "존재하지 않는 아이디입니다." : "잘못된 비밀번호 입니다.";
                         break;
                     case 403:
                         message = callback.GetMessage().Contains("user") ? "차단당한 유저입니다." : "차단당한 계정입니다.";
