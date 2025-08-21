@@ -11,47 +11,56 @@ public class MiinimapUI : MonoBehaviour
     public GameObject minimapActivateBtn;
     public GameObject minimapOpenClose;
 
-    private float originalWidth;
-    private float originalHeight;
-
+    public RectTransform minimapPanel; // 맵 전체
+    public RectTransform minimapBar;
     [SerializeField] private TextMeshProUGUI mapBtnText;
 
     private bool _isOpen = true;
 
-    public void ActivateMap()
-    {
-        if (_isOpen)
-        {
-            _isOpen = false;
-            minimap.SetActive(false);
-            minimapOpenClose.transform.position = new Vector3(175, 12.5f, 0);
-            background.transform.position = new Vector3(175, -112.5f, 0);
-            mapBtnText.text = "+";
-        }
-        else
-        {
-            _isOpen = true;
-            minimap.SetActive(true);
-            minimapOpenClose.transform.position = new Vector3(175, 262.5f, 0);
-            background.transform.position = new Vector3(175, 137.5f, 0);
-            mapBtnText.text = "-";
-        }
-    }
+    private float minimapRatio = 0.2f;      // 화면 비율
+    private Vector2 _openMinimapPos;
+    private Vector2 _closedMinimapPos;
+    private Vector2 _openBarPos;
+    private Vector2 _closedBarPos;
+
 
     private void Start()
     {
+        // 초기 위치 저장 (좌표는 anchoredPosition 기준)
+        _openMinimapPos = minimapPanel.anchoredPosition;
+        _closedMinimapPos = new Vector2(_openMinimapPos.x, _openMinimapPos.y - minimapPanel.rect.height);   // 아래로 내려감
+
+        _openBarPos = minimapBar.anchoredPosition;
+        _closedBarPos = new Vector2(_openBarPos.x, _openMinimapPos.y); // 맨 위로 옴 (맵 안 보이게)
+
         AdjustMinimapUI();
+    }
+
+    public void ToggleMinimap()
+    {
+        _isOpen = !_isOpen;
+
+        if (_isOpen)
+        {
+            minimapPanel.anchoredPosition = _openMinimapPos;
+            minimapBar.anchoredPosition = _openBarPos;
+            mapBtnText.text = "-";
+        }
+        else
+        {
+            minimapPanel.anchoredPosition = _closedMinimapPos;
+            minimapBar.anchoredPosition = _closedBarPos;
+            mapBtnText.text = "+";
+        }
     }
 
     void AdjustMinimapUI()
     {
-        float aspectRatio = (float)Screen.width / Screen.height;
-        // MinimapUI의 RectTransform에서 초기 사이즈 값을 가져옴
-        RectTransform minimapRect = minimap.GetComponent<RectTransform>();
-        originalWidth = minimapRect.sizeDelta.x;
-        originalHeight = minimapRect.sizeDelta.y;
+        RectTransform rt = minimap.GetComponent<RectTransform>();
+        float screenWidth = Screen.width;
+        float screenHeight = Screen.height;
 
-        // 특정 비율에 맞춰 MinimapUI의 크기를 조정
-        minimapRect.sizeDelta = new Vector2(originalWidth * aspectRatio, originalHeight);
+        // 화면 크기의 비율에 따라 UI 크기를 정함 (예: 화면의 20%)
+        rt.sizeDelta = new Vector2(screenWidth * minimapRatio, screenHeight * minimapRatio);
     }
 }
