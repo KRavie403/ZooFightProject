@@ -438,7 +438,7 @@ public partial class BackEndMatchManager : MonoBehaviour
 
             if (args.ErrInfo == BackEnd.Tcp.ErrorCode.Success)
             {         
-                // GameManager.GetInstance().ChangeState(GameManager.GameState.Result);
+                Gamemanager.GetInstance().ChangeState(Gamemanager.GameState.Result);
             }
             else if (args.ErrInfo == BackEnd.Tcp.ErrorCode.Match_InGame_Timeout)
             {
@@ -829,6 +829,26 @@ public partial class BackEndMatchManager : MonoBehaviour
     public int GetTeamInfo(SessionId sessionId)
     {
         return gameRecords[sessionId].m_teamNumber;
+    }
+
+    public Team ConvertTeamNumberToEnum(int teamNumber)
+    {
+        switch (teamNumber)
+        {
+            case 0: return Team.RedTeam;
+            case 1: return Team.BlueTeam;
+            default: return Team.NotSetting;
+        }
+    }
+
+    public int ConvertEnumToTeamNumber (Team teamEnum)
+    {
+        switch (teamEnum)
+        {
+            case Team.RedTeam: return 0;
+            case Team.BlueTeam: return 1;
+            default: return -1 ;
+        }
     }
 
     //public MatchInfo GetMatchInfo(string indate)
