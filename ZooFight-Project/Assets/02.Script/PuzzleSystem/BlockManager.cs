@@ -141,6 +141,8 @@ public class BlockManager : MonoBehaviour
     {
         foreach (BlockData block in mapData.blocks)
         {
+            if (block.type == 0 || block.type == 1) continue;
+
             Vector3 blockPosition = new Vector3(block.x, block.y, block.z);
 
             GameObject blockPrefab = GetBlockPrefab(block.type);
@@ -170,18 +172,13 @@ public class BlockManager : MonoBehaviour
 
     private void PlaceTeamBlocks()
     {
-        //mapCoordinates[0] = new Vector3(0, 0, 0);
 
         Vector3 redBlockPosition = new Vector3(20.5f, 0.5f, 10.5f);
         Vector3 blueBlockPosition = new Vector3(40.5f, 0.5f, 10.5f);
 
-        Instantiate(redBlock, redBlockPosition, Quaternion.identity);
-        Instantiate(blueBlock, blueBlockPosition, Quaternion.identity);
+        //Instantiate(redBlock, redBlockPosition, Quaternion.identity);
+        //Instantiate(blueBlock, blueBlockPosition, Quaternion.identity);
 
-        //mapCoordinates[FindMapCoordinatesKey(mapCoordinates, redBlockPosition)] = new Vector3(0, 0, 0);
-        //mapCoordinates[FindMapCoordinatesKey(mapCoordinates, blueBlockPosition)] = new Vector3(0, 0, 0);
-        //MarkPositionAsOccupied(blockCount++, redBlockPosition);
-        //MarkPositionAsOccupied(blockCount++, blueBlockPosition);
         occupied.Add(redBlockPosition);
         occupied.Add(blueBlockPosition);
 
