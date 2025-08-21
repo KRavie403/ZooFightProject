@@ -195,12 +195,18 @@ public class KeyController : Singleton<KeyController>
                 return KeyCode.D;
             case KeyAction.Jump:
                 return KeyCode.Space;
+            case KeyAction.Run:
+                return KeyCode.LeftShift;
             case KeyAction.Grab:
                 return KeyCode.Mouse1;
+            case KeyAction.Selectskill:
+                return KeyCode.E;
             case KeyAction.Usingskill:
                 return KeyCode.F;
-            case KeyAction.Drop:
+            case KeyAction.Discard:
                 return KeyCode.R;
+            case KeyAction.Map:
+                return KeyCode.M;
             case KeyAction.Menu:
                 return KeyCode.Escape;
             default:
