@@ -38,6 +38,7 @@ public class GameSceneManager : MonoBehaviour
     public GameObject startCountObject;
     public GameObject gameTimerObject;
     public GameObject gameResultObject;
+    public GameObject gameResultBlur;
     public GameObject reconnectBoardObject;
 
     //[SerializeField] private Sprite[] _textSprite = new Sprite[2];
@@ -115,15 +116,12 @@ public class GameSceneManager : MonoBehaviour
 
     public void SetPlayerProfile(int playerNum, string nickName, int modelNum)
     {
-        this.nickName = nickName;
-        this.modelNum = modelNum;
-
         nameObjects[playerNum - 1].text = nickName;
 
-        int spriteIndex = (playerNum > 3) ? modelNum + 3 : modelNum;
+        int spriteIndex = (playerNum % 2 == 0) ? modelNum + 3 : modelNum;
         characterImages[playerNum - 1].sprite = modelImages[spriteIndex];
         
-        Logger.Log($"!!playerNum: {playerNum} name: {nickName} modelNum: {modelNum}");
+        Logger.Log($"!!playerNum: {playerNum} name: {nickName} modelNum: {modelNum} cI: {playerNum-1} spIndex: {spriteIndex}");
     }
 
 
@@ -192,6 +190,8 @@ public class GameSceneManager : MonoBehaviour
             {
                 startCountText.color = new Color32(255, 187, 0, 255);
                 startCountText.text = "시작!";
+
+                HideAfterDelay().Forget();
             }
             else
             {
@@ -201,8 +201,15 @@ public class GameSceneManager : MonoBehaviour
         }
     }
 
+    private async UniTaskVoid HideAfterDelay()
+    {
+        await UniTask.Delay(System.TimeSpan.FromSeconds(1));
+        startCountObject.SetActive(false);
+    }
+
     public void SetGameTimer(float time, bool isEnable = true)
     {
+                
         Logger.Log($"남은 시간: {time}초");
         gameTimerObject.SetActive(isEnable);
 
@@ -218,9 +225,11 @@ public class GameSceneManager : MonoBehaviour
             seconds = 0;
             gameTimerText.text = string.Format("{0:00}:{1:00}", minutes, seconds);
 
-            ShowResultBase();
-            LoadResultUI.GetInstance().LoadResultBGM();
-            LoadResultUI.GetInstance().LoadResultImg();
+            int result = 3;     // draw = 3
+
+            GameTimeOverMessage gameTimeOverMessage = new GameTimeOverMessage(result);
+            BackEndMatchManager.GetInstance().SendDataToInGame<GameTimeOverMessage>(gameTimeOverMessage);
+
         }
         else if (time == 3)
         {
@@ -243,8 +252,10 @@ public class GameSceneManager : MonoBehaviour
         ReconnectBoardClose().Forget();
     }
 
-    private void ShowResultBase()
+    public void ShowResultBase()
     {
+        Logger.Log("playerTeam: ShowResultBase 실행");
+        gameResultBlur.SetActive(true);
         gameResultObject.SetActive(true);
     }
 
