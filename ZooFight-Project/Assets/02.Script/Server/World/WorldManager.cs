@@ -27,12 +27,21 @@ public class WorldManager : MonoBehaviour
     private Dictionary<int, string> playersList;
     private Dictionary<int, int> playersModelNum;
     private Dictionary<SessionId, int> playerSessionId;
+    private HashSet<SessionId> commanderSessions;
     public GameObject startPointObject;
     private List<Vector4> statringPoints;
+    #endregion
+
+    #region 결과값
+    private List<int> escapeRecord;
+    private int result = 0;         // 0: None, 1: Win, 2: Lose, 3: Draw
+    private int winnerTeam;     // 0: Red, 1: Blue
+    private int endTime;
 
     private Stack<SessionId> gameRecord;
     public delegate void PlayerDie(SessionId index);
     public PlayerDie dieEvent;
+
     #endregion
 
     void Awake()
@@ -67,8 +76,8 @@ public class WorldManager : MonoBehaviour
         }
         Debug.Log("게임 초기화 진행");
         gameRecord = new Stack<SessionId>();
-        //Gamemanager.OnGameOver += OnGameOver;
-        //Gamemanager.OnGameResult += OnGameResult;
+        Gamemanager.OnGameOver += OnGameOver;
+        Gamemanager.OnGameResult += OnGameResult;
         myPlayerIndex = SessionId.None;
         SetPlayerAttribute();
         OnGameStart();
@@ -92,7 +101,7 @@ public class WorldManager : MonoBehaviour
         //dieEvent += PlayerDieEvent;
     }
 
-    private void PlayerDieEvent(SessionId index) // 캐릭터 죽음 이벤트를 종료 이벤트로 바꿔야하나? <<
+    private void PlayerEndEvent(SessionId index) // 캐릭터 죽음 이벤트를 종료 이벤트로 바꿔야하나? <<
     {
         alivePlayer -= 1;
         //players[index].gameObject.SetActive(false);
@@ -152,18 +161,44 @@ public class WorldManager : MonoBehaviour
     ///  1) 팀 블록이 먼저 탈출한 경우
     ///  2) 탈출구에 더 가까운 경우
     /// </summary>
+    /// 
+    private void OnEnable()
+    {
+        VictoryDecision.OnGameVictory += HandleGameVictory;
+    }
+
+    private void OnDisable()
+    {
+        VictoryDecision.OnGameVictory -= HandleGameVictory;
+    }
+
+    private void HandleGameVictory(Team winnerTeam)
+    {
+        Logger.Log($"게임 승리 팀: {winnerTeam}");
+
+        // 서버에 게임 종료 전송
+        SendGameEndOrder();
+    }
+
     private void SendGameEndOrder()
     {
+        if (Gamemanager.Inst.IsGameEndSent) return;
+        Gamemanager.Inst.IsGameEndSent = true;
+
         // 게임 종료 전환 메시지는 호스트에서만 보냄
         Logger.Log("Make GameResult & Send Game End Order");
-        foreach (SessionId session in BackEndMatchManager.GetInstance().sessionIdList)
+        List<SessionId> sessions = BackEndMatchManager.GetInstance().sessionIdList;
+
+        Logger.Log($"!!GameResult: {result}");
+
+        foreach (SessionId session in sessions)
         {
-            if (!gameRecord.Contains(session))
-            {
-                gameRecord.Push(session);
-            }
+            //if(BackEndMatchManager.GetInstance().GetTeamInfo(session) ==)
+            gameRecord.Push(session);
         }
         GameEndMessage message = new GameEndMessage(gameRecord);
+
+        //GameEndMessage message = new GameEndMessage(result, winnerTeam, endTime, seesionList);
         BackEndMatchManager.GetInstance().SendDataToInGame<GameEndMessage>(message);
     }
 
@@ -200,41 +235,55 @@ public class WorldManager : MonoBehaviour
         playersList = new Dictionary<int, string>();
         playersModelNum = new Dictionary<int, int>();
         playerSessionId = new Dictionary<SessionId, int>();
+        commanderSessions = new HashSet<SessionId>();
         BackEndMatchManager.GetInstance().SetPlayerSessionList(gamers);
 
         int index = 0;
+        int startPointIndex = 0;
         int modelNum = BackendGameData.Inst.UserGameData.character;
         foreach (var sessionId in gamers)
         {
+            var teamNumber = BackEndMatchManager.GetInstance().GetTeamInfo(sessionId);
+
+
+            //임시
+            var nick = BackEndMatchManager.GetInstance().GetNickNameBySessionId(sessionId);
             Logger.Log($"!sessionId: {index} : {sessionId}");
+            Logger.Log($"!index: {index}, teamNumber:  {teamNumber}, nickname: {nick}");
             Logger.Log($"!sessionId startingPoint: {statringPoints.Count}");
 
-            if (index >= statringPoints.Count) break;
-            else {
-                //if (index == 0 || index == 3)
-                //{
-                //    index += 1;
-                //    continue;
-                //}
-                GameObject player = Instantiate(playerPrefeb[modelNum], new Vector3(statringPoints[index].x, statringPoints[index].y, statringPoints[index].z), Quaternion.identity, playerPool.transform);
-                //players.Add(sessionId, player.GetComponent<PlayerController>());
-                players.Add(sessionId, player.GetComponent<Player>());
+            if (index >= MAXPLAYER) break;
 
-                if (BackEndMatchManager.GetInstance().IsMySessionId(sessionId))
-                {
-                    Logger.Log($"!IsMySessionId: {sessionId}");
-                    myPlayerIndex = sessionId;
-                    players[sessionId].Initialize(true, myPlayerIndex, BackEndMatchManager.GetInstance().GetNickNameBySessionId(sessionId), statringPoints[index].w);
-                }
-                else
-                {
-                    Logger.Log($"!JustSessionId: {sessionId}");
-                    players[sessionId].Initialize(false, sessionId, BackEndMatchManager.GetInstance().GetNickNameBySessionId(sessionId), statringPoints[index].w);
-                }
-
+            if (index == 0 || index == 3)
+            {
+                commanderSessions.Add(sessionId);
             }
-            index += 1;
-            Logger.Log($"num: {index} - modelId: {modelNum}");
+
+            GameObject player = Instantiate(playerPrefeb[modelNum], new Vector3(statringPoints[index].x, statringPoints[index].y, statringPoints[index].z), Quaternion.identity, playerPool.transform);
+            //players.Add(sessionId, player.GetComponent<PlayerController>());
+            players.Add(sessionId, player.GetComponent<Player>());
+
+            if (BackEndMatchManager.GetInstance().IsMySessionId(sessionId))
+            {
+                Logger.Log($"!IsMySessionId: {sessionId}");
+
+                myPlayerIndex = sessionId;
+                players[sessionId].Initialize(true, myPlayerIndex, BackEndMatchManager.GetInstance().GetNickNameBySessionId(sessionId), statringPoints[index].w);
+
+                //var team = BackEndMatchManager.GetInstance().GetTeamInfo(sessionId);
+                //var teamType = BackEndMatchManager.GetInstance().ConvertTeamNumberToEnum(team);
+                //Gamemanager.Inst.currentPlayer.myTeam = teamType;
+                //Logger.Log($"myTeamType: {teamType}");
+            }
+            else
+            {
+                Logger.Log($"!JustSessionId: {sessionId}");
+                players[sessionId].Initialize(false, sessionId, BackEndMatchManager.GetInstance().GetNickNameBySessionId(sessionId), statringPoints[index].w);
+            }
+
+            index++;
+
+            Logger.Log($"!!num: {index} - modelId: {modelNum}");
             PlayerModelIdMessage msg = new PlayerModelIdMessage(sessionId, modelNum);
             Logger.Log("!!msg-modelId: " + msg.modelId);
             BackEndMatchManager.GetInstance().SendDataToInGame<PlayerModelIdMessage>(msg);
@@ -242,9 +291,66 @@ public class WorldManager : MonoBehaviour
             playersList[index] = BackEndMatchManager.GetInstance().GetNickNameBySessionId(sessionId);
             playerSessionId[sessionId] = index;
             playersModelNum[index] = modelNum;
-            Logger.Log($"playersModelNum[{index}] = {modelNum}");
-            Logger.Log($"playerSessionId[{sessionId}]: index: {index} - nickname: {playersList[index]}");
+            Logger.Log($"!!playersModelNum[{index}] = {modelNum}");
+            Logger.Log($"!!playerSessionId[{sessionId}]: index: {index} - nickname: {playersList[index]}");
         }
+
+        // 필요없으면 지우기
+        #region players 0,3/1,2,4,5 분리
+
+        //foreach (var sessionId in gamers)
+        //{
+        //    Logger.Log($"!sessionId: {index} : {sessionId}");
+        //    Logger.Log($"!sessionId startingPoint: {statringPoints.Count}");
+
+        //    Logger.Log($"Current index: {index}");
+        //    if (index >= MAXPLAYER) break;
+
+        //    Logger.Log($"num: {index + 1} - modelId: {modelNum}");
+        //    PlayerModelIdMessage msg = new PlayerModelIdMessage(sessionId, modelNum);
+        //    Logger.Log("!!msg-modelId: " + msg.modelId);
+        //    BackEndMatchManager.GetInstance().SendDataToInGame<PlayerModelIdMessage>(msg);
+
+        //    if (index == 0 || index == 3)
+        //    {
+        //        index++;
+        //        commanderSessions.Add(sessionId);
+        //        players.Add(sessionId, null); // null로 저장
+        //        playersList[index] = BackEndMatchManager.GetInstance().GetNickNameBySessionId(sessionId);
+        //        playerSessionId[sessionId] = index;
+        //        Logger.Log($"playerSessionId[{sessionId}]: index: {index} - nickname: {playersList[index]}");
+        //        continue;
+        //    }
+
+        //    GameObject player = Instantiate(playerPrefeb[modelNum], new Vector3(statringPoints[startPointIndex].x, statringPoints[startPointIndex].y, statringPoints[startPointIndex].z), Quaternion.identity, playerPool.transform);
+        //    //players.Add(sessionId, player.GetComponent<PlayerController>());
+        //    players.Add(sessionId, player.GetComponent<Player>());
+
+        //    if (BackEndMatchManager.GetInstance().IsMySessionId(sessionId))
+        //    {
+        //        Logger.Log($"!IsMySessionId: {sessionId}");
+        //        myPlayerIndex = sessionId;
+        //        players[sessionId].Initialize(true, myPlayerIndex, BackEndMatchManager.GetInstance().GetNickNameBySessionId(sessionId), statringPoints[startPointIndex].w);
+        //    }
+        //    else
+        //    {
+        //        Logger.Log($"!JustSessionId: {sessionId}");
+        //        players[sessionId].Initialize(false, sessionId, BackEndMatchManager.GetInstance().GetNickNameBySessionId(sessionId), statringPoints[startPointIndex].w);
+        //    }
+
+        //    index++;
+        //    startPointIndex++;
+
+
+
+        //    playersList[index] = BackEndMatchManager.GetInstance().GetNickNameBySessionId(sessionId);
+        //    playerSessionId[sessionId] = index;
+        //    playersModelNum[index] = modelNum;
+        //    Logger.Log($"playersModelNum[{index}] = {modelNum}");
+        //    Logger.Log($"playerSessionId[{sessionId}]: index: {index} - nickname: {playersList[index]}");
+        //}
+        #endregion // <<<<필요없으면 지우기
+
         Logger.Log("Num Of Current Player : " + size);
 
         // 스코어 보드 설정
@@ -268,12 +374,10 @@ public class WorldManager : MonoBehaviour
             {
                 Logger.Log("Player Index Not Exist!");
                 // 호스트 기준 세션데이터가 없으면 게임을 바로 종료한다.
-                foreach (var session in BackEndMatchManager.GetInstance().sessionIdList)
-                {
-                    // 세션 순서대로 스택에 추가
-                    gameRecord.Push(session);
-                }
+                List<SessionId> seesionList = BackEndMatchManager.GetInstance().sessionIdList;
+
                 GameEndMessage gameEndMessage = new GameEndMessage(gameRecord);
+                //GameEndMessage gameEndMessage = new GameEndMessage(result, winnerTeam, endTime, seesionList);
                 BackEndMatchManager.GetInstance().SendDataToInGame<GameEndMessage>(gameEndMessage);
                 return;
             }
@@ -301,17 +405,23 @@ public class WorldManager : MonoBehaviour
 
     public IEnumerator GameTimer()
     {
+
         GameTimerMessage msg = new GameTimerMessage(GAME_TIMER);
 
         // 카운트 다운
         for (int i = 0; i < GAME_TIMER + 1; ++i)
         {
+            if (Gamemanager.Inst.IsGameEnd) yield break;
+
             msg.time = GAME_TIMER - i;
+            endTime = GAME_TIMER - i;
             BackEndMatchManager.GetInstance().SendDataToInGame<GameTimerMessage>(msg);
             yield return new WaitForSeconds(1); //1초 단위
         }
 
-        // 게임 종료 메시지를 전송
+        if (Gamemanager.Inst.IsGameEnd) yield break;
+
+        // 게임 타이머 메시지를 전송
         GameStartMessage gameTimerMessage = new GameStartMessage();
         BackEndMatchManager.GetInstance().SendDataToInGame<GameStartMessage>(gameTimerMessage);
     }
@@ -341,6 +451,8 @@ public class WorldManager : MonoBehaviour
     public void OnGameResult()
     {
         Debug.Log("Game Result");
+
+        BackEndMatchManager.GetInstance().LeaveInGameRoom();
 
         if (Gamemanager.GetInstance().IsLobbyScene())
         {
@@ -386,14 +498,21 @@ public class WorldManager : MonoBehaviour
                 GameTimerMessage gameTimer = DataParser.ReadJsonData<GameTimerMessage>(args.BinaryUserData);
                 GameSceneManager.GetInstance().SetGameTimer(gameTimer.time);
                 break;
+            case Protocol.Type.GameTimeOver:
+                GameTimerMessage gameTimeOver = DataParser.ReadJsonData<GameTimerMessage>(args.BinaryUserData);
+                result = 3;
+                Logger.Log("확인: 타임 오버");
+                SendGameEndOrder();
+                break;
             case Protocol.Type.GameStart:
                 GameSceneManager.GetInstance().SetStartCount(0, false);
                 Gamemanager.GetInstance().ChangeState(Gamemanager.GameState.InGame);
                 break;
             case Protocol.Type.GameEnd:
                 GameEndMessage endMessage = DataParser.ReadJsonData<GameEndMessage>(args.BinaryUserData);
+                Logger.Log("확인: 게임 오버");
                 SetGameRecord(endMessage.count, endMessage.sessionList);
-                //GameManager.GetInstance().ChangeState(GameManager.GameState.Over);
+                Gamemanager.GetInstance().ChangeState(Gamemanager.GameState.Over);
                 break;
 
             case Protocol.Type.Key:
@@ -587,11 +706,30 @@ public class WorldManager : MonoBehaviour
         float[] hp = new float[numOfClient];
         bool[] online = new bool[numOfClient];
         int index = 0;
+        //foreach (var player in players)
+        //{
+        //    xPos[index] = player.Value.GetPosition().x;
+        //    zPos[index] = player.Value.GetPosition().z;
+        //    //hp[index] = player.Value.hp;
+        //    index++;
+        //}
         foreach (var player in players)
         {
-            xPos[index] = player.Value.GetPosition().x;
-            zPos[index] = player.Value.GetPosition().z;
-            //hp[index] = player.Value.hp;
+            if (player.Value != null)
+            {
+                xPos[index] = player.Value.GetPosition().x;
+                zPos[index] = player.Value.GetPosition().z;
+                //hp[index] = player.Value.hp;
+                //online[index] = true;
+            }
+            else
+            {
+                // 지시자 → 좌표는 0
+                xPos[index] = 0f;
+                zPos[index] = 0f;
+                hp[index] = 0f;
+                //online[index] = true;
+            }
             index++;
         }
         return new GameSyncMessage(hostSession, numOfClient, xPos, zPos, hp, online);
