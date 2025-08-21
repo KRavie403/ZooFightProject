@@ -11,11 +11,11 @@ using System.Linq;
 public enum KeyAction
 {
     Forward = 0, Backward, Left, Right,
-    Jump, Attack, Selectskill, Usingskill, Grab,
-    Menu, Run,
-    ItemCreate,
-    Drop,
-    // 맵열기 = M
+    Jump, Run, Attack, Selectskill, Usingskill, Grab,
+    Discard,
+    Map,
+    Menu,
+    ItemCreate,     // ItemCreate(테스트용)
     KeyCount
 }
 
@@ -40,9 +40,11 @@ public class KeyInputMapper : MonoBehaviour
     KeyCode[] defaultKeys = new KeyCode[]
     {
         KeyCode.W, KeyCode.S, KeyCode.A, KeyCode.D,
-        KeyCode.Space, KeyCode.Mouse0, KeyCode.E, KeyCode.F, KeyCode.R, KeyCode.X, KeyCode.Mouse1,
-        KeyCode.Escape ,KeyCode.LeftShift,
-        KeyCode.Q, KeyCode.Z,
+        KeyCode.Space, KeyCode.LeftShift, KeyCode.Mouse0, KeyCode.E, KeyCode.F, KeyCode.Mouse1, 
+        KeyCode.R,
+        KeyCode.M,
+        KeyCode.Escape,
+        KeyCode.Q,
         KeyCode.None
     };
 

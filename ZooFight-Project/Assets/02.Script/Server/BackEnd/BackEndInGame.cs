@@ -199,6 +199,13 @@ public partial class BackEndMatchManager : MonoBehaviour
         }
 
         //MatchResultUI.GetInstance().SetGameResult(matchGameResult);
+        Logger.Log("playerTeam: MatchGameOver 실행");
+        GameSceneManager.GetInstance().ShowResultBase();
+        LoadResultUI.GetInstance().LoadResultBGM();
+        LoadResultUI.GetInstance().LoadResultImg();
+        LoadResultUI.GetInstance().LoadEff();
+        LoadResultUI.GetInstance().LoadUserName(matchGameResult);
+
         RemoveAISessionInGameResult();
         Backend.Match.MatchEnd(matchGameResult);
     }
@@ -282,11 +289,13 @@ public partial class BackEndMatchManager : MonoBehaviour
     // 팀전 게임 결과
     private MatchGameResult TeamRecord(Stack<SessionId> record)
     {
-        var winnerSession = record.Pop();
-        var teamNumber = GetTeamInfo(winnerSession);
+        //var winnerSession = record.Pop();
+        //var teamNumber = GetTeamInfo(winnerSession);
+        Team victoryTeam = Gamemanager.Inst.VictoryTeam;
+        var teamNumber = ConvertEnumToTeamNumber(victoryTeam);
 
         MatchGameResult nowGameResult = new MatchGameResult();
-        nowGameResult.m_draws = null;
+        nowGameResult.m_draws = new List<SessionId>();
         nowGameResult.m_losers = new List<SessionId>();
         nowGameResult.m_winners = new List<SessionId>();
 
@@ -295,6 +304,10 @@ public partial class BackEndMatchManager : MonoBehaviour
             if (user.Value.m_teamNumber == teamNumber)
             {
                 nowGameResult.m_winners.Add(user.Key);
+            }
+            else if(teamNumber == -1)
+            {
+                nowGameResult.m_draws.Add(user.Key);
             }
             else
             {

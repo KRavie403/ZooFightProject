@@ -82,7 +82,9 @@ public class Gamemanager : MonoBehaviour
     public PlayerController currentPlayer;
     public int CharacterID = -1;
 
-    public bool IsGameEnd = false;
+    public bool IsGameEnd { get; set; } = false;
+    public bool IsGameEndSent { get; set; } = false;
+    public bool IsGameStart { get; set; } = false;
     public Team VictoryTeam = Team.NotSetting;
 
 

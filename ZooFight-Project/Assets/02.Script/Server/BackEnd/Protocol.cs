@@ -39,6 +39,7 @@ namespace Protocol
         LoadGameScene,      // 인게임 씬으로 전환
         StartCount,     // 시작 카운트
         GameTimer,      // 본 게임 타이머
+        GameTimeOver,   // 게임 타임 오버
         GameStart,      // 게임 시작
         GameEnd,        // 게임 종료
         GameSync,       // 플레이어 재접속 시 게임 현재 상황 싱크
@@ -369,10 +370,20 @@ namespace Protocol
         }
     }
 
+    public class GameTimeOverMessage : Message
+    {
+        public int time;
+        public GameTimeOverMessage(int time) : base(Type.GameTimeOver)
+        {
+            this.time = time;
+        }
+    }
+
     public class GameStartMessage : Message
     {
         public GameStartMessage() : base(Type.GameStart) { }
     }
+
 
     public class GameEndMessage : Message
     {
@@ -388,6 +399,21 @@ namespace Protocol
             }
         }
     }
+
+    //public class GameEndMessage : Message
+    //{
+    //    public int result;          // 0: None, 1: Win, 2: Lose, 3: Draw
+    //    public int winnerTeamId;
+    //    public float endTime;
+    //    public int[] sessionList;
+    //    public GameEndMessage(int result, int winnerTeamId, float endTime, List<SessionId> sessionList) : base(Type.GameEnd)
+    //    {
+    //        this.result = result;
+    //        this.winnerTeamId = winnerTeamId;
+    //        this.endTime = endTime;
+    //        //sessionList는 어따 쓸까
+    //    }
+    //}
 
     public class GameSyncMessage : Message
     {

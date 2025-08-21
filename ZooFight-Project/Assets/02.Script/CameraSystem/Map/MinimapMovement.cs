@@ -1,87 +1,95 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Rendering;
+using UnityEngine.UI;
 
 public class MinimapMovement : MonoBehaviour
 {
-    private float moveSpeed = 45f;
-    private float boundary = 20f;
+    [Header("UI References")]
+    public RectTransform minimapRect;         // 미니맵 전체 이미지의 RectTransform
+    public RectTransform viewportRect;         // 이동하는 뷰포트(플레이어 시야 영역)의 RectTransform
 
-    private float boundaryXMin = 81f;
-    private float boundaryXMax = 269f;
-    private float boundaryYMin = 36;
-    private float boundaryYMax = 213;
+    [Header("Settings")]
+    public float moveSpeed = 50f;                 // 뷰포트 이동 속도
+    public float screenEdgeBoundary = 20f;  // 마우스가 화면 끝으로 인식되는 거리(px)
 
+    private Vector2 boundaryMin;                 // 뷰포트가 이동 가능한 최소 위치
+    private Vector2 boundaryMax;                // 뷰포트가 이동 가능한 최대 위치
 
-    private void Update()
+    void Update()
     {
-        MinimapHandler();
-        HandleKeyboardInput();
+        // 미니맵 및 뷰포트의 크기를 기준으로 경계 계산 (해상도 변화 등 대응)
+        UpdateBoundaries();
+
+        // 입력 처리
+        Vector2 move = GetKeyboardInput() + GetMouseEdgeInput();
+
+        if (move.sqrMagnitude > 1f)
+            move.Normalize(); // 대각선 이동 시 속도 보정
+
+        // 이동 처리
+        MoveViewport(move);
+
+        // 경계 밖으로 나가지 않도록 제한
+        ClampViewportPosition();
     }
 
-    public void MinimapHandler()
+    /// <summary>
+    /// 경계값을 실시간으로 계산 (미니맵/뷰포트 크기 기반)
+    /// </summary>
+    void UpdateBoundaries()
     {
-        // 마우스 위치 감지
-        Vector2 mousePos = Input.mousePosition;
+        Vector2 minimapSize = minimapRect.rect.size;
+        Vector2 viewportSize = viewportRect.rect.size;
 
-        // 목표 위치 설정
-        Vector3 targetPosition = transform.position;
-
-
-        // 이동 조건 검사 및 목표 위치 갱신
-        if (mousePos.x < boundary)
-            targetPosition += Vector3.left * moveSpeed * Time.deltaTime;
-        else if (mousePos.x > Screen.width - boundary)
-            targetPosition += Vector3.right * moveSpeed * Time.deltaTime;
-
-        if (mousePos.y < boundary)
-            targetPosition += Vector3.down * moveSpeed * Time.deltaTime;
-        else if (mousePos.y > Screen.height - boundary)
-            targetPosition += Vector3.up * moveSpeed * Time.deltaTime;
-
-        // 경계값을 넘어가지 않도록 목표 위치 제한
-        targetPosition.x = Mathf.Clamp(targetPosition.x, boundaryXMin + boundary, boundaryXMax - boundary);
-        targetPosition.y = Mathf.Clamp(targetPosition.y, boundaryYMin + boundary, boundaryYMax - boundary);
-
-        // 부드러운 이동을 위해 Lerp 사용
-        transform.position = Vector3.Lerp(transform.position, targetPosition, Time.deltaTime * moveSpeed);
+        boundaryMin = -minimapSize * 0.5f + viewportSize * 0.5f;
+        boundaryMax = minimapSize * 0.5f - viewportSize * 0.5f;
     }
 
-    private void HandleKeyboardInput()
+    /// <summary>
+    /// 키보드 입력 처리 (WASD, 화살표)
+    /// </summary>
+    Vector2 GetKeyboardInput()
     {
-        // 키보드 입력 감지
-        float horizontal = 0;
-        float vertical = 0;
+        float h = 0f, v = 0f;
+        if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A)) h -= 1f;
+        if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D)) h += 1f;
+        if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W)) v += 1f;
+        if (Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S)) v -= 1f;
+        return new Vector2(h, v);
+    }
 
-        // 화살표 키 입력
-        if (Input.GetKey(KeyCode.LeftArrow))
-            horizontal -= 1;
-        if (Input.GetKey(KeyCode.RightArrow))
-            horizontal += 1;
-        if (Input.GetKey(KeyCode.UpArrow))
-            vertical += 1;
-        if (Input.GetKey(KeyCode.DownArrow))
-            vertical -= 1;
+    /// <summary>
+    /// 마우스가 화면 가장자리에 있을 때 입력 처리
+    /// </summary>
+    Vector2 GetMouseEdgeInput()
+    {
+        Vector2 move = Vector2.zero;
+        Vector2 mouse = Input.mousePosition;
 
-        // WASD 키 입력
-        if (Input.GetKey(KeyCode.A))
-            horizontal -= 1;
-        if (Input.GetKey(KeyCode.D))
-            horizontal += 1;
-        if (Input.GetKey(KeyCode.W))
-            vertical += 1;
-        if (Input.GetKey(KeyCode.S))
-            vertical -= 1;
+        if (mouse.x < screenEdgeBoundary) move.x -= 1f;
+        else if (mouse.x > Screen.width - screenEdgeBoundary) move.x += 1f;
 
-        Vector3 moveDirection = new Vector3(horizontal, vertical, 0).normalized;
-        Vector3 targetPosition = transform.position + moveDirection * moveSpeed * Time.deltaTime;
+        if (mouse.y < screenEdgeBoundary) move.y -= 1f;
+        else if (mouse.y > Screen.height - screenEdgeBoundary) move.y += 1f;
 
-        // 경계값을 넘어가지 않도록 목표 위치 제한
-        targetPosition.x = Mathf.Clamp(targetPosition.x, boundaryXMin + boundary, boundaryXMax - boundary);
-        targetPosition.y = Mathf.Clamp(targetPosition.y, boundaryYMin + boundary, boundaryYMax - boundary);
+        return move;
+    }
 
-        // 부드러운 이동을 위해 Lerp 사용
-        transform.position = Vector3.Lerp(transform.position, targetPosition, Time.deltaTime * moveSpeed);
+    /// <summary>
+    /// 뷰포트를 입력 방향으로 이동
+    /// </summary>
+    void MoveViewport(Vector2 dir)
+    {
+        viewportRect.anchoredPosition += dir * moveSpeed * Time.deltaTime;
+    }
+
+    /// <summary>
+    /// 뷰포트가 미니맵 밖으로 나가지 않도록 Clamp
+    /// </summary>
+    void ClampViewportPosition()
+    {
+        Vector2 pos = viewportRect.anchoredPosition;
+        pos.x = Mathf.Clamp(pos.x, boundaryMin.x, boundaryMax.x);
+        pos.y = Mathf.Clamp(pos.y, boundaryMin.y, boundaryMax.y);
+        viewportRect.anchoredPosition = pos;
     }
 }
