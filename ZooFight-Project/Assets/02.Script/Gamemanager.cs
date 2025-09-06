@@ -98,6 +98,7 @@ public class Gamemanager : MonoBehaviour
     public Dictionary<int, GameObject> BlueTeam;
     public Dictionary<int, GameObject> SpawnItems;
     public Dictionary<int, GameObject> SpawnBlocks;
+
     /// <summary>
     /// 
     /// </summary>
@@ -187,7 +188,11 @@ public class Gamemanager : MonoBehaviour
         //ClientUpdateCoroutine = PollingRateUpdate();
         //StartCoroutine(ClientUpdateCoroutine);
 
+#if UNITY_EDITOR
+        //임시코드 삭제예정
         currentPlayer = FindObjectOfType<PlayerController>();
+        //
+#endif
     }
 
     float Times = 0;
@@ -535,7 +540,7 @@ public class Gamemanager : MonoBehaviour
         switch (VictoryTeam)
         {
             case Team.RedTeam:
-
+                return RedTeamId;
             case Team.NotSetting:
             case Team.BlueTeam:
                 return BlueTeamId;

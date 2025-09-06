@@ -50,7 +50,7 @@ MonoBehaviour:
   myCam: {fileID: 0}
   crashMask:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 0
   CameraPos: {fileID: 0}
   myZoomData:
     ZoomSpeed: 5
@@ -181,6 +181,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff0b30bba8536b646baf344473124fd2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  myObjType: 0
+  myObjectNum: -1
   SessionId: 0
   CharacterID: -1
   myTeam: 0
@@ -207,6 +209,7 @@ MonoBehaviour:
   AxisX: 0
   AxisY: 0
   DenialPos: {x: 0, y: 0, z: 0}
+  curNetPos: {x: 0, y: 0, z: 0}
   TargetCamera: {fileID: 3118051548614708299}
   groundMask:
     serializedVersion: 2
@@ -215,6 +218,7 @@ MonoBehaviour:
   AttackPoint: {fileID: 0}
   ItemPoint: {fileID: 0}
   curItems: {fileID: 0}
+  isPlayersConrtol: 0
   isForceMoving: 0
   isPushing: 0
   isCrashed: 0

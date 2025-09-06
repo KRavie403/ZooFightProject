@@ -7,6 +7,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 
+
 #region 게임 
 
 /// <summary>
@@ -304,8 +305,6 @@ public class PlayerInfomation
 public class CharacterMovements : BasicData
 {
     public CharacterDatas myPlayer;
-
-    public int ModelId;
 
     // 가지고있는 아이템
     public ItemCode curItem;
