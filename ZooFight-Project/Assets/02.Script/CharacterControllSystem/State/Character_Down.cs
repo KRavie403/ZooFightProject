@@ -33,6 +33,7 @@ public class Character_Down : BaseState
 
     public override void LogicUpdate()
     {
+
         base.LogicUpdate();
     }
 

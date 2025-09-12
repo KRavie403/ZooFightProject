@@ -11,7 +11,7 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
     #region 참조 변수 목록
     public enum pState
     {
-        Create = 0,
+        Create = 0, 
         Idle,
         Move,
         Jump,
@@ -155,7 +155,7 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
 
     void IHitScanner.AddTarget(Component[] target)
     {
-
+        
     }
 
     void IHitScanner.Hit()
@@ -267,6 +267,10 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
         base.Update();
         //MoveStateCheck();
         PlayerSM.CurrentState.LogicUpdate();
+        //if(Input.GetKeyDown(KeyCode.Space))
+        //{
+        //    Slide(transform.forward, 1, 0.5f);
+        //}
         //CharacterMove(AxisX, AxisY,isDenial);
 
     }
@@ -370,6 +374,7 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
         return myData.isRunning;
     }
 
+    //작업 필요
     public void MoveStateCheck()
     {
         
@@ -548,6 +553,7 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
         }
 
     }
+
     public Vector3 MakeDir(float AxisX,float AxisY)
     {
         Vector3 dir = Vector3.Normalize(new Vector3(AxisX,0,AxisY));
@@ -632,6 +638,7 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
             StartCoroutine(ForceMovement);
             isSliding = true;
         }
+        //myAnim.SetBool("");
         //StartCoroutine(CharacterSlide(dir, dist, Speed, e));   
     }
 

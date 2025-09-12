@@ -49,15 +49,15 @@ public class VictoryDecision : MonoBehaviour
     {
         //Gamemanager.Inst.GetTeam(WinnerTeam);
         if (winnerTeam == Team.NotSetting) return;
-        //Gamemanager.Inst.currentPlayer.WinAction();
-        // 서버 업로드시 사용할 부분
-        //for (int i = 0; i < Gamemanager.Inst.GetTeamId(WinnerTeam).Count; i++)
-        //{
-        //    // 승리 애니메이션 동작
-        //    //if (Gamemanager.Inst.)
-        //    Gamemanager.Inst.GetTeam(WinnerTeam)
-        //        [Gamemanager.Inst.GetWinnerTeamId()[i]].WinAction();
-        //}
+        Gamemanager.Inst.currentPlayer.WinAction();
+        //서버 업로드시 사용할 부분
+        for (int i = 0; i < Gamemanager.Inst.GetTeamId(winnerTeam).Count; i++)
+        {
+            // 승리 애니메이션 동작
+            //if (Gamemanager.Inst.)
+            //Gamemanager.Inst.GetTeam(winnerTeam)
+            //    [Gamemanager.Inst.GetWinnerTeamId()[i]].WinAction();
+        }
     }
 
     private void LoseTeamAction(Team winnerTeam)
@@ -67,12 +67,12 @@ public class VictoryDecision : MonoBehaviour
         //Gamemanager.Inst.currentPlayer.LoseAction();
 
         // 서버 업로드시 사용할부분
-        //for (int i = 0; i < Gamemanager.Inst.GetTeamId((myHitScanner.Team)((int)WinnerTeam*-1)).Count; i++)
-        //{
-        //    // 승리 애니메이션 동작
-        //    Gamemanager.Inst.GetEnemyTeam(WinnerTeam)
-        //        [Gamemanager.Inst.GetLoserTeamId()[i]].LoseAction();
-        //}
+        for (int i = 0; i < Gamemanager.Inst.GetTeamId((Team)((int)winnerTeam * -1)).Count; i++)
+        {
+            // 승리 애니메이션 동작
+            //Gamemanager.Inst.GetEnemyTeam(winnerTeam)
+            //    [Gamemanager.Inst.GetLoserTeamId()[i]].LoseAction();
+        }
     }
 
 }
