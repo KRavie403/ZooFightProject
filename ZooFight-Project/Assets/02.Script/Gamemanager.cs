@@ -287,6 +287,8 @@ public class Gamemanager : MonoBehaviour
     private void GameResult()
     {
         OnGameResult();
+
+        ChangeScene(LOBBY);
     }
 
     private void GameReconnect()
