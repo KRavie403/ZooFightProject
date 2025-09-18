@@ -43098,6 +43098,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 0282acb23b1314e46a5687d47a10b920, type: 3}
   - {fileID: 8300000, guid: 6da37b5c3682902419ee5a9603536ac7, type: 3}
   - {fileID: 8300000, guid: 90231986573c2a144996b4cafffd8209, type: 3}
+  - {fileID: 8300000, guid: d88ec5df982a40942a3c0b0ff165abc3, type: 3}
   sfxCharacter:
   - {fileID: 8300000, guid: d09da6cd20858f0429d1f742ef010772, type: 3}
   - {fileID: 8300000, guid: 7bd5b0cfcb69487429bfd65eee71338e, type: 3}

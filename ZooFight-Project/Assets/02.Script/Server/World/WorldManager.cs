@@ -1,5 +1,6 @@
 using BackEnd.Tcp;
 using Protocol;
+//using DataScripts;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,7 +9,7 @@ using TMPro;
 
 public class WorldManager : MonoBehaviour
 {
-    static public WorldManager instance;
+    static public WorldManager Inst;
 
     const int START_COUNT = 10;
     const int GAME_TIMER = 12;    //1200
@@ -46,7 +47,7 @@ public class WorldManager : MonoBehaviour
 
     void Awake()
     {
-        instance = this;
+        Inst = this;
     }
     void Start()
     {
@@ -79,6 +80,9 @@ public class WorldManager : MonoBehaviour
         Gamemanager.OnGameOver += OnGameOver;
         Gamemanager.OnGameResult += OnGameResult;
         myPlayerIndex = SessionId.None;
+        Gamemanager.Inst.IsGameEnd = false;
+        Gamemanager.Inst.IsGameEndSent = false;
+        //Gamemanager.Inst.IsGameStart = true;
         SetPlayerAttribute();
         OnGameStart();
         return true;
@@ -254,21 +258,35 @@ public class WorldManager : MonoBehaviour
 
             if (index >= MAXPLAYER) break;
 
-            if (index == 0 || index == 3)
-            {
-                commanderSessions.Add(sessionId);
-            }
+#if 지시자보유
+            //if (index == 0 || index == 3)
+            //{
+            //    commanderSessions.Add(sessionId);
+            //}
+#endif
 
             GameObject player = Instantiate(playerPrefeb[modelNum], new Vector3(statringPoints[index].x, statringPoints[index].y, statringPoints[index].z), Quaternion.identity, playerPool.transform);
             //players.Add(sessionId, player.GetComponent<PlayerController>());
             players.Add(sessionId, player.GetComponent<Player>());
+
+            CameraController cam = player.GetComponentInChildren<CameraController>();
 
             if (BackEndMatchManager.GetInstance().IsMySessionId(sessionId))
             {
                 Logger.Log($"!IsMySessionId: {sessionId}");
 
                 myPlayerIndex = sessionId;
+                int teamType = BackEndMatchManager.GetInstance().GetTeamInfo(sessionId);
+                Team playerTeam = BackEndMatchManager.GetInstance().ConvertTeamNumberToEnum(teamType);
+
                 players[sessionId].Initialize(true, myPlayerIndex, BackEndMatchManager.GetInstance().GetNickNameBySessionId(sessionId), statringPoints[index].w);
+                Gamemanager.Inst.currentPlayer = FindObjectOfType<PlayerController>();
+
+                //cam.EnableListener();   // 내 캐릭터 → 카메라 ON
+
+                // 회의 이후 주석 해제
+                //PlayerController.Inst.CharacterInitalize(playerTeam, myPlayerIndex, index);
+
 
                 //var team = BackEndMatchManager.GetInstance().GetTeamInfo(sessionId);
                 //var teamType = BackEndMatchManager.GetInstance().ConvertTeamNumberToEnum(team);
@@ -279,6 +297,8 @@ public class WorldManager : MonoBehaviour
             {
                 Logger.Log($"!JustSessionId: {sessionId}");
                 players[sessionId].Initialize(false, sessionId, BackEndMatchManager.GetInstance().GetNickNameBySessionId(sessionId), statringPoints[index].w);
+               
+                //cam.DisableListener();  // 다른 캐릭터 → 카메라 OFF
             }
 
             index++;
@@ -296,7 +316,7 @@ public class WorldManager : MonoBehaviour
         }
 
         // 필요없으면 지우기
-        #region players 0,3/1,2,4,5 분리
+#region players 0,3/1,2,4,5 분리
 
         //foreach (var sessionId in gamers)
         //{
@@ -349,7 +369,7 @@ public class WorldManager : MonoBehaviour
         //    Logger.Log($"playersModelNum[{index}] = {modelNum}");
         //    Logger.Log($"playerSessionId[{sessionId}]: index: {index} - nickname: {playersList[index]}");
         //}
-        #endregion // <<<<필요없으면 지우기
+#endregion // <<<<필요없으면 지우기
 
         Logger.Log("Num Of Current Player : " + size);
 
@@ -385,7 +405,7 @@ public class WorldManager : MonoBehaviour
         SetPlayerInfo();
     }
 
-    #region 타이머 설정
+#region 타이머 설정
     public IEnumerator StartCount()
     {
         StartCountMessage msg = new StartCountMessage(START_COUNT);
@@ -401,6 +421,8 @@ public class WorldManager : MonoBehaviour
         // 게임 시작 메시지를 전송
         GameStartMessage gameStartMessage = new GameStartMessage();
         BackEndMatchManager.GetInstance().SendDataToInGame<GameStartMessage>(gameStartMessage);
+
+        StartCoroutine(GameTimer());
     }
 
     public IEnumerator GameTimer()
@@ -426,7 +448,7 @@ public class WorldManager : MonoBehaviour
         BackEndMatchManager.GetInstance().SendDataToInGame<GameStartMessage>(gameTimerMessage);
     }
 
-    #endregion
+#endregion
 
 
     public void PreInGame()
@@ -446,6 +468,11 @@ public class WorldManager : MonoBehaviour
             return;
         }
         BackEndMatchManager.GetInstance().MatchGameOver(gameRecord);
+    }
+
+    public void OnGameEnd()
+    {
+        BackEndMatchManager.GetInstance().MatchEnd();
     }
 
     public void OnGameResult()
@@ -469,6 +496,7 @@ public class WorldManager : MonoBehaviour
             return;
         }
         Message msg = DataParser.ReadJsonData<Message>(args.BinaryUserData);
+        //BasicData bda = DataParser.ReadJsonData<BasicData>(args.BinaryUserData);
         if (msg == null)
         {
             return;
@@ -519,10 +547,10 @@ public class WorldManager : MonoBehaviour
                 KeyMessage keyMessage = DataParser.ReadJsonData<KeyMessage>(args.BinaryUserData);
                 ProcessKeyEvent(args.From.SessionId, keyMessage);
                 break;
-            case Protocol.Type.PlayerMove:
-                PlayerMoveMessage moveMessage = DataParser.ReadJsonData<PlayerMoveMessage>(args.BinaryUserData);
-                ProcessPlayerData(moveMessage);
-                break;
+            //case Protocol.Type.PlayerMove:
+            //    PlayerMoveMessage moveMessage = DataParser.ReadJsonData<PlayerMoveMessage>(args.BinaryUserData);
+            //    ProcessPlayerData(moveMessage);
+            //    break;
             case Protocol.Type.PlayerAttack:
                 PlayerAttackMessage attackMessage = DataParser.ReadJsonData<PlayerAttackMessage>(args.BinaryUserData);
                 ProcessPlayerData(attackMessage);
@@ -535,14 +563,31 @@ public class WorldManager : MonoBehaviour
                 PlayerNoMoveMessage noMoveMessage = DataParser.ReadJsonData<PlayerNoMoveMessage>(args.BinaryUserData);
                 ProcessPlayerData(noMoveMessage);
                 break;
+            //case DataScripts.Type.BlockData:
+            //    BlockData_Class blockDataMessage = DataParser.ReadJsonData<BlockData_Class>(args.BinaryUserData);
+            //    break;
             case Protocol.Type.GameSync:
                 GameSyncMessage syncMessage = DataParser.ReadJsonData<GameSyncMessage>(args.BinaryUserData);
                 ProcessSyncData(syncMessage);
                 break;
             default:
-                Debug.Log("Unknown protocol type");
+                Logger.Log("Unknown protocol type");
                 return;
         }
+        //switch (bda.type)
+        //{
+        //    case DataScripts.DataTypes.CharacterData:
+        //        CharacterData_Class moveMessage = DataParser.ReadJsonData<CharacterData_Class>(args.BinaryUserData);
+        //        ProcessPlayerData(moveMessage);
+        //        break;
+        //    case DataScripts.DataTypes.ItemData:
+        //        break;
+        //    case DataScripts.DataTypes.BlockData:
+        //        break;
+        //    default:
+        //        Logger.Log("Unknown datascript type");
+        //        return;
+        //}
     }
 
     public void OnRecieveForLocal(KeyMessage keyMessage)
@@ -629,11 +674,29 @@ public class WorldManager : MonoBehaviour
             players[data.playerSession].SetMoveVector(moveVector);
         }
     }
+
+    //private void ProcessPlayerData(CharacterData_Class data)
+    //{
+    //    //if (BackEndMatchManager.GetInstance().IsHost() == true)
+    //    //{
+    //    //    //호스트면 리턴
+    //    //    return;
+    //    //}
+    //    //Vector3 moveVector = new Vector3(data.xDir, data.yDir, data.zDir);
+    //    ////moveVector가 같으면 방향 & 이동량 같으므로 적용 굳이 안함
+    //    //if (!moveVector.Equals(players[data.playerSession].moveVector))
+    //    //{
+    //    //    players[data.playerSession].SetPosition(data.xPos, data.yPos, data.zPos);
+    //    //    players[data.playerSession].SetMoveVector(moveVector);
+    //    //}
+    //}
     private void ProcessPlayerData(PlayerNoMoveMessage data)
     {
         players[data.playerSession].SetPosition(data.xPos, data.yPos, data.zPos);
         players[data.playerSession].SetMoveVector(Vector3.zero);
     }
+
+
     private void ProcessPlayerData(PlayerAttackMessage data)
     {
         if (BackEndMatchManager.GetInstance().IsHost() == true)
