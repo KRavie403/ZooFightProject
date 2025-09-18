@@ -6,6 +6,7 @@ using BackEnd;
 using BackEnd.Tcp;
 using static UnityEngine.InputSystem.InputControlScheme;
 using System.Runtime.CompilerServices;
+using Cysharp.Threading.Tasks;
 
 /*
  * 매치매니저 (인게임 관련 기능)
@@ -128,6 +129,29 @@ public partial class BackEndMatchManager : MonoBehaviour
         Backend.Match.LeaveGameServer();
     }
 
+    public async UniTask MatchEnd()
+    {
+        Backend.Match.MatchEnd(matchGameResult);
+
+        // 바로 씬 전환하지 말고, 서버에서 게임 종료 반영됐는지 확인
+        SendQueue.Enqueue(Backend.Match.IsGameRoomActivate, result =>
+        {
+                Logger.Log($"statusCode {result.GetStatusCode()}");
+
+            if (result.GetStatusCode() == "statusCode : 404")
+            {
+                Gamemanager.GetInstance().ChangeScene("LOBBY");
+            }
+            else
+            {
+                Logger.Log("게임 종료가 아직 서버에 반영되지 않았습니다.");
+            }
+        });
+    }
+
+
+
+
     // 서버에서 게임 시작 패킷을 보냈을 때 호출
     // 모든 세션이 게임 룸에 참여 후 "콘솔에서 설정한 시간" 후에 게임 시작 패킷이 서버에서 온다
     private void GameSetup()
@@ -207,7 +231,6 @@ public partial class BackEndMatchManager : MonoBehaviour
         LoadResultUI.GetInstance().LoadUserName(matchGameResult);
 
         RemoveAISessionInGameResult();
-        Backend.Match.MatchEnd(matchGameResult);
     }
 
     private void RemoveAISessionInGameResult()
@@ -362,7 +385,7 @@ public partial class BackEndMatchManager : MonoBehaviour
     private void SendGameSyncMessage()
     {
         // 현재 게임 상황 (위치, hp 등등...)
-        var message = WorldManager.instance.GetNowGameState(hostSession);
+        var message = WorldManager.Inst.GetNowGameState(hostSession);
         SendDataToInGame(message);
     }
 
