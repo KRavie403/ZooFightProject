@@ -95,9 +95,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 8d372d6464c19564f878415495dcc79f, type: 3}
       insertIndex: -1
       addedObject: {fileID: 9211316298419217614}
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 8d372d6464c19564f878415495dcc79f, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 7298225091855216228}
   m_SourcePrefab: {fileID: 100100000, guid: 8d372d6464c19564f878415495dcc79f, type: 3}
 --- !u!1 &4293694550500778207 stripped
 GameObject:
@@ -116,58 +113,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c4206edee777110459dad676deceb0e9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &7298225091855216228
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4293694550500778207}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ff0b30bba8536b646baf344473124fd2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  myObjType: 0
-  myObjectNum: -1
-  SessionId: 0
-  CharacterID: -1
-  myTeam: 0
-  BaseSpeedRate: 0
-  _moveSpeed: 1
-  RunSpeedRate: 1
-  JumpHeight: 2
-  MaxHP: 0
-  UpdateHp:
-    m_PersistentCalls:
-      m_Calls: []
-  UpdateSp:
-    m_PersistentCalls:
-      m_Calls: []
-  MaxSP: 0
-  SPRecovery: 10
-  isShield: 0
-  UpdateShield:
-    m_PersistentCalls:
-      m_Calls: []
-  MaxShield: 0
-  MotionSpeed: 0
-  State: 0
-  AxisX: 0
-  AxisY: 0
-  DenialPos: {x: 0, y: 0, z: 0}
-  curNetPos: {x: 0, y: 0, z: 0}
-  TargetCamera: {fileID: 0}
-  groundMask:
-    serializedVersion: 2
-    m_Bits: 0
-  grabPoint: {fileID: 0}
-  AttackPoint: {fileID: 0}
-  ItemPoint: {fileID: 0}
-  curItems: {fileID: 0}
-  isPlayersConrtol: 0
-  isForceMoving: 0
-  isPushing: 0
-  isCrashed: 0
-  TestCode: 0
-  RecoveryTime: 2
