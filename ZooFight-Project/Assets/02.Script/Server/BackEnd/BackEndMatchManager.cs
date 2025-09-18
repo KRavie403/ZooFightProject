@@ -117,7 +117,7 @@ public partial class BackEndMatchManager : MonoBehaviour
                     while (localQueue.Count > 0)
                     {
                         var msg = localQueue.Dequeue();
-                        WorldManager.instance.OnRecieveForLocal(msg);
+                        WorldManager.Inst.OnRecieveForLocal(msg);
                     }
                 }
             }
@@ -435,8 +435,9 @@ public partial class BackEndMatchManager : MonoBehaviour
             Debug.Log("게임 결과값 업로드 결과 : " + string.Format("{0} : {1}", args.ErrInfo, args.Reason));
             // 서버에서 게임 결과 패킷을 보내면 호출
             // 내가(클라이언트가) 서버로 보낸 결과값이 정상적으로 업데이트 되었는지 확인
+            string target = "status code: 400, reason: {\"errorCode\":\"ValidationException\",\"message\":\"1 validation error detected: Value '[]' at 'transactItems' failed to satisfy constraint: Member must have length greater than or equal to 1\",\"statusCode\":400}";
 
-            if (args.ErrInfo == BackEnd.Tcp.ErrorCode.Success)
+            if (args.ErrInfo == BackEnd.Tcp.ErrorCode.Success || args.Reason == target)
             {         
                 Gamemanager.GetInstance().ChangeState(Gamemanager.GameState.Result);
             }
@@ -465,7 +466,7 @@ public partial class BackEndMatchManager : MonoBehaviour
                 return;
             }
 
-            if (WorldManager.instance == null)
+            if (WorldManager.Inst == null)
             {
                 // 월드 매니저가 존재하지 않으면 바로 리턴
                 Logger.Log($"!!Worldmanager 존재 x");
@@ -479,7 +480,7 @@ public partial class BackEndMatchManager : MonoBehaviour
                 return;
             }
 
-            WorldManager.instance.OnRecieve(args);
+            WorldManager.Inst.OnRecieve(args);
             BlockManager.instance.OnRecieve(args);
         };
 
@@ -557,7 +558,7 @@ public partial class BackEndMatchManager : MonoBehaviour
                 while (localQueue.Count > 0)
                 {
                     var msg = localQueue.Dequeue();
-                    WorldManager.instance.OnRecieveForLocal(msg);
+                    WorldManager.Inst.OnRecieveForLocal(msg);
                 }
             }
         }
@@ -705,6 +706,7 @@ public partial class BackEndMatchManager : MonoBehaviour
             else
             {
                 isReconnectEnable = false;
+                Logger.Log($"확인: {isGameProgress}");
                 Debug.Log(string.Format("진행중인 게임이 없습니다. {0}", isGameProgress));
                 JoinMatchServer();
             }
