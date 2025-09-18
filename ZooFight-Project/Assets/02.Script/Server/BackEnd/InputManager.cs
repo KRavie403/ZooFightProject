@@ -105,7 +105,7 @@ public class InputManager : MonoBehaviour
         int keyCode = 0;
 
         // 이동하지 않고, 월드에서 플레이어가 움직였으면 NoMove 메시지 전송
-        if (!isMove && WorldManager.instance.IsMyPlayerMove())
+        if (!isMove && WorldManager.Inst.IsMyPlayerMove())
         {
             keyCode |= KeyEventCode.NO_MOVE;
         }
