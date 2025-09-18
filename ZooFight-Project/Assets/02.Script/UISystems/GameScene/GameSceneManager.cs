@@ -131,8 +131,34 @@ public class GameSceneManager : MonoBehaviour
     /// <param name="curUser"></param>
     public void UpdateCharacterUI(int curUser, Dictionary<int, int> modelNum)
     {
-        Debug.Log($"!! curUser: {curUser} ModelNum: {modelNum[curUser]}");
+        Logger.Log($"!! curUser: {curUser} ModelNum: {modelNum[curUser]}");
 
+        #region 지시자 X
+        switch (curUser % 3)
+        {
+            case 0:     // 3번 유저
+                minimapUI.SetActive(true);
+                characterStats[0].SetActive(true);
+                characterStatImages[0].sprite = modelImages[modelNum[3]];
+                break;
+            case 1:     // 1번 유저
+                minimapUI.SetActive(true);
+                characterStats[0].SetActive(true);
+                characterStatImages[0].sprite = modelImages[modelNum[1]];
+                break;
+            case 2:     // 2번 유저
+                minimapUI.SetActive(true);
+                characterStats[0].SetActive(true);
+                characterStatImages[0].sprite = modelImages[modelNum[2]];
+                break;
+            default:
+                Logger.LogError("유저 번호가 할당되지 않았습니다.");
+                break;
+        }
+        #endregion
+
+        #region 지시자 O
+        /*
         switch (curUser % 3)
         {
             case 0:     // 3번 유저
@@ -162,6 +188,8 @@ public class GameSceneManager : MonoBehaviour
                 Debug.LogError("유저 번호가 할당되지 않았습니다.");
                 break;
         }
+        */
+        #endregion
     }
 
     private async UniTask ToggleImagesAsync()
@@ -174,9 +202,7 @@ public class GameSceneManager : MonoBehaviour
 
         if (BackEndMatchManager.GetInstance().IsHost())
         {
-            StartCoroutine(WorldManager.instance.StartCount());
-            await UniTask.Delay(TimeSpan.FromSeconds(10));
-            StartCoroutine(WorldManager.instance.GameTimer());
+            StartCoroutine(WorldManager.Inst.StartCount());
         }
     }
 
@@ -195,7 +221,11 @@ public class GameSceneManager : MonoBehaviour
             }
             else
             {
-                if (time == 3) AudioManager.Inst.PlayBasicEffect(0);
+                if (time == 3)
+                {
+                    startCountText.color = new Color32(255, 187, 0, 255);
+                    AudioManager.Inst.PlayBasicEffect(0);
+                }
                 startCountText.text = string.Format("{0}", time);
             }
         }
@@ -219,6 +249,10 @@ public class GameSceneManager : MonoBehaviour
         int seconds = Mathf.FloorToInt(time % 60);
 
         // 0초일 경우 강제로 0 처리
+        if(Mathf.Approximately(time, 12f))
+        {
+            AudioManager.Inst.PlayBackgroundMusic("Hurry-Up");
+        }
         if (Mathf.Approximately(time, 0f) || time <= 0f)
         {
             minutes = 0;
