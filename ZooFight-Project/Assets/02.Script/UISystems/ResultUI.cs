@@ -11,7 +11,6 @@ public class ResultUI : MonoBehaviour
     private void Update()
     {
         ESC();
-        Q();
     }
 
     // 메인 화면으로 나가기
@@ -19,26 +18,12 @@ public class ResultUI : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            SceneManager.LoadScene("MainMenuScene");
+            //SceneManager.LoadScene("MainMenuScene");
         }
     }
     
     public void clickESC()
     {
-            SceneManager.LoadScene("MainMenuScene");
-    }
-    
-
-    // 재매칭하기
-    public void Q()
-    {
-        if (Input.GetKeyDown(KeyCode.Q))
-        {
-            SceneManager.LoadScene("MainMenuScene");
-        }
-    }
-    public void clickQ()
-    {
-            SceneManager.LoadScene("MainMenuScene");
+        Gamemanager.GetInstance().ChangeState(Gamemanager.GameState.Result);
     }
 }

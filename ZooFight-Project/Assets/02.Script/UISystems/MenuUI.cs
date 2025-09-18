@@ -82,7 +82,7 @@ public class MenuUI : MonoBehaviour
 
     public void ClickQuit()
     {
-        SceneManager.LoadScene("MainMenuScene");
+        WorldManager.Inst.OnGameResult();
     }
 
     public void CanvasGroupOn(CanvasGroup cg)
