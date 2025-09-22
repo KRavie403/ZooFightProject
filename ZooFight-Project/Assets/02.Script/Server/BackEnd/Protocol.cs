@@ -254,7 +254,7 @@ namespace Protocol
         }
     }
 
-    public class BlockMove : Message
+    public class BlockMoveMessage : Message
     {
         public SessionId playerSession;
         public byte blockId; 
@@ -264,7 +264,7 @@ namespace Protocol
         public float xDir;
         public float yDir;
         public float zDir;
-        public BlockMove(SessionId session,byte blockId,Vector3 pos,Vector3 dir) : base(Type.BlockMove)
+        public BlockMoveMessage(SessionId session,byte blockId,Vector3 pos,Vector3 dir) : base(Type.BlockMove)
         {
             this.playerSession = session;
             this.blockId = blockId;
