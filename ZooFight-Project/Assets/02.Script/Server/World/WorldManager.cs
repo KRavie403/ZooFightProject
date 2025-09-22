@@ -592,8 +592,23 @@ public class WorldManager : MonoBehaviour
                 break;
             default:
                 Logger.Log("Unknown datascript type");
+
                 return;
         }
+        //switch (bda.type)
+        //{
+        //    case DataScripts.DataTypes.CharacterData:
+        //        CharacterData_Class moveMessage = DataParser.ReadJsonData<CharacterData_Class>(args.BinaryUserData);
+        //        ProcessPlayerData(moveMessage);
+        //        break;
+        //    case DataScripts.DataTypes.ItemData:
+        //        break;
+        //    case DataScripts.DataTypes.BlockData:
+        //        break;
+        //    default:
+        //        Logger.Log("Unknown datascript type");
+        //        return;
+        //}
     }
 
     public void OnRecieveForLocal(KeyMessage keyMessage)
