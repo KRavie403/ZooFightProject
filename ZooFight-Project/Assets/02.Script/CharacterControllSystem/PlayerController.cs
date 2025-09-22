@@ -3,7 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-
+using DataScripts;
+using Protocol;
+using BackEnd;
 
 public class PlayerController : MovementController, IHitScanTarget , IHitScanner , IObjectId
 {
@@ -213,7 +215,7 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
         }
     }
 
-    Type IHitScanTarget.GetMyType() 
+    System.Type IHitScanTarget.GetMyType() 
     { 
         return GetType();
     }
@@ -537,6 +539,21 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
             Vector2 BlockDir = Vector2.zero;
             BlockDir = grabPoint.curGrabBlock.DistSelect(Direction,transform.forward);
             grabPoint.curGrabBlock.SetcurDir(BlockDir, transform.forward);
+
+
+            // 그냥 블록
+            Vector3 pos = new Vector3(BlockDir.x, 0, BlockDir.y);
+            Vector3 dir = new Vector3(0, 0, 0);
+            //BlockMoveMessage blockMoveMessage = new BlockMoveMessage(0, 0, pos, dir);
+            //BackEndMatchManager.GetInstance().SendDataToInGame<BlockMoveMessage>(blockMoveMessage);
+
+            // 팀 블록
+            var sessionId = Backend.Match.GetMySessionId();
+            int teamNumber = BackEndMatchManager.GetInstance().GetTeamInfo(sessionId);
+            Team playerTeam = BackEndMatchManager.GetInstance().ConvertTeamNumberToEnum(teamNumber);
+            BlockData_Class blockDataMessage = new BlockData_Class(playerTeam);
+            blockDataMessage.dirPos = pos;
+            BackEndMatchManager.GetInstance().SendDataToInGame<BlockData_Class>(blockDataMessage);
         }
 
         myAnim.SetFloat("MoveAxisX", Mathf.Clamp(AxisX * MotionSpeed, -1.0f, 1.0f));
@@ -723,7 +740,7 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
     IEnumerator PushOut(Vector3 Pos, float Dist, float Speed, UnityAction e = null)
     {
         isPushing = true;
-        isForceMoving = true;
+        isForceMoving = true    ;
 
         Vector3 NewPos = new Vector3(Pos.x, 0.0f, Pos.z);
         Vector3 NewTpos = new Vector3(transform.position.x, 0.0f, transform.position.z);

@@ -1,6 +1,6 @@
 using BackEnd.Tcp;
 using Protocol;
-//using DataScripts;
+using DataScripts;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -496,7 +496,7 @@ public class WorldManager : MonoBehaviour
             return;
         }
         Message msg = DataParser.ReadJsonData<Message>(args.BinaryUserData);
-        //BasicData bda = DataParser.ReadJsonData<BasicData>(args.BinaryUserData);
+        BasicData bda = DataParser.ReadJsonData<BasicData>(args.BinaryUserData);
         if (msg == null)
         {
             return;
@@ -570,24 +570,30 @@ public class WorldManager : MonoBehaviour
                 GameSyncMessage syncMessage = DataParser.ReadJsonData<GameSyncMessage>(args.BinaryUserData);
                 ProcessSyncData(syncMessage);
                 break;
+            case Protocol.Type.BlockMove:
+                BlockMoveMessage blockMoveMessage = DataParser.ReadJsonData<BlockMoveMessage>(args.BinaryUserData);
+                Logger.Log($"{blockMoveMessage.xPos}");
+                Logger.Log($"{blockMoveMessage.yPos}");
+                Logger.Log($"{blockMoveMessage.zPos}");
+                break;
             default:
                 Logger.Log("Unknown protocol type");
                 return;
         }
-        //switch (bda.type)
-        //{
-        //    case DataScripts.DataTypes.CharacterData:
-        //        CharacterData_Class moveMessage = DataParser.ReadJsonData<CharacterData_Class>(args.BinaryUserData);
-        //        ProcessPlayerData(moveMessage);
-        //        break;
-        //    case DataScripts.DataTypes.ItemData:
-        //        break;
-        //    case DataScripts.DataTypes.BlockData:
-        //        break;
-        //    default:
-        //        Logger.Log("Unknown datascript type");
-        //        return;
-        //}
+        switch (bda.type)
+        {
+            case DataScripts.DataTypes.CharacterData:
+                CharacterData_Class moveMessage = DataParser.ReadJsonData<CharacterData_Class>(args.BinaryUserData);
+                //ProcessPlayerData(moveMessage);
+                break;
+            case DataScripts.DataTypes.ItemData:
+                break;
+            case DataScripts.DataTypes.BlockData:
+                break;
+            default:
+                Logger.Log("Unknown datascript type");
+                return;
+        }
     }
 
     public void OnRecieveForLocal(KeyMessage keyMessage)
