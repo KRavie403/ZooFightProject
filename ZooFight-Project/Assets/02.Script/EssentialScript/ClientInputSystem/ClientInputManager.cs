@@ -25,6 +25,11 @@ public class ClientInputManager : Singleton<ClientInputManager>
     // Update is called once per frame
     void Update()
     {
+        if (!BackEndMatchManager.GetInstance().isServerConnected)
+        {
+            // 입력 차단
+            return;
+        }
 
         InputKeyDown();
         InputKeyStay();

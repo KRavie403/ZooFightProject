@@ -50,6 +50,7 @@ public partial class BackEndMatchManager : MonoBehaviour
     private bool isJoinGameRoom = false;
     private bool isFirstEnter = true;
     public bool isReconnectProcess { get; private set; } = false;
+    public bool isServerConnected { get; private set; } = false;
     public bool isSandBoxGame { get; private set; } = false;
 
     private int numOfClient = 2;                    // 매치에 참가한 유저의 총 수
@@ -501,6 +502,7 @@ public partial class BackEndMatchManager : MonoBehaviour
 
         Backend.Match.OnSessionOnline += (args) =>
         {
+            isServerConnected = true;
             // 다른 유저가 재접속 했을 때 호출
             var nickName = Backend.Match.GetNickNameBySessionId(args.GameRecord.m_sessionId);
             Debug.Log(string.Format("[{0}] 온라인되었습니다. - {1} : {2}", nickName, args.ErrInfo, args.Reason));
@@ -509,6 +511,7 @@ public partial class BackEndMatchManager : MonoBehaviour
 
         Backend.Match.OnSessionOffline += (args) =>
         {
+            isServerConnected = false;
             // 다른 유저 혹은 자기자신이 접속이 끊어졌을 때 호출
             var nickName = string.Format(args.GameRecord.m_nickname);
             Debug.Log(string.Format("[{0}] 오프라인되었습니다. - {1} : {2}", args.GameRecord.m_nickname, args.ErrInfo, args.Reason));
