@@ -242,6 +242,7 @@ public partial class BackEndMatchManager : MonoBehaviour
 
         if (!Backend.Match.JoinGameServer(args.RoomInfo.m_inGameServerEndPoint.m_address, args.RoomInfo.m_inGameServerEndPoint.m_port, false, out errorInfo))
         {
+            isServerConnected = true;
             var debugLog = string.Format(FAIL_ACCESS_INGAME, errorInfo.ToString(), string.Empty);
             Debug.Log(debugLog);
         }

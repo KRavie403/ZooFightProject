@@ -76,10 +76,10 @@ public class Player : MonoBehaviour
 
         //nameObject.GetComponent<Text>().text = nickName;
 
-        //if (this.isMe)
-        //{
-        //    Camera.main.GetComponent<FollowCamera>().target = this.transform;
-        //}
+        if (this.isMe)
+        {
+            Camera.main.GetComponent<CharacterCamera>().CameraPos = this.transform;
+        }
 
         this.isLive = true;
 
