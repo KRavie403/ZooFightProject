@@ -139,25 +139,135 @@ public class BlockManager : MonoBehaviour
 
     private void PlaceBlocks(MapData mapData)
     {
+        List<GameObject> allBlocks = new();
+
         foreach (BlockData block in mapData.blocks)
         {
             if (block.type == 0 || block.type == 1) continue;
 
             Vector3 blockPosition = new Vector3(block.x, block.y, block.z);
-
             GameObject blockPrefab = GetBlockPrefab(block.type);
 
             Quaternion rot = (block.type >= 2 && block.type <= 4)
-            ? Quaternion.Euler(0, 90, 0)
-            : Quaternion.identity;
+                ? Quaternion.Euler(0, 90, 0)
+                : Quaternion.identity;
 
-            Instantiate(blockPrefab, blockPosition, rot);
+            GameObject blockInstance = Instantiate(blockPrefab, blockPosition, rot, transform);
+            allBlocks.Add(blockInstance);
 
-#if UNITY_EDITOR || DEBUG
-            Debug.Log($"블록 생성 - 번호: {block.blockNum}, 타입: {block.type}, 위치: {blockPosition}");
-#endif
+            blockInstance.GetComponent<BlockObject>().IdInsert(block.blockNum);
+
+            Logger.Log($"블록 생성 - 번호: {block.blockNum}, 타입: {block.type}, 위치: {blockPosition}");
         }
+
+        Combine();
+        //// Material별 Combine 준비
+        //Dictionary<Material, List<CombineInstance>> materialToCombine = new();
+
+        //foreach (var block in allBlocks)
+        //{
+        //    MeshRenderer[] renderers = block.GetComponentsInChildren<MeshRenderer>();
+        //    foreach (var mr in renderers)
+        //    {
+        //        MeshFilter mf = mr.GetComponent<MeshFilter>();
+        //        if (mf == null || mf.sharedMesh == null || mr.sharedMaterial == null)
+        //            continue;
+
+        //        Material mat = mr.sharedMaterial;
+
+        //        if (!materialToCombine.ContainsKey(mat))
+        //            materialToCombine[mat] = new List<CombineInstance>();
+
+        //        CombineInstance ci = new CombineInstance();
+        //        ci.mesh = mf.sharedMesh;
+        //        ci.transform = mf.transform.localToWorldMatrix; // 월드 좌표 기준
+        //        materialToCombine[mat].Add(ci);
+
+        //        // 원본 MeshRenderer는 화면에서 숨김
+        //        mr.gameObject.SetActive(false);
+        //    }
+        //}
+
+        //// Material별 Mesh 합치기 & Instancing
+        //foreach (var kvp in materialToCombine)
+        //{
+        //    Material mat = kvp.Key;
+        //    List<CombineInstance> combineList = kvp.Value;
+
+        //    Mesh combinedMesh = new Mesh();
+
+        //    int totalVertexCount = 0;
+        //    foreach (var ci in combineList)
+        //        totalVertexCount += ci.mesh.vertexCount;
+
+        //    if (totalVertexCount > 65535)
+        //        combinedMesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+
+        //    combinedMesh.CombineMeshes(combineList.ToArray(), true, true);
+
+        //    GameObject combinedGO = new GameObject("CombinedBlock_" + mat.name);
+        //    combinedGO.transform.parent = transform;
+        //    combinedGO.transform.localPosition = Vector3.zero;
+        //    combinedGO.transform.localRotation = Quaternion.identity;
+
+        //    MeshFilter mf = combinedGO.AddComponent<MeshFilter>();
+        //    mf.mesh = combinedMesh;
+
+        //    MeshRenderer mrNew = combinedGO.AddComponent<MeshRenderer>();
+        //    Material instancedMat = new Material(mat);
+        //    instancedMat.enableInstancing = true;
+        //    mrNew.sharedMaterial = instancedMat;
+        //}
+
+        Debug.Log("블록 Mesh 합치기 완료, Draw Call 최소화 완료!");
     }
+
+    void Combine()
+    {
+        // 자식 오브젝트들의 MeshFilter 컴포넌트를 가져온다.
+        MeshFilter[] meshFilters = GetComponentsInChildren<MeshFilter>();
+        // CombineInstance 배열 생성
+        CombineInstance[] combine = new CombineInstance[meshFilters.Length];
+
+        int vertexCount = 0;
+        for (int i = 0; i < meshFilters.Length; i++)
+        {
+            // MeshFilter가 null인 경우 continue
+            if (meshFilters[i].sharedMesh == null) continue;
+
+            // CombineInstance에 Mesh와 Transform 정보 저장
+            combine[i].mesh = meshFilters[i].sharedMesh;
+            combine[i].transform = meshFilters[i].transform.localToWorldMatrix;
+            // GameObject 비활성화
+            meshFilters[i].gameObject.SetActive(false);
+
+            // 정점 수 추가
+            vertexCount += meshFilters[i].sharedMesh.vertexCount;
+        }
+
+        // MeshFilter 컴포넌트 가져오기
+        MeshFilter meshFilter = transform.GetComponent<MeshFilter>();
+        // Mesh 생성
+        meshFilter.mesh = new Mesh();
+
+        // 정점 수에 따라 IndexFormat 자동 선택
+        if (vertexCount > 65535)
+        {
+            meshFilter.mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+        }
+
+        // CombineMeshes 함수를 사용하여 Mesh 결합
+        meshFilter.mesh.CombineMeshes(combine);
+        // MeshCollider에 Mesh 할당
+        GetComponent<MeshCollider>().sharedMesh = meshFilter.mesh;
+        // GameObject 활성화
+        transform.gameObject.SetActive(true);
+
+        // 회전과 위치 초기화
+        transform.rotation = Quaternion.identity;
+        transform.position = Vector3.zero;
+    }
+
 
     private GameObject GetBlockPrefab(int type)
     {
@@ -349,17 +459,18 @@ public class BlockManager : MonoBehaviour
         mapManager.SaveMapData(blocks);
     }
 
+    #region 특정 맵 불러오기 (테스트용)
     public void LoadAndPlaceBlocks(int mapIndex)
     {
         MapData mapData = mapManager.LoadMapData(mapIndex); // 데이터만 가져옴
 
         if (mapData == null || mapData.blocks == null)
         {
-            Debug.LogError("MapData is null or empty.");
+            Logger.LogError("MapData is null or empty.");
             return;
         }
 
-        Debug.Log($"[BlockPlacement] 맵 데이터 로딩 및 배치 시작 - 블록 수: {mapData.blocks.Count}");
+        Logger.Log($"[BlockPlacement] 맵 데이터 로딩 및 배치 시작 - 블록 수: {mapData.blocks.Count}");
 
         foreach (var block in mapData.blocks)
         {
@@ -368,16 +479,23 @@ public class BlockManager : MonoBehaviour
 
             GameObject blockInstance;
             if (block.type == 5 || block.type == 6 || block.type == 7)
+            {
                 blockInstance = Instantiate(blockPrefab, blockPosition, Quaternion.Euler(0, 90, 0));
+                Logger.Log($"checking blockNum: {block.blockNum}");
+                blockInstance.GetComponent<BlockObject>().IdInsert(block.blockNum);
+            }
             else
+            {
                 blockInstance = Instantiate(blockPrefab, blockPosition, Quaternion.identity);
+                blockInstance.GetComponent<BlockObject>().IdInsert(block.blockNum);
+            }
 
-            // blockNum 등록
             blockDict[block.blockNum] = blockInstance;
 
-            Debug.Log($"블록 생성 - 번호: {block.blockNum}, 타입: {block.type}, 위치: {blockPosition}");
+            Logger.Log($"블록 생성 - 번호: {block.blockNum}, 타입: {block.type}, 위치: {blockPosition}");
         }
     }
+    #endregion
 
     public void SetSpawnUsers(List<Vector3> spawnUsers)
     {
@@ -440,6 +558,7 @@ public class BlockManager : MonoBehaviour
             Logger.LogError("Map data load failed");
     }
 
+    #region 초기 코드
     /*private void PlaceBlocks()
     {
 
@@ -623,4 +742,5 @@ public class BlockManager : MonoBehaviour
         }
     }
 */
+    #endregion
 }
