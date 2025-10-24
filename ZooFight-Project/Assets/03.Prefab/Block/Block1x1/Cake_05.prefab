@@ -79,5 +79,33 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: fd6a9348e48acad478a20680761a35a8, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -7027931056602602244}
   m_SourcePrefab: {fileID: 100100000, guid: fd6a9348e48acad478a20680761a35a8, type: 3}
+--- !u!1 &8263749503012184214 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: fd6a9348e48acad478a20680761a35a8, type: 3}
+  m_PrefabInstance: {fileID: 9110735532275998151}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &-7027931056602602244
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8263749503012184214}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 960b7e2920ff6904abbe498e13c7e0ed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  myTeam: 2
+  myBlockObj: {fileID: 0}
+  curDir: {x: 0, y: 0}
+  BlockId: -1
+  RedBlock: {fileID: 0}
+  BlueBlock: {fileID: 0}
+  DefaultBlock: []
+  isChangeActive: 0

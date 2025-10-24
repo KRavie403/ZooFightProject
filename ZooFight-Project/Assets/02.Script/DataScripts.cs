@@ -403,10 +403,12 @@ namespace DataScripts
 
     public class ItemData_Class : BasicData
     {
+        public SessionId playerSession;
         public ItemCode itemCode;
 
-        public ItemData_Class(ItemCode itemCode) : base(DataTypes.ItemData)
+        public ItemData_Class(SessionId session, ItemCode itemCode) : base(DataTypes.ItemData)
         {
+            this.playerSession = session;
             this.itemCode = itemCode;
         }
 

@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using DataScripts;
+using BackEnd;
 
 public class Character_ItemUse : BaseState
 {
@@ -21,20 +23,35 @@ public class Character_ItemUse : BaseState
 
     public override void Enter(BaseState BeforeState)
     {
+        Logger.Log("ì•„ì´í…œ ì‚¬ì˜¹1");
         base.Enter(BeforeState);
         player.SetState(PlayerController.pState.ItemUse);
         //ableFuncs[PlayerController.pFunc.ItemUse]();
 
-        // ¾ÆÀÌÅÛ »ç¿ë»óÅÂ ÁøÀÔ½Ã Ä³¸¯ÅÍ ÀÌµ¿¸ğ¼Ç Ãë¼Ò
+        // ì•„ì´í…œ ì‚¬ìš©ìƒíƒœ ì§„ì…ì‹œ ìºë¦­í„° ì´ë™ëª¨ì…˜ ì·¨ì†Œ
         player.AxisX = 0;
         player.AxisY = 0;
         player.myAnim.SetBool("IsMoving", false);
         player.myAnim.SetBool("IsRunning", false);
 
-        // ¾ÆÀÌÅÛ »ç¿ë ¸ğ¼Ç Ãâ·Â
+        // ì•„ì´í…œ ì‚¬ìš© ëª¨ì…˜ ì¶œë ¥
         player.myAnim.SetBool("ItemUse",true);
 
-        player.curItems.ItemUse();
+        var item = player.curItems;
+
+        if (item != null)
+        {
+            var sessionId = Backend.Match.GetMySessionId();
+            var teamNumber = BackEndMatchManager.GetInstance().GetTeamInfo(sessionId);
+
+            ItemData_Class message = new ItemData_Class(sessionId, item.myCode);
+            BackEndMatchManager.GetInstance().SendDataToInGame<ItemData_Class>(message);
+
+            message.curTeam = BackEndMatchManager.GetInstance().ConvertTeamNumberToEnum(teamNumber);
+            message.ItemOwner = player;
+
+            BackEndMatchManager.GetInstance().SendDataToInGame<ItemData_Class>(message);
+        }
     }
 
     public override void Exit()

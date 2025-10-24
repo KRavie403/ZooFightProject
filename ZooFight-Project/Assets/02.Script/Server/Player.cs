@@ -75,11 +75,22 @@ public class Player : MonoBehaviour
         //hpObject = Instantiate(hpObject, Vector3.zero, Quaternion.identity, playerUICanvas.transform);
 
         //nameObject.GetComponent<Text>().text = nickName;
-
         if (this.isMe)
         {
-            Camera.main.GetComponent<CharacterCamera>().CameraPos = this.transform;
+            Gamemanager.Inst.currentPlayer = FindObjectOfType<PlayerController>();
         }
+
+        CharacterCamera cam = GetComponentInChildren<CharacterCamera>();
+
+        if (cam != null)
+            cam.gameObject.SetActive(this.isMe);
+
+        AudioListener listener = GetComponentInChildren<AudioListener>();
+        if (listener != null)
+        {
+            listener.enabled = this.isMe;
+        }
+
 
         this.isLive = true;
 
@@ -373,92 +384,92 @@ public class Player : MonoBehaviour
         return nickName;
     }
 
-    void OnTriggerEnter(Collider collider)
-    {
-        // 플레이어 투명화
-        if (collider.gameObject.CompareTag("Bush"))
-        {
-            if (isHide)
-            {
-                return;
-            }
-            isHide = true;
+    //void OnTriggerEnter(Collider collider)
+    //{
+    //    // 플레이어 투명화
+    //    if (collider.gameObject.CompareTag("Bush"))
+    //    {
+    //        if (isHide)
+    //        {
+    //            return;
+    //        }
+    //        isHide = true;
 
-            var standardShaderMaterial = playerModelObject.GetComponentInChildren<SkinnedMeshRenderer>().material;
-            standardShaderMaterial.SetFloat("_Surface", (float)SurfaceType.Transparent);
-            standardShaderMaterial.SetFloat("_Blend", (float)BlendMode.Alpha);
+    //        var standardShaderMaterial = playerModelObject.GetComponentInChildren<SkinnedMeshRenderer>().material;
+    //        standardShaderMaterial.SetFloat("_Surface", (float)SurfaceType.Transparent);
+    //        standardShaderMaterial.SetFloat("_Blend", (float)BlendMode.Alpha);
 
-            standardShaderMaterial.SetOverrideTag("RenderType", "Transparent");
-            standardShaderMaterial.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-            standardShaderMaterial.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-            standardShaderMaterial.SetInt("_ZWrite", 0);
-            standardShaderMaterial.DisableKeyword("_ALPHAPREMULTIPLY_ON");
-            standardShaderMaterial.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
-            standardShaderMaterial.SetShaderPassEnabled("ShadowCaster", false);
+    //        standardShaderMaterial.SetOverrideTag("RenderType", "Transparent");
+    //        standardShaderMaterial.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+    //        standardShaderMaterial.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+    //        standardShaderMaterial.SetInt("_ZWrite", 0);
+    //        standardShaderMaterial.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+    //        standardShaderMaterial.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+    //        standardShaderMaterial.SetShaderPassEnabled("ShadowCaster", false);
 
-            if (isMe)
-            {
-                standardShaderMaterial.color = new Color32(255, 255, 255, 100);
-            }
-            else
-            {
-                standardShaderMaterial.color = new Color32(255, 255, 255, 0);
-                //nameObject.SetActive(false);
-                //hpObject.SetActive(false);
-            }
-        }
-    }
+    //        if (isMe)
+    //        {
+    //            standardShaderMaterial.color = new Color32(255, 255, 255, 100);
+    //        }
+    //        else
+    //        {
+    //            standardShaderMaterial.color = new Color32(255, 255, 255, 0);
+    //            //nameObject.SetActive(false);
+    //            //hpObject.SetActive(false);
+    //        }
+    //    }
+    //}
 
-    void OnTriggerStay(Collider collider)
-    {
-        if (isHide)
-        {
-            return;
-        }
-        isHide = true;
+    //void OnTriggerStay(Collider collider)
+    //{
+    //    if (isHide)
+    //    {
+    //        return;
+    //    }
+    //    isHide = true;
 
-        var standardShaderMaterial = playerModelObject.GetComponentInChildren<SkinnedMeshRenderer>().material;
-        standardShaderMaterial.SetFloat("_Surface", (float)SurfaceType.Transparent);
-        standardShaderMaterial.SetFloat("_Blend", (float)BlendMode.Alpha);
+    //    var standardShaderMaterial = playerModelObject.GetComponentInChildren<SkinnedMeshRenderer>().material;
+    //    standardShaderMaterial.SetFloat("_Surface", (float)SurfaceType.Transparent);
+    //    standardShaderMaterial.SetFloat("_Blend", (float)BlendMode.Alpha);
 
-        standardShaderMaterial.SetOverrideTag("RenderType", "Transparent");
-        standardShaderMaterial.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-        standardShaderMaterial.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-        standardShaderMaterial.SetInt("_ZWrite", 0);
-        standardShaderMaterial.DisableKeyword("_ALPHAPREMULTIPLY_ON");
-        standardShaderMaterial.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
-        standardShaderMaterial.SetShaderPassEnabled("ShadowCaster", false);
+    //    standardShaderMaterial.SetOverrideTag("RenderType", "Transparent");
+    //    standardShaderMaterial.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+    //    standardShaderMaterial.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+    //    standardShaderMaterial.SetInt("_ZWrite", 0);
+    //    standardShaderMaterial.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+    //    standardShaderMaterial.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+    //    standardShaderMaterial.SetShaderPassEnabled("ShadowCaster", false);
 
-        if (isMe)
-        {
-            standardShaderMaterial.color = new Color32(255, 255, 255, 100);
-        }
-        else
-        {
-            standardShaderMaterial.color = new Color32(255, 255, 255, 0);
-            //nameObject.SetActive(false);
-            //hpObject.SetActive(false);
-        }
-    }
+    //    if (isMe)
+    //    {
+    //        standardShaderMaterial.color = new Color32(255, 255, 255, 100);
+    //    }
+    //    else
+    //    {
+    //        standardShaderMaterial.color = new Color32(255, 255, 255, 0);
+    //        //nameObject.SetActive(false);
+    //        //hpObject.SetActive(false);
+    //    }
+    //}
 
-    void OnTriggerExit(Collider collider)
-    {
-        // 플레이어 투명화 해제
-        if (collider.gameObject.CompareTag("Bush"))
-        {
-            isHide = false;
-            var standardShaderMaterial = playerModelObject.GetComponentInChildren<SkinnedMeshRenderer>().material;
-            standardShaderMaterial.SetFloat("_Surface", (float)SurfaceType.Opaque);
-            standardShaderMaterial.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
-            standardShaderMaterial.SetInt("_ZWrite", 1);
-            standardShaderMaterial.EnableKeyword("_ALPHATEST_ON");
-            standardShaderMaterial.DisableKeyword("_ALPHAPREMULTIPLY_ON");
-            standardShaderMaterial.renderQueue = 2450;
+    //void OnTriggerExit(Collider collider)
+    //{
+    //    // 플레이어 투명화 해제
+    //    if (collider.gameObject.CompareTag("Bush"))
+    //    {
+    //        isHide = false;
+    //        var standardShaderMaterial = playerModelObject.GetComponentInChildren<SkinnedMeshRenderer>().material;
+    //        standardShaderMaterial.SetFloat("_Surface", (float)SurfaceType.Opaque);
+    //        standardShaderMaterial.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
+    //        standardShaderMaterial.SetInt("_ZWrite", 1);
+    //        standardShaderMaterial.EnableKeyword("_ALPHATEST_ON");
+    //        standardShaderMaterial.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+    //        standardShaderMaterial.renderQueue = 2450;
 
-            standardShaderMaterial.color = new Color32(255, 255, 255, 255);
+    //        standardShaderMaterial.color = new Color32(255, 255, 255, 255);
 
-            //nameObject.SetActive(true);
-            //hpObject.SetActive(true);
-        }
-    }
+    //        //nameObject.SetActive(true);
+    //        //hpObject.SetActive(true);
+    //    }
+    //}
 }

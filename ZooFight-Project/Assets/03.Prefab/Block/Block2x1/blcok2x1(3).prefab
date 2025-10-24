@@ -112,6 +112,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 8
       objectReference: {fileID: 0}
+    - target: {fileID: -4863903083674774765, guid: 3f9668e35782a084e804f941a4483408, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: -4734750662419665741, guid: 3f9668e35782a084e804f941a4483408, type: 3}
       propertyPath: m_Layer
       value: 8
@@ -239,5 +243,33 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 3f9668e35782a084e804f941a4483408, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4084079135195360674}
   m_SourcePrefab: {fileID: 100100000, guid: 3f9668e35782a084e804f941a4483408, type: 3}
+--- !u!1 &3033144475090823999 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 3f9668e35782a084e804f941a4483408, type: 3}
+  m_PrefabInstance: {fileID: 2798579273390560878}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4084079135195360674
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3033144475090823999}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 960b7e2920ff6904abbe498e13c7e0ed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  myTeam: 2
+  myBlockObj: {fileID: 0}
+  curDir: {x: 0, y: 0}
+  BlockId: -1
+  RedBlock: {fileID: 0}
+  BlueBlock: {fileID: 0}
+  DefaultBlock: []
+  isChangeActive: 0

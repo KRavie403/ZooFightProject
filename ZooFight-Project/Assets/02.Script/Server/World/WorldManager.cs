@@ -11,6 +11,9 @@ public class WorldManager : MonoBehaviour
 {
     static public WorldManager Inst;
 
+    public PlayerController player;
+
+
     const int START_COUNT = 10;
     const int GAME_TIMER = 12;    //1200
 
@@ -587,8 +590,11 @@ public class WorldManager : MonoBehaviour
                 //ProcessPlayerData(moveMessage);
                 break;
             case DataScripts.DataTypes.ItemData:
+                ItemData_Class itemMessage = DataParser.ReadJsonData<ItemData_Class>(args.BinaryUserData);
+                player.curItems.ItemUse();
                 break;
             case DataScripts.DataTypes.BlockData:
+                BlockData_Class blockMoveMessage = DataParser.ReadJsonData<BlockData_Class>(args.BinaryUserData);
                 break;
             default:
                 Logger.Log("Unknown datascript type");
