@@ -92,6 +92,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 8
       objectReference: {fileID: 0}
+    - target: {fileID: -2804699722735378873, guid: d640018e14f6a9440bd84adb66024d9b, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: d640018e14f6a9440bd84adb66024d9b, type: 3}
       propertyPath: m_Name
       value: Cake_01
@@ -160,6 +164,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 8
       objectReference: {fileID: 0}
+    - target: {fileID: 8974314524680280453, guid: d640018e14f6a9440bd84adb66024d9b, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 9202468380412474858, guid: d640018e14f6a9440bd84adb66024d9b, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
@@ -171,6 +179,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: d640018e14f6a9440bd84adb66024d9b, type: 3}
       insertIndex: -1
       addedObject: {fileID: 542297229971749353}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: d640018e14f6a9440bd84adb66024d9b, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -7338220576654860845}
   m_SourcePrefab: {fileID: 100100000, guid: d640018e14f6a9440bd84adb66024d9b, type: 3}
 --- !u!1 &1195682417008461356 stripped
 GameObject:
@@ -219,3 +230,23 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &-7338220576654860845
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1195682417008461356}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 960b7e2920ff6904abbe498e13c7e0ed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  myTeam: 2
+  myBlockObj: {fileID: 0}
+  curDir: {x: 0, y: 0}
+  BlockId: -1
+  RedBlock: {fileID: 0}
+  BlueBlock: {fileID: 0}
+  DefaultBlock: []
+  isChangeActive: 0
