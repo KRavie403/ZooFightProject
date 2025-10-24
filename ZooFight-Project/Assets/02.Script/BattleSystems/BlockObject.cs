@@ -38,7 +38,7 @@ public class BlockObject : MonoBehaviour , IBlock , IObjectId
 
     public Vector2 curDir = Vector2.zero;
 
-    int BlockId = -1;
+    public int BlockId = -1;
 
     #region Blocks 인터페이스 관련
 
@@ -151,10 +151,10 @@ public class BlockObject : MonoBehaviour , IBlock , IObjectId
         return -1;
     }
 
-    //public void IdInsert(int id)
-    //{
-    //    BlockId = id;
-    //}
+    public void IdInsert(int id)
+    {
+        BlockId = id;
+    }
 
     #region 잡기관련
     public void Grab(PlayerController player)
