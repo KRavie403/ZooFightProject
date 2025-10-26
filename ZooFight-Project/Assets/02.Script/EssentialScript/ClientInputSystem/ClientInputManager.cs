@@ -25,11 +25,13 @@ public class ClientInputManager : Singleton<ClientInputManager>
     // Update is called once per frame
     void Update()
     {
-
+        // 인터넷 팅김시 입력제한 걸기
+        // if(???)
         InputKeyDown();
         InputKeyStay();
         InputKeyUp();
         MouseAxis();
+
         if(Input.GetMouseButtonDown(0))
         {
             //RangeUse(RangeTypeSetting.keys[0].GetComponent<IRangeEvent>().comp);

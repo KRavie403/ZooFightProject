@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using DataScripts;
 
 interface IBlock
 {
@@ -84,7 +85,8 @@ public class BlockObject : MonoBehaviour , IBlock , IObjectId
     protected Vector2[] JudgeVector = new Vector2[2] {new(1,1),new(-1,1) };
     protected Vector3[] myDirs = new Vector3[5] {Vector3.zero , Vector3.forward, Vector3.left, Vector3.back, Vector3.right };
 
-    NormalBlockdata myBlockData;    
+    NormalBlockdata myBlockData;
+    BlockData_Class myBlockDatas;
 
     public bool isChangeActive = false;
 
@@ -150,10 +152,10 @@ public class BlockObject : MonoBehaviour , IBlock , IObjectId
         return -1;
     }
 
-    //public void IdInsert(int id)
-    //{
-    //    BlockId = id;
-    //}
+    public void IdInsert(int id)
+    {
+        BlockId = id;
+    }
 
     #region 잡기관련
     public void Grab(PlayerController player)
@@ -164,8 +166,13 @@ public class BlockObject : MonoBehaviour , IBlock , IObjectId
             DeGrab(player);
             return;
         }
-        myPlayer = player;
 
+        if(player.myTeam == myTeam)
+        {
+
+        }
+
+        myPlayer = player;
 
         myPlayer.grabPoint.curGrabBlock = this;
         myPlayer.isGrab = true;

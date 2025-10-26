@@ -3,7 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-
+using DataScripts;
+using System.IO.IsolatedStorage;
 
 public class PlayerController : MovementController, IHitScanTarget , IHitScanner , IObjectId
 {
@@ -59,10 +60,17 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
     public Vector3 DenialPos = Vector3.zero;
     public Vector3 Dir => Vector3.right * AxisX + Vector3.forward * AxisY;
     public Vector3 curNetPos = Vector3.zero;
+    public Vector3 curNetRot = Vector3.zero;
+
+    /// <summary>
+    /// -1 프레임의 캐릭터의 위치 = 기준점으로 사용
+    /// </summary>
+    public Vector3 ReferencePos = Vector3.zero;
 
     public CharacterCamera TargetCamera;
     public LayerMask groundMask;
     Vector2 SetNetPos = Vector2.zero;
+
 
     public GrabPoint grabPoint;
     public Transform AttackPoint;
@@ -74,7 +82,21 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
     CharacterData_Class C_myData;
 
 
-    public bool isPlayersConrtol = false;
+    public bool isPlayersConrtol
+    {
+        get
+        {
+            if (Gamemanager.Inst.currentPlayer == this)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+    }
+
     bool isMoving 
     {
         get
@@ -118,6 +140,23 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
     bool isPushing = false;
     bool isSliding = false;
     
+    // 사용자의 캐릭터 여부
+    bool isOwner 
+    { 
+        get
+        {
+            if(Gamemanager.Inst.currentPlayer == this)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+    }
+
+
     public bool isCrashed = false;
     public bool isKeyReverse
     {
@@ -129,8 +168,7 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
         get { return myData.isGrab; }
         set { myData.isGrab = value;}
     }
-    // 캐릭터 위치 검증여부
-    bool isDenial = false;
+
     Vector2 acceleration = Vector2.zero;
 
 
@@ -420,26 +458,37 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
 
     #region 이동관련 신규코드
 
+    public void Move()
+    {
+        if (isOwner)
+        {
+            PlayerMove(new Vector3(AxisX, 0, AxisY), transform.forward, false);
+        }
+        else
+        {
+            PlayerMove(curNetPos, curNetRot, true);
+        }
+              
+    }
 
     /// <summary>
     /// 플레이어의 이동을 진행 하는 함수
     /// </summary>
     /// <param name="Pos">목표 방향 or 좌표</param>
-    /// <param name="Rot">오브젝트의 전방 설정</param>
+    /// <param name="Rot">오브젝트의 전방 설정</param
     /// <param name="isStatic">동적,정적이동을 결정</param>
     /// <param name="e"></param>
     public void PlayerMove(Vector3 Pos, Vector3 Rot, bool isStatic, UnityAction e = null)
     {
-        if (myData.isDenial)
-        {
-            return;
-        }
+
         if (isStatic)
         {
+            // 패킷데이터를 사용한 이동
             StaticMove(Pos, Rot,e);
         }
         else
         {
+            // 키보드 입력값을 사용한 이동
             DynamicMove(Pos, Rot,e);
         }
     }
@@ -452,6 +501,7 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
     /// <param name="e">이동 종료후 작업</param>
     public void DynamicMove(Vector3 Pos, Vector3 Rot, UnityAction e = null)
     {
+
         if(Pos == Vector3.zero)
         {
             myAnim.SetBool("IsMoving", false);
@@ -461,9 +511,41 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
             return;
         }
 
+
+        Vector3 Direction = Vector3.Normalize(new Vector3(AxisX, 0, AxisY));
+        Direction = Vector3.Normalize(Pos);
+
+        float Speed = myData.isRunning ? MoveSpeed * RunSpeedRate : MoveSpeed;
+
+        // 프로토콜 전송용 벡터
+        Vector3 Dir = MakeDir(AxisX, AxisY);
+        //transform.Translate(MoveSpeed * time.deltaTime * Direction, Space.Self);
+        Vector3 dirPos = transform.position + Dir * Speed * Time.deltaTime;
+        transform.position += MakeDir(AxisX, AxisY) * Speed * Time.deltaTime;
+
+        if (isGrab)
+        {
+            Vector2 BlockDir = Vector2.zero;
+            BlockDir = grabPoint.curGrabBlock.DistSelect(Direction, transform.forward);
+            grabPoint.curGrabBlock.SetcurDir(BlockDir, transform.forward);
+        }
+
+        myAnim.SetFloat("MoveAxisX", Mathf.Clamp(AxisX * MotionSpeed, -1.0f, 1.0f));
+        myAnim.SetFloat("MoveAxisY", Mathf.Clamp(AxisY * MotionSpeed, -1.0f, 1.0f));
+
+        myAnim.SetBool("IsMoving", true);
+        if (myData.isRunning)
+        {
+            myAnim.SetBool("IsRunning", true);
+        }
+        else
+        {
+            myAnim.SetBool("IsRunning", false);
+        }
+
         // 목표방향으로 회전 -> 지정거리 이동
-        transform.forward = Rot;
-        transform.Translate(Pos);
+        //transform.forward = Rot;
+        //transform.Translate(Pos);
 
     }
 
@@ -477,23 +559,71 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
     {
         if (transform.position == Pos)
         {
+            myAnim.SetBool("IsMoving", false);
+            myAnim.SetBool("IsRunning", false);
+            myAnim.SetFloat("MoveAxisX", 0);
+            myAnim.SetFloat("MoveAxisY", 0);
             return;
         }
 
+        Vector3 dir = Pos - transform.position;
+
+        // 좌표 이동후 
+       
         transform.position = Pos;
 
         transform.forward = Rot;
+
+
+        // 물체를 잡은 상태에서의 이동 다소 날림처리계획
+        if (isGrab)
+        {
+
+        }
+
 
         myAnim.SetBool("IsMoving", false);
         myAnim.SetBool("IsRunning", false);
         myAnim.SetFloat("MoveAxisX", 0);
         myAnim.SetFloat("MoveAxisY", 0);
 
+
+
         DenialPos = Vector3.zero;
+        // transform.position = curNetPos;
+    }
+
+    /// <summary>
+    /// 대상 지점으로의 이동
+    /// </summary>
+    /// <param name="Pos">목표 지점</param>
+    /// <param name="Rot">캐릭터의 전방</param>
+    /// <param name="e">이동 종료후 작업</param>
+    public void SetPosMove(Vector3 Pos, Vector3 Rot, UnityAction e = null)
+    {
+        // 기준점에서 이동이 감지되지 않앗을때 정지
+        if(ReferencePos == Pos)
+        {
+            // 동일지점 입력시 정지
+            if (transform.position == Pos)
+            {
+                myAnim.SetBool("IsMoving", false);
+                myAnim.SetBool("IsRunning", false);
+                myAnim.SetFloat("MoveAxisX", 0);
+                myAnim.SetFloat("MoveAxisY", 0);
+                return;
+            }
+
+        }
+
+
+        Vector3 dir = Pos - transform.position;
+
+
     }
 
     #endregion
-
+      
 
     public void CurAxisMove()
     {
@@ -959,6 +1089,7 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
         {
             PlayerSM.ChangeState(p_States[pState.Idle]);
             MoveStateCheck();
+            Debug.Log(GetState()+"Test");
         }
     }
 

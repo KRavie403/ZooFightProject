@@ -62,7 +62,7 @@ public class Item_Bomb : Items ,IHitScanner
     protected override void Awake()
     {
         base.Awake();
-        myCode = ItemCode.BananaTrap;
+        myCode = ItemCode.Bomb;
 
         //GetComponent<Rigidbody>().useGravity = false;
     }
