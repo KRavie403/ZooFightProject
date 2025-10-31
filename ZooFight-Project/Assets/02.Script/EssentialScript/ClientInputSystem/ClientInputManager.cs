@@ -35,6 +35,7 @@ public class ClientInputManager : Singleton<ClientInputManager>
         InputKeyStay();
         InputKeyUp();
         MouseAxis();
+
         if(Input.GetMouseButtonDown(0))
         {
             //RangeUse(RangeTypeSetting.keys[0].GetComponent<IRangeEvent>().comp);

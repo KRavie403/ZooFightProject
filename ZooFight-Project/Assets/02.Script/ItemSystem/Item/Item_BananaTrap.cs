@@ -215,7 +215,14 @@ public class Item_BananaTrap : Items , IHitScanner
 
     }
 
+    public override void ItemEnd()
+    {
+        base.ItemEnd();
+        
+        NonActiveObj.SetActive (true);
+        ActivedObj.SetActive (false);
 
+    }
 
 
 

@@ -285,11 +285,8 @@ namespace DataScripts
 
         public SessionId sessionId;
 
-        /// <summary>
-        /// 생성된 게임 내의 플레이어 번호
-        /// -1 = 게임밖 , 0 = 호스트 , 1 ~ N = 플레이어 넘버
-        /// </summary>
-        public int PlayerNum;
+
+
         public void InsertPlayerInfo()
         {
 
@@ -405,17 +402,17 @@ namespace DataScripts
     {
         public SessionId playerSession;
         public ItemCode itemCode;
+  
 
-        public ItemData_Class(SessionId session, ItemCode itemCode) : base(DataTypes.ItemData)
+        public ItemData_Class(ItemCode itemCode) : base(DataTypes.ItemData)
         {
-            this.playerSession = session;
             this.itemCode = itemCode;
         }
 
 
         /// <summary>
         /// 아이템의 목적지
-        /// Zero = 비 이동형 아이템
+        /// Zero = 비 이동형 아이템                  
         /// </summary>
         public Vector3 dirPos;
         public Team curTeam;
@@ -428,7 +425,7 @@ namespace DataScripts
     {
         public Team curTeam;
 
-        public BlockData_Class(Team curTeam) : base(DataTypes.BlockData)
+        public BlockData_Class(Team curTeam) : base(DataTypes.BlockData) 
         {
             this.curTeam = curTeam;
         }
@@ -438,7 +435,9 @@ namespace DataScripts
         public bool isMoving;
         public bool isGrab;
         public Vector3 dirPos;
+
+
     }
 
-    #endregion
+#endregion
 }
