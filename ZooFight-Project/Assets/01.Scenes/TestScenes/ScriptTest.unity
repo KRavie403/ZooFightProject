@@ -455,6 +455,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff0b30bba8536b646baf344473124fd2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  myObjType: 0
+  myObjectNum: -1
   SessionId: 11
   CharacterID: 1111
   myTeam: -1
@@ -481,6 +483,9 @@ MonoBehaviour:
   AxisX: 0
   AxisY: 0
   DenialPos: {x: 0, y: 0, z: 0}
+  curNetPos: {x: 0, y: 0, z: 0}
+  curNetRot: {x: 0, y: 0, z: 0}
+  ReferencePos: {x: 0, y: 0, z: 0}
   TargetCamera: {fileID: 296081544}
   groundMask:
     serializedVersion: 2
@@ -556,6 +561,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6e77b19ff9c5ef45803fb75be35495c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  myType: 0
+  myObjectId: 0
   Value1: 0
   Value2: 0
   Value3: 0
@@ -1350,6 +1357,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3aea0bd8f77427945882d4ead9e693cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  myType: 0
+  myObjectId: 0
   Value1: 1
   Value2: 5
   Value3: 0
@@ -1420,6 +1429,7 @@ MonoBehaviour:
   myTeam: -1
   myBlockObj: {fileID: 507406855}
   curDir: {x: 0, y: 0}
+  BlockId: -1
   RedBlock: {fileID: 0}
   BlueBlock: {fileID: 0}
   DefaultBlock: []
@@ -6260,6 +6270,7 @@ MonoBehaviour:
   myTeam: -1
   myBlockObj: {fileID: 1479730495}
   curDir: {x: 0, y: 0}
+  BlockId: -1
   RedBlock: {fileID: 0}
   BlueBlock: {fileID: 0}
   DefaultBlock: []
@@ -6542,6 +6553,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 80fff4a570984a2499dfd01340133b53, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  myType: 0
+  myObjectId: 0
   Value1: 0
   Value2: 0
   Value3: 3
@@ -6561,6 +6574,7 @@ MonoBehaviour:
   NonActiveObj: {fileID: 0}
   ActivedObj: {fileID: 0}
   myHitScanner: {fileID: 0}
+  myTarget: []
 --- !u!4 &1518868857
 Transform:
   m_ObjectHideFlags: 0
@@ -6976,6 +6990,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4d7c31e2514dd1a4293160fced13f454, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  myType: 0
+  myObjectId: 0
   Value1: 0.2
   Value2: 30
   Value3: 2
@@ -6994,8 +7010,8 @@ MonoBehaviour:
   NonActiveObj: {fileID: 0}
   ActivedObj: {fileID: 0}
   myEffect: {fileID: 0}
-  myTarget: []
   myHitScanner: {fileID: 0}
+  myTarget: []
 --- !u!1 &1576079596
 GameObject:
   m_ObjectHideFlags: 0
@@ -7237,6 +7253,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ea9602fd479ef014ea60a27d74de4503, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  myType: 0
+  myObjectId: 0
   Value1: 10
   Value2: 0
   Value3: 0
@@ -7979,7 +7997,6 @@ GameObject:
   - component: {fileID: 1881647177}
   - component: {fileID: 1881647176}
   - component: {fileID: 1881647175}
-  - component: {fileID: 1881647178}
   m_Layer: 0
   m_Name: NewPlayer
   m_TagString: Untagged
@@ -8067,6 +8084,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff0b30bba8536b646baf344473124fd2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  myObjType: 0
+  myObjectNum: -1
   SessionId: 11
   CharacterID: 1111
   myTeam: 1
@@ -8093,6 +8112,9 @@ MonoBehaviour:
   AxisX: 0
   AxisY: 0
   DenialPos: {x: 0, y: 0, z: 0}
+  curNetPos: {x: 0, y: 0, z: 0}
+  curNetRot: {x: 0, y: 0, z: 0}
+  ReferencePos: {x: 0, y: 0, z: 0}
   TargetCamera: {fileID: 1924296909}
   groundMask:
     serializedVersion: 2
@@ -8106,29 +8128,6 @@ MonoBehaviour:
   isCrashed: 0
   TestCode: 0
   RecoveryTime: 2
---- !u!136 &1881647178
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1881647173}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.2
-  m_Height: 0.8
-  m_Direction: 1
-  m_Center: {x: 0, y: 0.4, z: 0}
 --- !u!1 &1900643102
 GameObject:
   m_ObjectHideFlags: 0
@@ -8370,11 +8369,13 @@ MonoBehaviour:
   PollingRate: 30
   currentPlayer: {fileID: 1881647177}
   CharacterID: -1
-  IsGameEnd: 0
   VictoryTeam: 0
   MaxTeamMember: 3
   RedTeamId: 
   BlueTeamId: 
+  RedTeamid: 
+  BlueTeamid: 
+  Players: []
   RedTeamBlock: {fileID: 1949466877}
   BlueTeamBlock: {fileID: 1131381750}
 --- !u!4 &1944853664
@@ -8566,6 +8567,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8bbe039b7a76eeb46a9ea2a50576804e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  myType: 1
+  myObjectId: -1
   Value1: 0
   Value2: 0
   Value3: 0

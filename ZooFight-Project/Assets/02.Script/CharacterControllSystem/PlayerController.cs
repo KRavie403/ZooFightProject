@@ -6,6 +6,8 @@ using UnityEngine.Events;
 using DataScripts;
 using Protocol;
 using BackEnd;
+using Unity.Mathematics;
+using static UnityEditor.PlayerSettings;
 
 public class PlayerController : MovementController, IHitScanTarget , IHitScanner , IObjectId
 {
@@ -58,20 +60,17 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
 
     [Range(-1.0f, 1.0f)]
     public float AxisX, AxisY = 0;
-    public Vector3 DenialPos = Vector3.zero;
+
     public Vector3 Dir => Vector3.right * AxisX + Vector3.forward * AxisY;
     public Vector3 curNetPos = Vector3.zero;
     public Vector3 curNetRot = Vector3.zero;
 
-    /// <summary>
-    /// -1 프레임의 캐릭터의 위치 = 기준점으로 사용
-    /// </summary>
-    public Vector3 ReferencePos = Vector3.zero;
+    public Vector2 curNetAxis = Vector2.zero;
+    public float curNetDist = 0.0f;
+
 
     public CharacterCamera TargetCamera;
     public LayerMask groundMask;
-    Vector2 SetNetPos = Vector2.zero;
-
 
     public GrabPoint grabPoint;
     public Transform AttackPoint;
@@ -169,9 +168,6 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
         get { return myData.isGrab; }
         set { myData.isGrab = value;}
     }
-
-    Vector2 acceleration = Vector2.zero;
-
 
     #region 히트스캔코드
 
@@ -461,75 +457,87 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
 
     public void Move()
     {
-        if (isOwner)
+        if (!isForceMoving)
         {
-            PlayerMove(new Vector3(AxisX, 0, AxisY), transform.forward, false);
-        }
-        else
-        {
-            PlayerMove(curNetPos, curNetRot, true);
+            if (isOwner)
+            {
+                PlayerMove(new Vector2(AxisX, AxisY), transform.forward, Time.deltaTime);
+            }
+            else
+            {
+                PlayerMove(curNetPos, curNetRot,curNetDist);
+            }
         }
               
     }
 
-    /// <summary>
-    /// 플레이어의 이동을 진행 하는 함수
-    /// </summary>
-    /// <param name="Pos">목표 방향 or 좌표</param>
-    /// <param name="Rot">오브젝트의 전방 설정</param
-    /// <param name="isStatic">동적,정적이동을 결정</param>
-    /// <param name="e"></param>
-    public void PlayerMove(Vector3 Pos, Vector3 Rot, bool isStatic, UnityAction e = null)
+    public Vector3 GetMoveVector()
     {
-
-        if (isStatic)
-        {
-            // 패킷데이터를 사용한 이동
-            StaticMove(Pos, Rot,e);
-        }
-        else
-        {
-            // 키보드 입력값을 사용한 이동
-            DynamicMove(Pos, Rot,e);
-        }
+        return Vector3.zero;
     }
 
     /// <summary>
-    /// 동적 이동을 진행하는 함수
+    /// 플레이어의 이동동작
     /// </summary>
-    /// <param name="Pos">목표 방향</param>
-    /// <param name="Rot">오브젝트의 전방설정</param>
-    /// <param name="e">이동 종료후 작업</param>
-    public void DynamicMove(Vector3 Pos, Vector3 Rot, UnityAction e = null)
+    /// <param name="Axis">플레이어의 전방기준 이동방향</param>
+    /// <param name="rot">플레이어의 전방벡터</param>
+    /// <param name="dist">플레이어의 이동거리</param>
+    /// <param name="e"></param>
+    public void PlayerMove(Vector2 Axis, Vector3 rot, float dist, UnityAction e = null)
     {
+        BasicMove(Axis, rot, dist);
 
-        if(Pos == Vector3.zero)
+    }
+
+
+    public Quaternion GetCharacterRot()
+    {
+        return transform.rotation;
+    }
+
+    public void BasicMove(Vector2 Axis, Vector3 rot, float dist)
+    {
+        // 이동거리가 0일때 모션정지
+        if (dist == 0)
         {
-            myAnim.SetBool("IsMoving", false);
-            myAnim.SetBool("IsRunning", false);
-            myAnim.SetFloat("MoveAxisX", 0);
-            myAnim.SetFloat("MoveAxisY", 0);
+            MoveMotionStop();
+            return;
+        }
+        // Axis가 없을때 정지
+        if (Axis == Vector2.zero)
+        {
+            MoveMotionStop();
             return;
         }
 
 
-        Vector3 Direction = Vector3.Normalize(new Vector3(AxisX, 0, AxisY));
-        Direction = Vector3.Normalize(Pos);
+        Vector3 Direction = new Vector3(Axis.x, 0, Axis.y);
+        Direction = Vector3.Normalize(Direction);
 
-        float Speed = myData.isRunning ? MoveSpeed * RunSpeedRate : MoveSpeed;
-
-        // 프로토콜 전송용 벡터
-        Vector3 Dir = MakeDir(AxisX, AxisY);
-        //transform.Translate(MoveSpeed * time.deltaTime * Direction, Space.Self);
-        Vector3 dirPos = transform.position + Dir * Speed * Time.deltaTime;
-        transform.position += MakeDir(AxisX, AxisY) * Speed * Time.deltaTime;
+        transform.position += MakeDir(AxisX, AxisY) * dist;
 
         if (isGrab)
         {
             Vector2 BlockDir = Vector2.zero;
             BlockDir = grabPoint.curGrabBlock.DistSelect(Direction, transform.forward);
             grabPoint.curGrabBlock.SetcurDir(BlockDir, transform.forward);
+
+
+            // 그냥 블록
+            Vector3 pos = new Vector3(BlockDir.x, 0, BlockDir.y);
+            Vector3 dir = new Vector3(0, 0, 0);
+            //BlockMoveMessage blockMoveMessage = new BlockMoveMessage(0, 0, pos, dir);
+            //BackEndMatchManager.GetInstance().SendDataToInGame<BlockMoveMessage>(blockMoveMessage);
+
+            // 팀 블록
+            var sessionId = Backend.Match.GetMySessionId();
+            int teamNumber = BackEndMatchManager.GetInstance().GetTeamInfo(sessionId);
+            Team playerTeam = BackEndMatchManager.GetInstance().ConvertTeamNumberToEnum(teamNumber);
+            BlockData_Class blockDataMessage = new BlockData_Class(playerTeam);
+            blockDataMessage.dirPos = pos;
+            BackEndMatchManager.GetInstance().SendDataToInGame<BlockData_Class>(blockDataMessage);
         }
+
 
         myAnim.SetFloat("MoveAxisX", Mathf.Clamp(AxisX * MotionSpeed, -1.0f, 1.0f));
         myAnim.SetFloat("MoveAxisY", Mathf.Clamp(AxisY * MotionSpeed, -1.0f, 1.0f));
@@ -544,83 +552,29 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
             myAnim.SetBool("IsRunning", false);
         }
 
-        // 목표방향으로 회전 -> 지정거리 이동
-        //transform.forward = Rot;
-        //transform.Translate(Pos);
+    }
+     
+    public void BasicMove()
+    {
+        float Speed = myData.isRunning ? MoveSpeed * RunSpeedRate : MoveSpeed;
+        
+        BasicMove(curNetAxis, curNetRot, Time.deltaTime * Speed);
 
     }
 
-    /// <summary>
-    /// 정적 이동을 진행하는 함수
-    /// </summary>
-    /// <param name="Pos">목표 좌표</param>
-    /// <param name="Rot">오브젝트의 전방 설정</param>
-    /// <param name="e">이동 종료후 작업</param>
-    public void StaticMove(Vector3 Pos, Vector3 Rot, UnityAction e = null)
+    public void MoveMotionStop()
     {
-        if (transform.position == Pos)
-        {
-            myAnim.SetBool("IsMoving", false);
-            myAnim.SetBool("IsRunning", false);
-            myAnim.SetFloat("MoveAxisX", 0);
-            myAnim.SetFloat("MoveAxisY", 0);
-            return;
-        }
-
-        Vector3 dir = Pos - transform.position;
-
-        // 좌표 이동후 
-       
-        transform.position = Pos;
-
-        transform.forward = Rot;
-
-
-        // 물체를 잡은 상태에서의 이동 다소 날림처리계획
-        if (isGrab)
-        {
-
-        }
-
-
         myAnim.SetBool("IsMoving", false);
         myAnim.SetBool("IsRunning", false);
         myAnim.SetFloat("MoveAxisX", 0);
         myAnim.SetFloat("MoveAxisY", 0);
-
-
-
-        DenialPos = Vector3.zero;
-        // transform.position = curNetPos;
     }
 
-    /// <summary>
-    /// 대상 지점으로의 이동
-    /// </summary>
-    /// <param name="Pos">목표 지점</param>
-    /// <param name="Rot">캐릭터의 전방</param>
-    /// <param name="e">이동 종료후 작업</param>
-    public void SetPosMove(Vector3 Pos, Vector3 Rot, UnityAction e = null)
+    public void SendPlayerMove()
     {
-        // 기준점에서 이동이 감지되지 않앗을때 정지
-        if(ReferencePos == Pos)
-        {
-            // 동일지점 입력시 정지
-            if (transform.position == Pos)
-            {
-                myAnim.SetBool("IsMoving", false);
-                myAnim.SetBool("IsRunning", false);
-                myAnim.SetFloat("MoveAxisX", 0);
-                myAnim.SetFloat("MoveAxisY", 0);
-                return;
-            }
-
-        }
-
-
-        Vector3 dir = Pos - transform.position;
-
-
+        Vector2 Axis = new Vector2(AxisX, AxisY);
+        Vector3 rot = transform.forward;
+        float dist = Time.deltaTime;
     }
 
     #endregion
@@ -647,10 +601,7 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
         // 입력 이동값이 0일때 아무것도안하기
         if (AxisX == 0 && AxisY == 0)
         {
-            myAnim.SetBool("IsMoving", false);
-            myAnim.SetBool("IsRunning", false); 
-            myAnim.SetFloat("MoveAxisX", 0);
-            myAnim.SetFloat("MoveAxisY", 0);
+            MoveMotionStop();
             return;
         }
 
@@ -715,48 +666,10 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
         }
         else
         {
-            transform.position = DenialPos;
             myAnim.SetBool("IsMoving", false);
             myAnim.SetBool("IsRunning", false);
-            DenialPos = Vector3.zero;
         }
     }
-
-    /// <summary>
-    /// 패킷의 명령전달로 인한 이동 함수
-    /// </summary>
-    /// <param name="pos"></param>
-    public void NetworkMove(Vector3 pos)
-    {
-        curNetPos = pos;
-        // 현재위치 입력시
-        if(pos == transform.position)
-        {
-            //정지상태 모션으로 전환
-            return;
-        }
-        
-        //이동상태 모션으로 전환 & 상태 이동상태로 변환
-
-
-
-
-
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="Dir"></param>
-    public void SetPosition(Vector3 Dir)
-    {
-
-    }
-    public void SetPosition(float x, float y, float z)
-    {
-        SetPosition(new Vector3(x,y,z)); 
-    }
-
 
     /// <summary>
     /// 캐릭터를 특정 방향(dir)으로 일정 거리(dist)만큼 speed 만큼의 속도로 미끄러지게 하는 함수
@@ -810,7 +723,7 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
         {
             duringTime += Time.deltaTime;
             //CharacterMove(false, dir.x, dir.z);
-            transform.position += Dir * Speed * Time.deltaTime;
+            transform.position += newDir * Speed * Time.deltaTime;
             yield return null;
         }
         
@@ -899,41 +812,6 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
     }
 
 
-    /// <summary>
-    /// 패킷 데이터용 이동 함수
-    /// </summary>
-    /// <param name="dir">목표 좌표</param>
-    public void MoveToPos(Vector3 dir)
-    {
-        
-
-        // 현재 위치 그대로 이동하면 미동작
-        if (dir == transform.position) return;
-
-        Vector3 Axis =  Quaternion.Euler(-transform.rotation.eulerAngles) * dir;
-
-        float Speed = myData.isRunning ? MoveSpeed * RunSpeedRate : MoveSpeed;
-
-        float curSpeed = Mathf.Sqrt(Axis.x * Axis.x + Axis.z * Axis.z);
-
-        transform.position = dir;
-        // 30 틱 이상의격차가 나면 이동모션없이 이동시키기
-        if (curSpeed > 30 * Speed / Gamemanager.Inst.PollingRate) return;
-
-        myAnim.SetFloat("MoveAxisX", Mathf.Clamp(Axis.x * MotionSpeed, -1.0f, 1.0f));
-        myAnim.SetFloat("MoveAxisY", Mathf.Clamp(Axis.y * MotionSpeed, -1.0f, 1.0f));
-        myAnim.SetBool("IsMoving", true);
-        if (myData.isRunning)
-        {
-            myAnim.SetBool("IsRunning", true);
-        }
-        else
-        {
-            myAnim.SetBool("IsRunning", false);
-        }
-    }
-
-
 
     //public void SetPosition(Vector3 pos)
     //{
@@ -972,6 +850,11 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
     public bool GetisJump()
     {
         return myData.isJump;
+    }
+
+    public void JumpEnd()
+    {
+        myData.isJump = false;
     }
 
     // 입력받은 타겟을 대상으로 입력받은 거리만큼 밀려나기

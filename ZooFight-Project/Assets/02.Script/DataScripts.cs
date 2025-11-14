@@ -113,11 +113,15 @@ namespace DataScripts
 
 
 
-        // 캐릭터의 목표지점
-        public Vector3 dirPos;
-        public bool isDynamic;
-        // 캐릭터의 목표회전값
-        public quaternion dirRot;
+        public Vector3 curPos;
+        public Vector3 curRot;
+
+
+        public void SetDir(Vector3 pos, Vector3 rot, bool isStatic = true)
+        {
+            this.curPos = pos;
+            this.curRot = rot;
+        }
 
     }
 
@@ -340,11 +344,10 @@ namespace DataScripts
 
         public CharacterBasicSetting BasicData;
 
-
-
         public int ModelId;
 
         public PlayerController myController;
+
         // 캐릭터의 상태변화값
         public PlayerController.pState dirState;
 
@@ -374,7 +377,6 @@ namespace DataScripts
         public bool isAbleMove;
         public bool isCrashed;
         public bool isKeyReverse;
-        public bool isDenial;
 
         public ItemCode curItem;
 
@@ -383,17 +385,14 @@ namespace DataScripts
         public bool isJump;
 
 
+        public Vector3 curPos;
+        public Vector3 curRot;
 
-        // 캐릭터의 목표지점
-        public Vector3 dirPos;
-        public bool isStatic;
-        // 캐릭터의 목표회전값
-        public Vector3 dirRot;
 
         public void SetDir(Vector3 pos, Vector3 rot, bool isStatic = true)
         {
-            this.dirPos = pos;
-            this.dirRot = rot;
+            this.curPos = pos;
+            this.curRot = rot;
         }
 
     }

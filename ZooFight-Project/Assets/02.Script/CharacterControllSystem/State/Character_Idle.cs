@@ -15,7 +15,7 @@ public class Character_Idle : BaseState
     public override void Initate()
     {
         base.Initate();
-        ableFuncs.Add(PlayerController.pFunc.Move, player.CurAxisMove);
+        ableFuncs.Add(PlayerController.pFunc.Move, player.Move);
         ableFuncs.Add(PlayerController.pFunc.Jump, player.Jump);
         ableFuncs.Add(PlayerController.pFunc.ItemReady, player.ItemReady);
 
