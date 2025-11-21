@@ -6,7 +6,10 @@ using UnityEngine.SceneManagement;
 
 public class SettingsController : Singleton<SettingsController>
 {
+    [Header("Root Settings UI")]
     public GameObject Settings;
+
+    [Header("Canvas Groups")]
     public CanvasGroup SettingGroup;
     public CanvasGroup DisplayGroup;
     public CanvasGroup AudioGroup;
@@ -15,13 +18,21 @@ public class SettingsController : Singleton<SettingsController>
     private bool _isESC = true;
     private MenuUI menuUI;
 
+    private Dictionary<string, CanvasGroup> _tabs;      // 카테고리 관리용
+
     private void Start()
     {
         if (Settings != null)
-        {
             Settings.SetActive(false);
-        }
+
         CanvasGroupOff(SettingGroup);
+
+        _tabs = new Dictionary<string, CanvasGroup>
+        {
+            { "Display", DisplayGroup },
+            { "Audio", AudioGroup },
+            { "Control", ControlGroup }
+        };
 
         menuUI = FindObjectOfType<MenuUI>();
     }
@@ -31,7 +42,10 @@ public class SettingsController : Singleton<SettingsController>
         ESC();
     }
 
-    public void ClickSetting()
+    // ---------------------------
+    // ▼ SETTINGS OPEN / CLOSE
+    // ---------------------------
+    public void OpenSettings()
     {
         if (Settings != null)
         {
@@ -94,7 +108,7 @@ public class SettingsController : Singleton<SettingsController>
                 if (_isESC)
                 {
                     _isESC = !_isESC;
-                    ClickSetting();
+                    OpenSettings();
                 }
                 else
                 {

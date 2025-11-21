@@ -94,7 +94,7 @@ public partial class BackEndMatchManager : MonoBehaviour
     void Start()
     {
 
-        Gamemanager.OnGameReconnect += OnGameReconnect; //이거 게임매니저에 추가해야할것.
+        Gamemanager.OnGameReconnect += OnGameReconnect;
         // 핸들러 설정
         Debug.Log("BackEndMatchManager 스크립트");
         MatchMakingHandler();

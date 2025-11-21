@@ -110,7 +110,7 @@ public partial class MainMenuManager : MonoBehaviour
     {
         if (SettingsController.Inst != null)
         {
-            SettingsController.Inst.ClickSetting();
+            SettingsController.Inst.OpenSettings();
         }
 #if DEBUG
         else
