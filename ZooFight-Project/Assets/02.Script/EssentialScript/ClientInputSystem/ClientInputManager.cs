@@ -17,7 +17,11 @@ public class ClientInputManager : Singleton<ClientInputManager>
     // Start is called before the first frame update
     void Start()
     {
-        
+        if (InputMapper == null)
+            InputMapper = FindObjectOfType<KeyInputMapper>();
+
+        if (InputSettingDecoder == null)
+            InputSettingDecoder = FindObjectOfType<KeySettingDecoder>();
     }
 
     bool isKeyDown;
@@ -25,11 +29,11 @@ public class ClientInputManager : Singleton<ClientInputManager>
     // Update is called once per frame
     void Update()
     {
-        if (!BackEndMatchManager.GetInstance().isServerConnected)
-        {
-            // 입력 차단
-            return;
-        }
+        //if (!BackEndMatchManager.GetInstance().isServerConnected)
+        //{
+        //    // 입력 차단
+        //    return;
+        //}
 
         InputKeyDown();
         InputKeyStay();
