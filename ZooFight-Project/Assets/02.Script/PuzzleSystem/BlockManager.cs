@@ -159,8 +159,8 @@ public class BlockManager : MonoBehaviour
 
             Logger.Log($"블록 생성 - 번호: {block.blockNum}, 타입: {block.type}, 위치: {blockPosition}");
         }
+        //Combine();
 
-        Combine();
         //// Material별 Combine 준비
         //Dictionary<Material, List<CombineInstance>> materialToCombine = new();
 
@@ -246,7 +246,7 @@ public class BlockManager : MonoBehaviour
         }
 
         // MeshFilter 컴포넌트 가져오기
-        MeshFilter meshFilter = transform.GetComponent<MeshFilter>();
+        MeshFilter meshFilter = GetComponent<MeshFilter>() ?? gameObject.AddComponent<MeshFilter>();
         // Mesh 생성
         meshFilter.mesh = new Mesh();
 
@@ -275,9 +275,12 @@ public class BlockManager : MonoBehaviour
         // 타입에 따라 프리팹 리턴 (직접 조정)
         if (type == 0) return redBlock;
         if (type == 1) return blueBlock;
-        if (type >= 2 && type <= 4) return block2x1[type - 2];
-        if (type >= 5 && type <= 7) return block1x2[type - 5];
-        else return block1x1[type - 8];
+        //if (type >= 2 && type <= 4) return block2x1[type - 2];
+        //if (type >= 5 && type <= 7) return block1x2[type - 5];
+        //else return block1x1[type - 8];
+        if (type >= 2 && type <= 4) return block2x1[2];
+        if (type >= 5 && type <= 7) return block1x2[1];
+        else return block1x1[1];
     }
 
     private void PlaceTeamBlocks()
