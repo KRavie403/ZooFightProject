@@ -172,7 +172,7 @@ public class Items : ItemProperty , IItems , IEffect ,IObjectId
 
             yield return null;
         }
-
+        // 아이템 사용동작의 최근시점
         Debug.Log($"{gameObject.name} Activate");
         // 상속받는 아이템이 사용중 동작 작성
         // 

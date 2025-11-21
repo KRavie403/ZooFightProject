@@ -113,11 +113,15 @@ namespace DataScripts
 
 
 
-        // 캐릭터의 목표지점
-        public Vector3 dirPos;
-        public bool isDynamic;
-        // 캐릭터의 목표회전값
-        public quaternion dirRot;
+        public Vector3 curPos;
+        public Vector3 curRot;
+
+
+        public void SetDir(Vector3 pos, Vector3 rot, bool isStatic = true)
+        {
+            this.curPos = pos;
+            this.curRot = rot;
+        }
 
     }
 
@@ -285,11 +289,8 @@ namespace DataScripts
 
         public SessionId sessionId;
 
-        /// <summary>
-        /// 생성된 게임 내의 플레이어 번호
-        /// -1 = 게임밖 , 0 = 호스트 , 1 ~ N = 플레이어 넘버
-        /// </summary>
-        public int PlayerNum;
+
+
         public void InsertPlayerInfo()
         {
 
@@ -343,11 +344,10 @@ namespace DataScripts
 
         public CharacterBasicSetting BasicData;
 
-
-
         public int ModelId;
 
         public PlayerController myController;
+
         // 캐릭터의 상태변화값
         public PlayerController.pState dirState;
 
@@ -377,7 +377,6 @@ namespace DataScripts
         public bool isAbleMove;
         public bool isCrashed;
         public bool isKeyReverse;
-        public bool isDenial;
 
         public ItemCode curItem;
 
@@ -386,17 +385,14 @@ namespace DataScripts
         public bool isJump;
 
 
+        public Vector3 curPos;
+        public Vector3 curRot;
 
-        // 캐릭터의 목표지점
-        public Vector3 dirPos;
-        public bool isStatic;
-        // 캐릭터의 목표회전값
-        public Vector3 dirRot;
 
         public void SetDir(Vector3 pos, Vector3 rot, bool isStatic = true)
         {
-            this.dirPos = pos;
-            this.dirRot = rot;
+            this.curPos = pos;
+            this.curRot = rot;
         }
 
     }
@@ -405,17 +401,17 @@ namespace DataScripts
     {
         public SessionId playerSession;
         public ItemCode itemCode;
+  
 
-        public ItemData_Class(SessionId session, ItemCode itemCode) : base(DataTypes.ItemData)
+        public ItemData_Class(ItemCode itemCode) : base(DataTypes.ItemData)
         {
-            this.playerSession = session;
             this.itemCode = itemCode;
         }
 
 
         /// <summary>
         /// 아이템의 목적지
-        /// Zero = 비 이동형 아이템
+        /// Zero = 비 이동형 아이템                  
         /// </summary>
         public Vector3 dirPos;
         public Team curTeam;
@@ -428,7 +424,7 @@ namespace DataScripts
     {
         public Team curTeam;
 
-        public BlockData_Class(Team curTeam) : base(DataTypes.BlockData)
+        public BlockData_Class(Team curTeam) : base(DataTypes.BlockData) 
         {
             this.curTeam = curTeam;
         }
@@ -438,7 +434,9 @@ namespace DataScripts
         public bool isMoving;
         public bool isGrab;
         public Vector3 dirPos;
+
+
     }
 
-    #endregion
+#endregion
 }

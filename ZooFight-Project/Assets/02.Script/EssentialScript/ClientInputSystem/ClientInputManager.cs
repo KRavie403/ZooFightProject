@@ -39,6 +39,7 @@ public class ClientInputManager : Singleton<ClientInputManager>
         InputKeyStay();
         InputKeyUp();
         MouseAxis();
+
         if(Input.GetMouseButtonDown(0))
         {
             //RangeUse(RangeTypeSetting.keys[0].GetComponent<IRangeEvent>().comp);
@@ -135,37 +136,43 @@ public class ClientInputManager : Singleton<ClientInputManager>
 
     public void InputKeyStay()
     {
-
+        // 출발가속 미적용으로 변경
         if (Input.GetKey(KeySetting.keys[KeyAction.Forward]))
         {
             Debug.Log("Stay");
-            Gamemanager.Inst.currentPlayer.AxisY = Gamemanager.Inst.currentPlayer.isKeyReverse ?
-                Gamemanager.Inst.currentPlayer.AxisY - Time.deltaTime :
-                Gamemanager.Inst.currentPlayer.AxisY + Time.deltaTime;
+            Gamemanager.Inst.currentPlayer.AxisY = Gamemanager.Inst.currentPlayer.isKeyReverse ? -1 : +1;
+
+            // 출발가속 적용시 코드
+            //Gamemanager.Inst.currentPlayer.AxisY - Time.deltaTime :
+            //Gamemanager.Inst.currentPlayer.AxisY + Time.deltaTime;
 
             //Gamemanager.Inst.currentPlayer.AxisY += Time.deltaTime;
         }
         if (Input.GetKey(KeySetting.keys[KeyAction.Backward]))
         {
-            Gamemanager.Inst.currentPlayer.AxisY = Gamemanager.Inst.currentPlayer.isKeyReverse ?
-                Gamemanager.Inst.currentPlayer.AxisY + Time.deltaTime :
-                Gamemanager.Inst.currentPlayer.AxisY - Time.deltaTime;
+            Gamemanager.Inst.currentPlayer.AxisY = Gamemanager.Inst.currentPlayer.isKeyReverse ? +1 : -1;
+            // 출발가속 적용시 코드
+            //Gamemanager.Inst.currentPlayer.AxisY + Time.deltaTime :
+            //Gamemanager.Inst.currentPlayer.AxisY - Time.deltaTime;
 
             //Gamemanager.Inst.currentPlayer.AxisY -= Time.deltaTime;
         }
         if (Input.GetKey(KeySetting.keys[KeyAction.Left]))
         {
-            Gamemanager.Inst.currentPlayer.AxisX = Gamemanager.Inst.currentPlayer.isKeyReverse ?
-                Gamemanager.Inst.currentPlayer.AxisX + Time.deltaTime :
-                Gamemanager.Inst.currentPlayer.AxisX - Time.deltaTime;
+            Gamemanager.Inst.currentPlayer.AxisX = Gamemanager.Inst.currentPlayer.isKeyReverse ? +1 : -1;
+            // 출발가속 적용시 코드
+            //Gamemanager.Inst.currentPlayer.AxisX + Time.deltaTime :
+            //Gamemanager.Inst.currentPlayer.AxisX - Time.deltaTime;
 
             //Gamemanager.Inst.currentPlayer.AxisX -= Time.deltaTime;
         }
         if (Input.GetKey(KeySetting.keys[KeyAction.Right]))
         {
-            Gamemanager.Inst.currentPlayer.AxisX = Gamemanager.Inst.currentPlayer.isKeyReverse ?
-                Gamemanager.Inst.currentPlayer.AxisX - Time.deltaTime :
-                Gamemanager.Inst.currentPlayer.AxisX + Time.deltaTime;
+            Gamemanager.Inst.currentPlayer.AxisX = Gamemanager.Inst.currentPlayer.isKeyReverse ? -1 : +1;
+
+            // 출발가속 적용시 코드
+            //Gamemanager.Inst.currentPlayer.AxisX - Time.deltaTime :
+            //Gamemanager.Inst.currentPlayer.AxisX + Time.deltaTime;
 
             //Gamemanager.Inst.currentPlayer.AxisX += Time.deltaTime;
         }

@@ -44,7 +44,7 @@ public class Character_ItemUse : BaseState
             var sessionId = Backend.Match.GetMySessionId();
             var teamNumber = BackEndMatchManager.GetInstance().GetTeamInfo(sessionId);
 
-            ItemData_Class message = new ItemData_Class(sessionId, item.myCode);
+            ItemData_Class message = new ItemData_Class(item.myCode);
             BackEndMatchManager.GetInstance().SendDataToInGame<ItemData_Class>(message);
 
             message.curTeam = BackEndMatchManager.GetInstance().ConvertTeamNumberToEnum(teamNumber);
