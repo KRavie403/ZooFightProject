@@ -15,7 +15,7 @@ public class Character_Move : BaseState
     {
 
         base.Initate();
-        ableFuncs.Add(PlayerController.pFunc.Move, player.CurAxisMove);
+        ableFuncs.Add(PlayerController.pFunc.Move, player.Move);
         ableFuncs.Add(PlayerController.pFunc.Jump, player.Jump);
         ableFuncs.Add(PlayerController.pFunc.ItemReady, player.ItemReady);
 
@@ -32,7 +32,7 @@ public class Character_Move : BaseState
     public override void Exit()
     {
         base.Exit();
-
+        player.MoveStateCheck();
     }
 
     public override void LogicUpdate()

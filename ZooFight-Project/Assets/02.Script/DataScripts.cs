@@ -220,7 +220,7 @@ namespace DataScripts
 
     public class GameData_Class : BasicData
     {
-        public PlayerInfo playerInfo;
+
 
         public SessionId SessionId;
         public GameData_Class(SessionId SessionId) : base(DataTypes.GameData)
@@ -230,14 +230,11 @@ namespace DataScripts
 
         public int GameId;
 
-        public CharacterData[] PlayerInfo;
-        public int myPlayerNum;
+        public PlayerProfiles_Class[] PlayerInfo;
 
 
         public bool isHost;
         public float PlayTIme;
-
-
 
     }
 
@@ -251,11 +248,25 @@ namespace DataScripts
     /// </summary>
     public class PlayerProfiles_Class : BasicData
     {
-        public PlayerInfo_Class myPlayer;
+        
+        public SessionId sessionId;
 
+        public PlayerProfiles_Class(SessionId sessionid) : base(DataTypes.PlayerData)
+        {
+            sessionId = sessionid;
+        }
 
         bool isGameStart = false;
 
+        public string PlayerName;
+        public string PlayerIP;
+
+
+        public int ModelId;
+
+        public bool isSeverConnect;
+
+        public int PlayerId;
 
         public CharacterData_Class mycharacter
         {
@@ -272,60 +283,42 @@ namespace DataScripts
             }
         }
 
-        public PlayerProfiles_Class(PlayerInfo_Class playerInfo) : base(DataTypes.PlayerData)
-        {
-            this.myPlayer = playerInfo;
-        }
+
     }
 
-
-    public class PlayerInfo_Class
-    {
-        public string PlayerName;
-        public int PlayerId;
-
-        public string PlayerIP;
-        public bool isSeverConnect;
-
-        public SessionId sessionId;
-
-
-
-        public void InsertPlayerInfo()
-        {
-
-        }
-    }
 
     /// <summary>
     /// 플레이어의 위치, 이동, 회전 등 무브먼트에 관한 정보를 담는 클래스
     /// 
     /// </summary>
-    public class CharacterBasicSetting : BasicData
+    public class CharacterMovementData : BasicData
     {
         public CharacterData_Class myPlayer;
 
-        // 가지고있는 아이템
-        public ItemCode curItem;
-
-
-        public CharacterBasicSetting(CharacterBasicSetting setData) : base(DataTypes.PlayerBasicData)
+        public CharacterMovementData(CharacterData_Class setData) : base(DataTypes.PlayerBasicData)
         {
-
+            myPlayer = setData;
         }
+
+
+        #region 이동 위치관련 데이터
+        public Vector3 curPos;
+        public Vector3 curRot;
+
+        public void SetDir(Vector3 pos, Vector3 rot, bool isStatic = true)
+        {
+            this.curPos = pos;
+            this.curRot = rot;
+        }
+
+        public Vector3 curAxis;
+        public Vector3 curForward;
+        public float curDist;
+
+        #endregion
+
     }
 
-    /// <summary>
-    /// 플레이어의 스테이트머신에서의 상태변화 및 각종 상태에 관한 정보를 담는 클래스
-    /// </summary>
-    public class CharacterState : BasicData
-    {
-
-        public CharacterState() : base(DataTypes.PlayerState)
-        {
-
-        }
-    }
 
     /// <summary>
     /// 게임 내부에서 호스트와 교환할 정보
@@ -334,24 +327,21 @@ namespace DataScripts
     public class CharacterData_Class : BasicData
     {
 
-        public CharacterData_Class(CharacterBasicSetting basicData) : base(DataTypes.CharacterData)
+        public CharacterData_Class(CharacterMovementData basicData) : base(DataTypes.CharacterData)
         {
 
             BasicData = basicData;
 
         }
 
-
-        public CharacterBasicSetting BasicData;
-
-        public int ModelId;
+        public CharacterMovementData BasicData;
 
         public PlayerController myController;
 
         // 캐릭터의 상태변화값
-        public PlayerController.pState dirState;
 
 
+        #region 스테이터스 데이터
         float curHp;
         public float SetHp(float hp)
         {
@@ -366,48 +356,45 @@ namespace DataScripts
             return curStamina;
         }
 
-        public float CurSp;
-        public bool isShield;
-
         public BlockObject myBlock;
-        public bool isGrab;
-
-        public bool isGameStart;
-        public bool isSuperArmor;
-        public bool isAbleMove;
-        public bool isCrashed;
-        public bool isKeyReverse;
 
         public ItemCode curItem;
 
+        #endregion
+
+        #region 애매한 데이터
+
+
+
+        #endregion
+
+
+        #region 삭제할 데이터
+
+        public PlayerController.pState dirState;
+        public bool isKeyReverse;
+        public bool isGameStart;
+        public bool isShield;
+        public bool isGrab;
+        public bool isSuperArmor;
+        public bool isAbleMove;
+        public bool isCrashed;
         public bool isMoving;
         public bool isRunning;
         public bool isJump;
 
-
-        public Vector3 curPos;
-        public Vector3 curRot;
-
-
-        public void SetDir(Vector3 pos, Vector3 rot, bool isStatic = true)
-        {
-            this.curPos = pos;
-            this.curRot = rot;
-        }
+        #endregion
 
     }
 
     public class ItemData_Class : BasicData
     {
-        public SessionId playerSession;
         public ItemCode itemCode;
-  
 
         public ItemData_Class(ItemCode itemCode) : base(DataTypes.ItemData)
         {
             this.itemCode = itemCode;
         }
-
 
         /// <summary>
         /// 아이템의 목적지
@@ -415,6 +402,9 @@ namespace DataScripts
         /// </summary>
         public Vector3 dirPos;
         public Team curTeam;
+
+        //  중복동작일지 구별 필요
+        public SessionId playerSession;
         public PlayerController ItemOwner;
 
 
@@ -430,13 +420,16 @@ namespace DataScripts
         }
 
         public Vector3 curPos;
-
-        public bool isMoving;
-        public bool isGrab;
         public Vector3 dirPos;
 
+        public PlayerController blockOwner;
+
+        #region 삭제예정라인
+        public bool isMoving;
+        public bool isGrab;
+        #endregion
 
     }
 
-#endregion
+    #endregion
 }

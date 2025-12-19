@@ -86,7 +86,11 @@ public class Items : ItemProperty , IItems , IEffect ,IObjectId
 
     
 
-    // 정보주입이 필요할때
+    /// <summary>
+    /// 플레이어에게 아이템 지급 상태로 만들기
+    /// </summary>
+    /// <param name="Values"></param>
+    /// <param name="player"></param>
     public virtual void Initate(List<float> Values,PlayerController player)
     {
         if (Values == null) return;

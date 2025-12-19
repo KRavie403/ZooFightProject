@@ -129,7 +129,7 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
 
     bool isSuperArmor = false;
     bool isUIOpen = false;
-    bool IsRunning = false;
+    bool isRunning = false;
     bool isJump = false;
     bool isAbleMove = false;
 
@@ -158,16 +158,10 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
 
 
     public bool isCrashed = false;
-    public bool isKeyReverse
-    {
-        get => myData.isKeyReverse;
-        set => myData.isKeyReverse = value;
-    }
-    public bool isGrab
-    {
-        get { return myData.isGrab; }
-        set { myData.isGrab = value;}
-    }
+    public bool isKeyReverse;
+
+    public bool isGrab;
+
 
     #region 히트스캔코드
 
@@ -314,7 +308,6 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
         base.LateUpdate();
         //PlayerSM.CurrentState.PhysicsUpdate();
 
-
     }
 
     protected override void FixedUpdate()
@@ -392,63 +385,47 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
 
     public void SetIsMoving(bool isMoving)
     {
-        myData.isMoving = isMoving;
+        isMoving = isMoving;
     }
     public bool GetIsMoving()
     {
-        return myData.isMoving;
+        return isMoving;
     }
 
 
-    public void SetRunning(bool isRunning)
+    public void SetRunning(bool IsRunning)
     {
-        myData.isRunning = isRunning;
+        isRunning = IsRunning;
     }
     public bool GetIsRunning()
     {
-        return myData.isRunning;
+        return isRunning;
     }
 
     //작업 필요
     public void MoveStateCheck()
     {
-        
-        // ismove로 전환 필요
-        if(AxisX == 0 && AxisY == 0)
+        if (isJump)
         {
-            if (isShield)
-            {
-                //if(PlayerSM.CurrentState == p_States[p])
-                if(isSuperArmor)
-                {
-                    SetIsMoving(false);
-                }
-            }
-            else
-            {
-                if (isSuperArmor)
-                {
-                    SetIsMoving(false);
-                }
-            }
+            return;
+        }
+        if (isForceMoving)
+        {
+            return;
+        }
+
+        if (isMoving) 
+        {
+
+            PlayerSM.ChangeState(p_States[pState.Idle]);
+            SetIsMoving(true);
         }
         else
         {
-            if (isShield)
-            {
-                if (isSuperArmor)
-                    ;
-                SetIsMoving(true);
-            }
-            else
-            {
-                if (isSuperArmor) 
-                    ;
+            PlayerSM.ChangeState(p_States[pState.Idle]);
+            SetIsMoving(false);
 
-                SetIsMoving(true);
-            }
         }
-
 
 
     }
@@ -457,11 +434,14 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
 
     public void Move()
     {
+        float Speed = isRunning ? MoveSpeed * RunSpeedRate : MoveSpeed;
+
         if (!isForceMoving)
         {
+            // 구조 변환 예정
             if (isOwner)
             {
-                PlayerMove(new Vector2(AxisX, AxisY), transform.forward, Time.deltaTime);
+                PlayerMove(new Vector2(AxisX, AxisY), transform.forward, Speed * Time.deltaTime);
             }
             else
             {
@@ -538,12 +518,11 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
             BackEndMatchManager.GetInstance().SendDataToInGame<BlockData_Class>(blockDataMessage);
         }
 
-
         myAnim.SetFloat("MoveAxisX", Mathf.Clamp(AxisX * MotionSpeed, -1.0f, 1.0f));
         myAnim.SetFloat("MoveAxisY", Mathf.Clamp(AxisY * MotionSpeed, -1.0f, 1.0f));
 
         myAnim.SetBool("IsMoving", true);
-        if (myData.isRunning)
+        if (isRunning)
         {
             myAnim.SetBool("IsRunning", true);
         }
@@ -556,7 +535,7 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
      
     public void BasicMove()
     {
-        float Speed = myData.isRunning ? MoveSpeed * RunSpeedRate : MoveSpeed;
+        float Speed = isRunning ? MoveSpeed * RunSpeedRate : MoveSpeed;
         
         BasicMove(curNetAxis, curNetRot, Time.deltaTime * Speed);
 
@@ -585,7 +564,7 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
         //CharacterMove(AxisX, AxisY, isDenial);
         if(!isForceMoving)
         {
-            CharacterMove(myData.isDenial, AxisX, AxisY);
+            //CharacterMove(myData.isDenial, AxisX, AxisY);
         }
     }
 
@@ -607,7 +586,7 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
 
         Vector3 Direction = Vector3.Normalize(new Vector3 (AxisX,0,AxisY));
 
-        float Speed = myData.isRunning ? MoveSpeed * RunSpeedRate : MoveSpeed;
+        float Speed = isRunning ? MoveSpeed * RunSpeedRate : MoveSpeed;
 
         // 프로토콜 전송용 벡터
         Vector3 Dir = MakeDir(AxisX, AxisY);
@@ -640,7 +619,7 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
         myAnim.SetFloat("MoveAxisY", Mathf.Clamp(AxisY * MotionSpeed, -1.0f, 1.0f));
 
         myAnim.SetBool("IsMoving", true);
-        if(myData.isRunning)
+        if(isRunning)
         {
             myAnim.SetBool("IsRunning", true);
         }
@@ -782,7 +761,7 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
     IEnumerator PushOut(Vector3 Pos, float Dist, float Speed, UnityAction e = null)
     {
         isPushing = true;
-        isForceMoving = true    ;
+        isForceMoving = true;
 
         Vector3 NewPos = new Vector3(Pos.x, 0.0f, Pos.z);
         Vector3 NewTpos = new Vector3(transform.position.x, 0.0f, transform.position.z);
@@ -835,26 +814,31 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
 
     public void CharacterJump()
     {
-        if (!myData.isJump)
+        if (!isJump)
         {
-
+            Debug.Log("isJump");
             GetComponent<Rigidbody>().AddForce(Vector3.up*JumpHeight, ForceMode.Impulse);
-            myData.isJump = true;
+            isJump = true;
         }
     }
 
     public void SetisJump(bool IsJump)
     {
-        myData.isJump = IsJump;
+        isJump = IsJump;
     }
     public bool GetisJump()
     {
-        return myData.isJump;
+        return isJump;
     }
 
     public void JumpEnd()
     {
-        myData.isJump = false;
+        PlayerSM.ChangeState(p_States[pState.Idle]);
+        if(PlayerSM.CurrentState == p_States[pState.Jump])
+        {
+            Debug.Log("JumpEnd");
+        }
+        isJump = false;
     }
 
     // 입력받은 타겟을 대상으로 입력받은 거리만큼 밀려나기
@@ -867,7 +851,7 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
     public IEnumerator KnockBackStart(Transform target, float dist, float Speed, UnityAction e = null)
     {
 
-        myData.isDenial = true;
+        isForceMoving = true;
 
         Vector3 dir = Vector3.Normalize(transform.position - target.position); 
         
@@ -883,13 +867,13 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
 
 
             // 물체 또는 벽에 충돌시 중단
-            if (myData.isCrashed) break;
+            if (isCrashed) break;
 
 
             yield return null;
         }
 
-        myData.isDenial = false;   
+        isForceMoving = false;   
     }
 
     #endregion
@@ -1064,7 +1048,7 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
         while(true)
         {
             // 스테 감소
-            if (myData.isRunning)
+            if (isRunning)
             {
                 CurSP -= Time.deltaTime * SPRecovery;
             }
@@ -1207,7 +1191,6 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
         }
         myAnim.SetTrigger("HammerSmash");
 
-
     }
 
     // 실드가 파괴 될 경우 발동하는 함수 = 기본값 true
@@ -1228,14 +1211,14 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
     private void OnCollisionEnter(Collision collision)
     {
         //Debug.Log($"{collision.gameObject.layer} , {groundMask.value}");
-        
+        Debug.Log(collision.gameObject.name);
         if ( (1 << collision.gameObject.layer) == groundMask)
         {
             Debug.Log("Ground");
             if(PlayerSM.CurrentState == p_States[pState.Jump])
             {
+                JumpEnd();
                 MoveStateCheck();
-                myData.isJump = false;
             }
         }
     }
@@ -1258,12 +1241,10 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
 
     private void OnCollisionStay(Collision collision)
     {
-        if (collision.gameObject.layer == groundMask)
-        {
-            myData.isJump = false;
-        }
+        
         if (PlayerSM.CurrentState == p_States[pState.Jump])
         {
+
         }
     }
 
