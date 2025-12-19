@@ -15,7 +15,7 @@ public class Character_Jump : BaseState
     public override void Initate()
     {
         base.Initate();
-        ableFuncs.Add(PlayerController.pFunc.Move, player.CurAxisMove);
+        ableFuncs.Add(PlayerController.pFunc.Move, player.Move);
         ableFuncs.Add(PlayerController.pFunc.Jump, player.CharacterJump);
     }
 
@@ -36,7 +36,8 @@ public class Character_Jump : BaseState
     public override void Exit()
     {
         base.Exit();
-        player.SetisJump(false);
+        //player.SetisJump(false);
+        //player.JumpEnd();
     }
 
     public override void LogicUpdate()

@@ -14,7 +14,7 @@ public class Characater_ItemReady : BaseState
     {
 
         base.Initate();
-        ableFuncs.Add(PlayerController.pFunc.Move, player.CurAxisMove);
+        ableFuncs.Add(PlayerController.pFunc.Move, player.Move);
         ableFuncs.Add(PlayerController.pFunc.ItemUse, player.ItemUse);
         ableFuncs.Add(PlayerController.pFunc.ItemRelease, player.ItemRelease);
 
