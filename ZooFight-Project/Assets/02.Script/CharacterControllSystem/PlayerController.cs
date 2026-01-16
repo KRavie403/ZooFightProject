@@ -79,7 +79,6 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
     public Items curItems;
 
     CharacterData myData;
-    CharacterData_Class C_myData;
 
 
     public bool isPlayersConrtol
@@ -288,6 +287,7 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
         PlayerSM.Initalize(p_States[pState.Create]);
 
         CharacterInitate();
+
     }
 
     // Update is called once per frame
@@ -296,7 +296,7 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
         base.Update();
         //MoveStateCheck();
         PlayerSM.CurrentState.LogicUpdate();
-        //if(Input.GetKeyDown(KeyCode.Space))
+        //if (Input.GetKeyDown(KeyCode.Space))
         //{
         //    Slide(transform.forward, 1, 0.5f);
         //}
@@ -383,9 +383,9 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
 
     #region 캐릭터 이동
 
-    public void SetIsMoving(bool isMoving)
+    public void SetIsMoving(bool IsMoving)
     {
-        isMoving = isMoving;
+        //isMoving = IsMoving;
     }
     public bool GetIsMoving()
     {
@@ -414,19 +414,18 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
             return;
         }
 
-        if (isMoving) 
+        if (isMoving)
         {
 
-            PlayerSM.ChangeState(p_States[pState.Idle]);
+            PlayerSM.ChangeState(p_States[pState.Move]);
             SetIsMoving(true);
         }
         else
         {
+
             PlayerSM.ChangeState(p_States[pState.Idle]);
             SetIsMoving(false);
-
         }
-
 
     }
 
@@ -513,9 +512,9 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
             var sessionId = Backend.Match.GetMySessionId();
             int teamNumber = BackEndMatchManager.GetInstance().GetTeamInfo(sessionId);
             Team playerTeam = BackEndMatchManager.GetInstance().ConvertTeamNumberToEnum(teamNumber);
-            BlockData_Class blockDataMessage = new BlockData_Class(playerTeam);
+            DataScripts.BlockData blockDataMessage = new DataScripts.BlockData(playerTeam);
             blockDataMessage.dirPos = pos;
-            BackEndMatchManager.GetInstance().SendDataToInGame<BlockData_Class>(blockDataMessage);
+            BackEndMatchManager.GetInstance().SendDataToInGame<DataScripts.BlockData>(blockDataMessage);
         }
 
         myAnim.SetFloat("MoveAxisX", Mathf.Clamp(AxisX * MotionSpeed, -1.0f, 1.0f));
@@ -610,9 +609,9 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
             var sessionId = Backend.Match.GetMySessionId();
             int teamNumber = BackEndMatchManager.GetInstance().GetTeamInfo(sessionId);
             Team playerTeam = BackEndMatchManager.GetInstance().ConvertTeamNumberToEnum(teamNumber);
-            BlockData_Class blockDataMessage = new BlockData_Class(playerTeam);
+            DataScripts.BlockData blockDataMessage = new DataScripts.BlockData(playerTeam);
             blockDataMessage.dirPos = pos;
-            BackEndMatchManager.GetInstance().SendDataToInGame<BlockData_Class>(blockDataMessage);
+            BackEndMatchManager.GetInstance().SendDataToInGame<DataScripts.BlockData>(blockDataMessage);
         }
 
         myAnim.SetFloat("MoveAxisX", Mathf.Clamp(AxisX * MotionSpeed, -1.0f, 1.0f));
@@ -958,7 +957,7 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
             {
                 PlayerSM.ChangeState(p_States[pState.ItemUse]);
 
-                //curItems.ItemUse();
+                curItems.ItemUse();
             }
         }
     }
@@ -1277,6 +1276,11 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
     public pState GetState()
     {
         return State;
+    }
+
+    public bool GetIsSliding()
+    {
+        return isSliding;
     }
 
     #endregion

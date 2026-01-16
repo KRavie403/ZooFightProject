@@ -32,13 +32,20 @@ public class Character_Move : BaseState
     public override void Exit()
     {
         base.Exit();
-        player.MoveStateCheck();
+        
     }
 
     public override void LogicUpdate()
     {
         base.LogicUpdate();
         ableFuncs[PlayerController.pFunc.Move]();
+        if(player.GetIsSliding())
+        {
+
+        }
+        else
+        {
+        }
         player.MoveStateCheck();
     }
 

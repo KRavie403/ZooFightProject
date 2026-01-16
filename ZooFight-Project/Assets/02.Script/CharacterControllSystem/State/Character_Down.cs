@@ -35,6 +35,7 @@ public class Character_Down : BaseState
     {
 
         base.LogicUpdate();
+
     }
 
     public override void PhysicsUpdate()

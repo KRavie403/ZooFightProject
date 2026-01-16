@@ -35,22 +35,26 @@ public class Character_ItemUse : BaseState
         player.myAnim.SetBool("IsRunning", false);
 
         // 아이템 사용 모션 출력
-        player.myAnim.SetBool("ItemUse",true);
+        player.myAnim.SetBool("IsItemUse", true);
 
         var item = player.curItems;
 
+        if (!Gamemanager.Inst.isOnline) return;
+        
         if (item != null)
         {
             var sessionId = Backend.Match.GetMySessionId();
             var teamNumber = BackEndMatchManager.GetInstance().GetTeamInfo(sessionId);
 
-            ItemData_Class message = new ItemData_Class(item.myCode);
-            BackEndMatchManager.GetInstance().SendDataToInGame<ItemData_Class>(message);
+            ItemData message = new ItemData(item.myCode);
+            BackEndMatchManager.GetInstance().SendDataToInGame<ItemData>(message);
 
             message.curTeam = BackEndMatchManager.GetInstance().ConvertTeamNumberToEnum(teamNumber);
-            message.ItemOwner = player;
 
-            BackEndMatchManager.GetInstance().SendDataToInGame<ItemData_Class>(message);
+            // 세션 ID 로의 변환이 필요함
+            //message.ItemOwner = player;
+
+            BackEndMatchManager.GetInstance().SendDataToInGame<ItemData>(message);
         }
     }
 

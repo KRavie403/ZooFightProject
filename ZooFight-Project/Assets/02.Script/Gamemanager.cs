@@ -42,6 +42,9 @@ public enum ObjectType : sbyte
 // 2.폴링레이트 간격의 업데이트
 public class Gamemanager : MonoBehaviour
 {
+    // 임시변수 
+    public bool isOnline;
+
 
     private static Gamemanager inst;
     public static Gamemanager Inst => inst;

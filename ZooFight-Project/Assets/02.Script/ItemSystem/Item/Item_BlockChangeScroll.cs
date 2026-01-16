@@ -153,7 +153,6 @@ public class Item_BlockChangeScroll : Items
         myEffect.EffectPlayAll(0, 0, myBlock.transform);
         myEffect.EffectPlayAll(1, 0, enemyBlock.transform);
         
-        
     }
 
     public IEnumerator ScrollActive()

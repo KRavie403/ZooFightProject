@@ -19,7 +19,7 @@ public class StateMachine
 
     public void ChangeState(BaseState newState)
     {
-        Debug.Log($"{CurrentState} Exit Start");
+        //Debug.Log($"{CurrentState} Exit Start");
         BeforeState = CurrentState;
         CurrentState.Exit();
 

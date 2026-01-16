@@ -567,7 +567,7 @@ public class WorldManager : MonoBehaviour
                 ProcessPlayerData(noMoveMessage);
                 break;
             //case DataScripts.Type.BlockData:
-            //    BlockData_Class blockDataMessage = DataParser.ReadJsonData<BlockData_Class>(args.BinaryUserData);
+            //    BlockData blockDataMessage = DataParser.ReadJsonData<BlockData>(args.BinaryUserData);
             //    break;
             case Protocol.Type.GameSync:
                 GameSyncMessage syncMessage = DataParser.ReadJsonData<GameSyncMessage>(args.BinaryUserData);
@@ -586,15 +586,15 @@ public class WorldManager : MonoBehaviour
         switch (bda.type)
         {
             case DataScripts.DataTypes.CharacterData:
-                CharacterData_Class moveMessage = DataParser.ReadJsonData<CharacterData_Class>(args.BinaryUserData);
+                CharacterData moveMessage = DataParser.ReadJsonData<CharacterData>(args.BinaryUserData);
                 //ProcessPlayerData(moveMessage);
                 break;
             case DataScripts.DataTypes.ItemData:
-                ItemData_Class itemMessage = DataParser.ReadJsonData<ItemData_Class>(args.BinaryUserData);
+                ItemData itemMessage = DataParser.ReadJsonData<ItemData>(args.BinaryUserData);
                 player.curItems.ItemUse();
                 break;
             case DataScripts.DataTypes.BlockData:
-                BlockData_Class blockMoveMessage = DataParser.ReadJsonData<BlockData_Class>(args.BinaryUserData);
+                DataScripts.BlockData blockMoveMessage = DataParser.ReadJsonData<DataScripts.BlockData>(args.BinaryUserData);
                 break;
             default:
                 Logger.Log("Unknown datascript type");
@@ -604,7 +604,7 @@ public class WorldManager : MonoBehaviour
         //switch (bda.type)
         //{
         //    case DataScripts.DataTypes.CharacterData:
-        //        CharacterData_Class moveMessage = DataParser.ReadJsonData<CharacterData_Class>(args.BinaryUserData);
+        //        CharacterData moveMessage = DataParser.ReadJsonData<CharacterData>(args.BinaryUserData);
         //        ProcessPlayerData(moveMessage);
         //        break;
         //    case DataScripts.DataTypes.ItemData:
@@ -702,7 +702,7 @@ public class WorldManager : MonoBehaviour
         }
     }
 
-    //private void ProcessPlayerData(CharacterData_Class data)
+    //private void ProcessPlayerData(CharacterData data)
     //{
     //    //if (BackEndMatchManager.GetInstance().IsHost() == true)
     //    //{
