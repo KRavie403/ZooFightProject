@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+
 /// <summary>
 /// 아이템명 : 휘핑기
 /// Value 1 미는 힘
@@ -93,7 +94,6 @@ public class Item_WhippingMachine : Items, IHitScanner
                 myTarget[0].GetComponent<IHitScanTarget>().Hit(this);
                 break;
             }
-
 
             // 피격대상 감지
 

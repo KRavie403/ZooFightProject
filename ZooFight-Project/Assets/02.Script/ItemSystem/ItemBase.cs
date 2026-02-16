@@ -1,3 +1,4 @@
+using DataScripts;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,19 +8,20 @@ using UnityEngine;
 public class ItemBase : ItemProperty , IItems , IEffect
 {
 
-    // ¾ÆÀÌÅÛ »ç¿ë ÁÖÃ¼
+    // ì•„ì´í…œ ì‚¬ìš© ì£¼ì²´
     [SerializeField] protected PlayerController myPlayer = null;
-    // ¾ÆÀÌÅÛ Áö¼Ó µ¿ÀÛ
+    // ì•„ì´í…œ ì§€ì† ë™ì‘
     public IEnumerator ItemAction;
-    // ¾ÆÀÌÅÛ µ¿ÀÛ Á¾·á È®ÀÎ
+    // ì•„ì´í…œ ë™ì‘ ì¢…ë£Œ í™•ì¸
     public bool isItemUseEnd = false;
 
-    // ¹æÇâ ÁöÁ¤ ÇÊ¿ä½Ã ¹Ş¾ÆµÎ´Â Ä­
+    // ë°©í–¥ ì§€ì • í•„ìš”ì‹œ ë°›ì•„ë‘ëŠ” ì¹¸
     protected Vector3 dir = Vector3.zero;
 
     EffectCode IEffect.EffectCode => effectCode;
 
-    
+    public ItemData itemData;
+
 
     void IItems.ItemUse()
     {
@@ -43,10 +45,10 @@ public class ItemBase : ItemProperty , IItems , IEffect
 
     }
 
-    #region ¾ÆÀÌÅÛ Á¤º¸°ü·Ã
-    #region Á¤º¸ÁÖÀÔ 
+    #region ì•„ì´í…œ ì •ë³´ê´€ë ¨
+    #region ì •ë³´ì£¼ì… 
 
-    // »ç¿ë ½ÃÀÛ Àü Á¤º¸ÁÖÀÔ
+    // ì‚¬ìš© ì‹œì‘ ì „ ì •ë³´ì£¼ì…
     public virtual void Initate(List<float> Values, PlayerController player)
     {
         if (Values == null) return;
@@ -74,8 +76,8 @@ public class ItemBase : ItemProperty , IItems , IEffect
     }
 
     #endregion
-    #region Á¤º¸ ÃßÃâ
-    // ¸ğÃ¼¿¡¼­ Á¤º¸ ÃßÃâÇÒ¶§ »ç¿ë
+    #region ì •ë³´ ì¶”ì¶œ
+    // ëª¨ì²´ì—ì„œ ì •ë³´ ì¶”ì¶œí• ë•Œ ì‚¬ìš©
     public List<float> GetValues()
     {
         List<float> Values = new List<float>
@@ -95,9 +97,9 @@ public class ItemBase : ItemProperty , IItems , IEffect
     #endregion
 
 
-    #region ¾ÆÀÌÅÛ »ç¿ë µ¿ÀÛ
+    #region ì•„ì´í…œ ì‚¬ìš© ë™ì‘
 
-    // ¾ÆÀÌÅÛ ¹ßµ¿½Ã µ¿ÀÛ
+    // ì•„ì´í…œ ë°œë™ì‹œ ë™ì‘
     public virtual void ItemUse()
     {
         if (myPlayer == null) return;
@@ -106,19 +108,19 @@ public class ItemBase : ItemProperty , IItems , IEffect
 
     }
 
-    // Å¸°İÆÇÁ¤ÀÌ ÀÖ´Â ¾ÆÀÌÅÛÀÇ Å¸°İ½Ã µ¿ÀÛ
+    // íƒ€ê²©íŒì •ì´ ìˆëŠ” ì•„ì´í…œì˜ íƒ€ê²©ì‹œ ë™ì‘
     public virtual void ItemHitAction()
     {
 
     }
 
-    // ¾ÆÀÌÅÛÀÇ µ¿ÀÛÀÌ ³¡³¯¶§ ½ÇÇà
+    // ì•„ì´í…œì˜ ë™ì‘ì´ ëë‚ ë•Œ ì‹¤í–‰
     public virtual void ItemEnd()
     {
-        // Áö¼Ó µ¿ÀÛ Á¾·á
+        // ì§€ì† ë™ì‘ ì¢…ë£Œ
         isItemUseEnd = true;
 
-        // µ¥ÀÌÅÍ ¸®¼Â
+        // ë°ì´í„° ë¦¬ì…‹
         myPlayer.curItems = null;
         myPlayer = null;
         ItemAction = null;
@@ -132,7 +134,7 @@ public class ItemBase : ItemProperty , IItems , IEffect
     {
         bool A = false;
 
-        // »ç¿ë ½ÃÀÛÀü
+        // ì‚¬ìš© ì‹œì‘ì „
         while (!A)
         {
             if (Input.GetKeyDown(KeyCode.Z))

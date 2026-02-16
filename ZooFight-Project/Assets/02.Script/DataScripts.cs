@@ -125,25 +125,22 @@ namespace DataScripts
     /// </summary>
     public class C_MovementData : BasicData
     {
-        public CharacterData myPlayer;
 
-        public C_MovementData(CharacterData setData) : base(DataTypes.PlayerBasicData)
+        public SessionId playerId;
+        public C_MovementData(SessionId playerID) : base(DataTypes.PlayerBasicData)
         {
-            myPlayer = setData;
+            playerId = playerID;
         }
+
 
         #region 이동 위치관련 데이터
         public Vector3 curPos;
-        public Vector3 curRot;
 
-        public void SetDir(Vector3 pos, Vector3 rot, bool isStatic = true)
-        {
-            this.curPos = pos;
-            this.curRot = rot;
-        }
+        public Vector3 curRot;
+        public float curRotX;
+        public float curRotZ;
 
         public Vector3 curAxis;
-        public Vector3 curForward;
         public float curDist;
 
         #endregion
@@ -158,37 +155,38 @@ namespace DataScripts
     public class CharacterData : BasicData
     {
 
-        public CharacterData(C_MovementData basicData) : base(DataTypes.CharacterData)
+        public CharacterData(SessionId PlayerId) : base(DataTypes.CharacterData)
         {
 
-            BasicData = basicData;
+            playerSession = PlayerId;
 
         }
 
-        public C_MovementData BasicData;
 
         public SessionId playerSession;
-        public PlayerController myController;
+        // 세션 id 값으로의 
 
         // 캐릭터의 상태변화값
 
 
         #region 스테이터스 데이터
-        float curHp;
+        public float curHp;
         public float SetHp(float hp)
         {
             curHp = hp;
             return curHp;
         }
 
-        float curStamina;
+        public float curStamina;
         public float SetStamina(float stamina)
         {
             curStamina = stamina;
             return curStamina;
         }
 
+        // 오브젝트 id 값으로의 변환 필요
         public BlockObject myBlock;
+        public int blockid;
 
         public ItemCode curItem;
 
@@ -203,18 +201,6 @@ namespace DataScripts
 
         #region 삭제할 데이터
 
-        public PlayerController.pState dirState;
-        public bool isKeyReverse;
-        public bool isGameStart;
-        public bool isShield;
-        public bool isGrab;
-        public bool isSuperArmor;
-        public bool isAbleMove;
-        public bool isCrashed;
-        public bool isMoving;
-        public bool isRunning;
-        public bool isJump;
-
         #endregion
 
     }
@@ -223,11 +209,14 @@ namespace DataScripts
     {
         public ItemCode itemCode;
 
-        public ItemData(ItemCode itemCode) : base(DataTypes.ItemData)
+        public int itemID;
+
+        public ItemData(int itemId) : base(DataTypes.ItemData)
         {
-            this.itemCode = itemCode;
+            itemID = itemId;
         }
 
+      
         /// <summary>
         /// 아이템의 목적지
         /// Zero = 비 이동형 아이템                  
@@ -235,29 +224,35 @@ namespace DataScripts
         public Vector3 dirPos;
         
         public Team curTeam;
+        public SessionId playerSession;
 
         //  중복동작일지 구별 필요
-        public SessionId playerSession;
 
     }
 
     public class BlockData : BasicData
     {
         public Team curTeam;
+        public int blockid;
 
-        public BlockData(Team curTeam) : base(DataTypes.BlockData) 
+        public BlockData(int blockId) : base(DataTypes.BlockData)
         {
-            this.curTeam = curTeam;
+            blockid = blockId;
         }
 
         public Vector3 curPos;
+
         public Vector3 dirPos;
 
         public SessionId playerSession;
 
+        public bool isGrab = false;
+        public bool isMoving = false;
+
         #region 삭제예정라인
-        public bool isMoving;
-        public bool isGrab;
+
+
+
         #endregion
 
     }

@@ -79,7 +79,7 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
     public Items curItems;
 
     CharacterData myData;
-
+    C_MovementData movementData;
 
     public bool isPlayersConrtol
     {
@@ -138,6 +138,9 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
     [SerializeField]
     bool isPushing = false;
     bool isSliding = false;
+    bool isBind = false;
+    bool isSlow = false;
+    bool isStun = false;
     
     // 사용자의 캐릭터 여부
     bool isOwner 
@@ -223,17 +226,22 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
                     break;
                 case ItemCode.BananaTrap:
                     //Slide()
+                    Slide(transform.forward,component.GetComponent<Item_BananaTrap>().Value3,component.GetComponent<Item_BananaTrap>().Value1);
                     break;
                 case ItemCode.BlockChangeScroll:
                     break;
                 case ItemCode.CurseScroll:
+                    //GetCrowdControl()
                     break;
                 case ItemCode.SpiderBomb:
                     GetCrowdControl(StatusCode.Slow,component.GetComponent<Item_SpiderBomb>().Value2,component.GetComponent<Item_SpiderBomb>().Value1);
                     break;
                 case ItemCode.InkBomb:
+                    GetCrowdControl(StatusCode.Blind, component.GetComponent<Item_InkBomb>().Value2, component.GetComponent<Item_InkBomb>().Value1);
                     break;
                 case ItemCode.ToyHammer:
+                    GetDamaged(component.GetComponent<Item_ToyHammer>().Value1);
+                    GetCrowdControl(StatusCode.Stun, component.GetComponent<Item_ToyHammer>().Value2);
                     break;
                 default:
                     break;
@@ -250,6 +258,7 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
 
     #endregion
 
+    #region Monobehavior
     protected override void Awake()
     {
         base.Awake();
@@ -288,6 +297,7 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
 
         CharacterInitate();
 
+        StartCoroutine(StaminaWork());
     }
 
     // Update is called once per frame
@@ -301,7 +311,8 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
         //    Slide(transform.forward, 1, 0.5f);
         //}
         //CharacterMove(AxisX, AxisY,isDenial);
-
+        Debug.Log(transform.forward);
+        
     }
     protected override void LateUpdate()
     {
@@ -315,6 +326,8 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
         base.FixedUpdate();
 
     }
+
+    #endregion
 
     public void StateInitiate()
     {
@@ -337,11 +350,17 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
 
     }
 
+    /// <summary>
+    /// 현재 이 캐릭터의 상태정보 취합
+    /// </summary>
     public void StatusRenewal()
     {
 
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public void InsertPlayerInfo()
     {
 
@@ -512,7 +531,7 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
             var sessionId = Backend.Match.GetMySessionId();
             int teamNumber = BackEndMatchManager.GetInstance().GetTeamInfo(sessionId);
             Team playerTeam = BackEndMatchManager.GetInstance().ConvertTeamNumberToEnum(teamNumber);
-            DataScripts.BlockData blockDataMessage = new DataScripts.BlockData(playerTeam);
+            DataScripts.BlockData blockDataMessage = new DataScripts.BlockData(grabPoint.curGrabBlock.BlockId);
             blockDataMessage.dirPos = pos;
             BackEndMatchManager.GetInstance().SendDataToInGame<DataScripts.BlockData>(blockDataMessage);
         }
@@ -609,7 +628,7 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
             var sessionId = Backend.Match.GetMySessionId();
             int teamNumber = BackEndMatchManager.GetInstance().GetTeamInfo(sessionId);
             Team playerTeam = BackEndMatchManager.GetInstance().ConvertTeamNumberToEnum(teamNumber);
-            DataScripts.BlockData blockDataMessage = new DataScripts.BlockData(playerTeam);
+            DataScripts.BlockData blockDataMessage = new DataScripts.BlockData(grabPoint.curGrabBlock.BlockId);
             blockDataMessage.dirPos = pos;
             BackEndMatchManager.GetInstance().SendDataToInGame<DataScripts.BlockData>(blockDataMessage);
         }
@@ -1078,8 +1097,10 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
                 GetSlow(time,Power);
                 break;
             case StatusCode.Blind:
+
                 break;
             case StatusCode.Bind:
+                
                 break;
             case StatusCode.Stun:
                 break;
@@ -1116,6 +1137,24 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
         BaseSpeedRate = tempRate;
     }
 
+    public void GetBind(float time)
+    {
+        StartCoroutine(Bind(time));
+    }
+
+    IEnumerator Bind(float time)
+    {
+
+        float curTime = 0;
+        if (isBind == true) yield break;
+
+        while (curTime < time)
+        {
+            curTime+= Time.deltaTime;
+            yield return null;
+        }
+    }
+   
     public void CharacterRecovery()
     {
         StartCoroutine(HpRecovery());
@@ -1282,6 +1321,7 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
     {
         return isSliding;
     }
+
 
     #endregion
 
