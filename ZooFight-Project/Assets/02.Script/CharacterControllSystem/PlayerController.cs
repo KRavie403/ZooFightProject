@@ -229,9 +229,10 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
                     Slide(transform.forward,component.GetComponent<Item_BananaTrap>().Value3,component.GetComponent<Item_BananaTrap>().Value1);
                     break;
                 case ItemCode.BlockChangeScroll:
+                    //미동작
                     break;
                 case ItemCode.CurseScroll:
-                    //GetCrowdControl()
+                    GetCrowdControl(StatusCode.Reverse,component.GetComponent<Item_CurseScroll>().Value1);
                     break;
                 case ItemCode.SpiderBomb:
                     GetCrowdControl(StatusCode.Slow,component.GetComponent<Item_SpiderBomb>().Value2,component.GetComponent<Item_SpiderBomb>().Value1);
@@ -608,7 +609,7 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
 
         // 프로토콜 전송용 벡터
         Vector3 Dir = MakeDir(AxisX, AxisY);
-        //transform.Translate(MoveSpeed * time.deltaTime * Direction, Space.Self);
+        //transform.Translate(MoveSpeed * duringTime.deltaTime * Direction, Space.Self);
         transform.position += MakeDir(AxisX, AxisY) * Speed * Time.deltaTime;
 
         if (isGrab)
@@ -800,7 +801,7 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
             duringTime += Time.deltaTime;
 
             transform.position += Dir * Speed * Time.deltaTime;
-            //transform.Translate(Dir * Speed * time.deltaTime);
+            //transform.Translate(Dir * Speed * duringTime.deltaTime);
 
             yield return null;
         }
@@ -1038,7 +1039,7 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
     }
     
     /// <summary>
-    /// time 동안 총합 Damage 수치만큼 데미지를 받는 함수
+    /// duringTime 동안 총합 Damage 수치만큼 데미지를 받는 함수
     /// </summary>
     /// <param name="Damage"></param>
     /// <param name="time"></param>
@@ -1106,9 +1107,28 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
                 break;
             case StatusCode.AirBone:
                 break;
+            case StatusCode.Reverse:
+                break;
             default:
                 break;
         }
+    }
+
+    public void KeyReverse(float time)
+    {
+        StartCoroutine(GetKeyReverse(time));
+    }
+    
+    IEnumerator GetKeyReverse(float time)
+    {
+        float duringTime = 0;
+        isKeyReverse = true;
+        while(duringTime < time)
+        {
+            duringTime += Time.deltaTime;
+            yield return null;
+        }
+        isKeyReverse = false;
     }
 
     public void DownAction()

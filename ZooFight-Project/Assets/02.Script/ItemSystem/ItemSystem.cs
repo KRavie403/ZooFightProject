@@ -33,8 +33,10 @@ public enum StatusCode
     // 0 = 기본상태 1 ~ 9 이동방해계열
     Normal = 0,
     Slow,       // 이동속도 감소
+    Reverse,
     //Minimal,    // 사이즈 감소 (이속,공속,점프력 감소)
     //Cripple,    // 공격속도 감소
+
     // 10 ~ 19  하급 상태 이상
     Blind = 10, // 시야 감소
     Bind,       // 속박
