@@ -7,7 +7,6 @@ using DataScripts;
 using Protocol;
 using BackEnd;
 using Unity.Mathematics;
-using static UnityEditor.PlayerSettings;
 
 public class PlayerController : MovementController, IHitScanTarget , IHitScanner , IObjectId
 {
