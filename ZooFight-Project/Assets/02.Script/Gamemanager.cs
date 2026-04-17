@@ -167,10 +167,11 @@ public class Gamemanager : MonoBehaviour
         {
             Destroy(this.gameObject);
         }
-        // 60프레임 고정
-        Application.targetFrameRate = 60;
-        // 게임중 슬립모드 해제
-        Screen.sleepTimeout = SleepTimeout.NeverSleep;
+
+        //// 60프레임 고정
+        //Application.targetFrameRate = 60;
+        //// 게임중 슬립모드 해제
+        //Screen.sleepTimeout = SleepTimeout.NeverSleep;
 
         InGameUpdateCoroutine = InGameUpdate();
 
@@ -370,7 +371,7 @@ public class Gamemanager : MonoBehaviour
             Debug.Log("알수없는 씬 입니다.");
             return;
         }
-
+         
         if (scene == INGAME)
         {
             await LoadSceneAsync(scene);

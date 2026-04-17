@@ -69,7 +69,7 @@ public class Item_BlockChangeScroll : Items
 
         Debug.Log(EffectCode.E_BlockChangeScroll.ToString());
         // 정지 상태의 이펙트를 인출해오기
-        myEffect = Effectmanager.Inst.effectPool.GetEffectObject<EffectPlayer>(EffectCode.E_BlockChangeScroll, Value2, null, false);
+        myEffect = EffectManager.Inst.effectPool.GetEffectObject<EffectPlayer>(EffectCode.E_BlockChangeScroll, Value2, null, false);
 
 
         float duringTime = 0;

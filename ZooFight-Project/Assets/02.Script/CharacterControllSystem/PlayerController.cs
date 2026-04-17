@@ -7,7 +7,6 @@ using DataScripts;
 using Protocol;
 using BackEnd;
 using Unity.Mathematics;
-using static UnityEditor.PlayerSettings;
 
 public class PlayerController : MovementController, IHitScanTarget , IHitScanner , IObjectId
 {
@@ -57,6 +56,8 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
 
     public bool IsDown => PlayerSM.CurrentState != p_States[pState.Down];
 
+    [Header("Controlls")]
+    public LayerMask groundMask;
 
     [Range(-1.0f, 1.0f)]
     public float AxisX, AxisY = 0;
@@ -64,17 +65,23 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
     public Vector3 Dir => Vector3.right * AxisX + Vector3.forward * AxisY;
     public Vector3 curNetPos = Vector3.zero;
     public Vector3 curNetRot = Vector3.zero;
-
     public Vector2 curNetAxis = Vector2.zero;
     public float curNetDist = 0.0f;
 
-
     public CharacterCamera TargetCamera;
-    public LayerMask groundMask;
 
     public GrabPoint grabPoint;
     public Transform AttackPoint;
     public Transform ItemPoint;
+
+
+    // 이펙트 작용점
+    [Header("EffectPoint")]
+    public Transform StunEffectPoint;
+    public Transform BuffEffectPoint;
+    public Transform SlowEffectPoint;
+    public Transform ReverseEffectPoint;
+
 
     public Items curItems;
 
@@ -124,6 +131,7 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
             }
         }
     }
+
 
 
     bool isSuperArmor = false;
@@ -1101,17 +1109,75 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
 
                 break;
             case StatusCode.Bind:
-                
+                GetBind(time);
                 break;
             case StatusCode.Stun:
+                GetStun(time);
                 break;
             case StatusCode.AirBone:
                 break;
             case StatusCode.Reverse:
+                KeyReverse(time);
                 break;
             default:
                 break;
         }
+    }
+
+    public void GetBlind(float time)
+    {
+
+        StartCoroutine(Blind(time));
+    }
+
+    IEnumerator Blind(float time)
+    {
+
+        float duringTime = 0;
+        while (duringTime < time)
+        {
+            duringTime += Time.deltaTime;
+
+            // 기능 구현중
+            // UI의 시야가리기창 켜기
+
+            yield return null;
+        }
+
+        // UI의 시야 가리기창 끄기
+    }
+
+    public void GetStun(float time)
+    {
+        StartCoroutine(Stun(time));
+    }
+
+    IEnumerator Stun(float time)
+    {
+        float duringTime = 0.0f;
+        isAbleMove = false;
+
+        GameObject stunEffectObj = EffectManager.Inst.effectPool.GetEffectObject(EffectCode.E_CharacterDamaged, null, false);
+        EffectPlayer stunEffect =  stunEffectObj.GetComponent<EffectPlayer>();
+
+        stunEffect.EffectPlayAll(0, this.transform);
+        while (duringTime < time)
+        {
+            duringTime += Time.deltaTime;
+
+            // 동작 추가중
+            //myAnim.SetBool("isStun",true);
+            //myAnim.SetTrigger("GetStun");
+            if (stunEffect.myEffect[0].isPlaying == false)
+            {
+                stunEffect.EffectPlayAll(0, this.transform);
+            }
+            // 이펙트 추가중
+            yield return null;
+        }
+        //myAnim.SetBool("isStun", false);
+        stunEffect.EffectEndAll();
+        isAbleMove = true; 
     }
 
     public void KeyReverse(float time)
@@ -1123,11 +1189,22 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
     {
         float duringTime = 0;
         isKeyReverse = true;
-        while(duringTime < time)
+
+        GameObject ReverseEffectObj = EffectManager.Inst.effectPool.GetEffectObject(EffectCode.E_CurseScroll, null, false);
+        EffectPlayer ReverseEffect = ReverseEffectObj.GetComponent<EffectPlayer>();
+        
+        //ReverseEffectPoint;
+        ReverseEffect.EffectPlayAll();
+
+        while (duringTime < time)
         {
             duringTime += Time.deltaTime;
+
+
             yield return null;
         }
+
+
         isKeyReverse = false;
     }
 
@@ -1138,7 +1215,7 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
 
     public void GetSlow(float time,float Power)
     {
-        
+        StartCoroutine(Slow(time,Power));
     }
 
     public IEnumerator Slow(float time, float Power)
@@ -1166,13 +1243,16 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
     {
 
         float curTime = 0;
+        // 지속시간 플레이어 컨트롤러 전역변수화
         if (isBind == true) yield break;
-
+        isAbleMove = false;
         while (curTime < time)
         {
             curTime+= Time.deltaTime;
+
             yield return null;
         }
+        isAbleMove = true;
     }
    
     public void CharacterRecovery()

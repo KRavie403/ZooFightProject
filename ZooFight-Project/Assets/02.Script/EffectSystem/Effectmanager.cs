@@ -16,10 +16,15 @@ public enum EffectCode
     E_CharacterWalk = 0, E_CharacterRun, E_CharacterJump, E_CharacterAttack, E_CharacterDamaged,
     E_GuardDrink = 100, E_StaminaDrink, E_PowerDrink, 
     E_BananaTrap,
-    E_BombExplose, E_SpiderBomb, E_InkBomb,
-    E_ToyHammer, E_WhippingMachine, E_MinimalRazer,
+    E_Bomb_Explose, E_SpiderBomb, E_InkBomb,
+    E_WhippingMachine, E_MinimalRazer,
     E_CurseScroll, E_BlockChangeScroll,
+    E_IncreseStatus,E_DecreseStatus,
+    E_Stun,
     E_ButtonClick = 200,
+    E_GameWin = 300,E_GameLose,E_GamDraw,
+
+    NotSetting,
     CodeCount
 }
 
@@ -34,7 +39,7 @@ interface IEffect
     // EffectCode GetEffectCode();
 }
 
-public class Effectmanager : Singleton<Effectmanager>
+public class EffectManager : Singleton<EffectManager>
 {
     public EffectPool effectPool;
 
@@ -47,7 +52,7 @@ public class Effectmanager : Singleton<Effectmanager>
         effectPlayers = new List<EffectPlayer>();  // 초기화
         for (int i = 0; i < effectObj.Count; i++)
         {
-            if (effectObj[i] != null)
+            if (effectObj[i] != null) 
             {
                 //effectPlayers.Add(effectObj[i].GetComponent<EffectPlayer>());
                 EffectPlayer effectPlayer = effectObj[i].GetComponent<EffectPlayer>();
