@@ -113,7 +113,32 @@ public class EffectPlayer : MonoBehaviour , IEffect
         myEffect[index].transform.rotation = rot;
         myEffect[index].Play();
     }
+
     #endregion
+
+    #region 반복실행
+
+    /// <summary>
+    /// 일정 시간동안 반복실행
+    /// </summary>
+    public void EffectPlayT()
+    {
+
+    }
+
+    IEnumerator EffectPlayerLoop(float time)
+    {
+        float duringTime = 0;
+        while (duringTime < time)
+        {
+            duringTime += Time.deltaTime;
+
+            yield return null;
+        }
+    }
+
+    #endregion
+
 
     #region 전체실행
 
@@ -240,6 +265,13 @@ public class EffectPlayer : MonoBehaviour , IEffect
         }
     }
 
+    public void EffectEndAll(UnityAction e = null)
+    {
+        for (int i = 0; i < myEffect.Count; i++)
+        {
+            EffectEnd(i, e);
+        }
+    }
  
 
 

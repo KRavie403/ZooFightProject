@@ -15,8 +15,6 @@ public class KeySettingDecoder : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
-        
 
     }
 
@@ -38,9 +36,16 @@ public class KeySettingDecoder : MonoBehaviour
 
     }
 
-    void LoadSaveKeys()
+    public void LoadSaveKeys()
     {
-        // SavedKeyCodes = Clientmanager.Inst.ConfigReader.(Ű�ڵ�迭)
+        if(LoadKeys.Length == (int)KeyAction.KeyCount)
+        {
+            for (int i = 0; i < LoadKeys.Length; i++)
+            {
+                KeySetting.keys[(KeyAction)i] = LoadKeys[i];
+            }
+        }
+        // SavedKeyCodes = Clientmanager.Inst.ConfigReader.(키코드배열)
     }
 
 

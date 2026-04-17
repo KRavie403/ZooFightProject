@@ -93,7 +93,7 @@ public class Item_Bomb : Items ,IHitScanner
         yield return base.ItemActions();
         transform.SetParent(null);
 
-        myEffect = Effectmanager.Inst.effectPool.GetEffectObject<EffectPlayer>(EffectCode.E_BombExplose, Value2, null, false);
+        myEffect = EffectManager.Inst.effectPool.GetEffectObject<EffectPlayer>(EffectCode.E_Bomb_Explose, Value2, null, false);
 
 
         bool isMoveEnd = false;

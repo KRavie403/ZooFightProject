@@ -4906,8 +4906,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 726522394606390232}
+  - component: {fileID: -8817236846427087312}
   m_Layer: 0
-  m_Name: EF_Smoke_Run
+  m_Name: E_CharacterRun
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4929,3 +4930,20 @@ Transform:
   - {fileID: 975170734428960127}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &-8817236846427087312
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7865329015946342473}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e59c297fd434ac0409ac2740cf656707, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  myEffectCode: 1
+  myObj: {fileID: 0}
+  myEffect: []
+  myEffectPlayers: []
+  triggerTarget: []
