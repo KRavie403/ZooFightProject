@@ -9966,9 +9966,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e59c297fd434ac0409ac2740cf656707, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  myEffectCode: 17
+  myEffectCode: 109
   myObj: {fileID: 7055220179825546305}
   myEffect:
   - {fileID: 1891980551477201311}
   - {fileID: 5457690421519941618}
+  myEffectPlayers: []
   triggerTarget: []

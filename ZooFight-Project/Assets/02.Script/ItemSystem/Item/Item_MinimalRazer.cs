@@ -65,7 +65,7 @@ public class Item_MinimalRazer : Items ,IHitScanner
     protected override void Awake()
     {
         base.Awake();
-        //Effectmanager.Inst.CreateEffectObj(effectPlayer, transform);\
+        //EffectManager.Inst.CreateEffectObj(effectPlayer, transform);\
         // 히트스캐너 생성
         if (GetComponent<HitScanner>() != null)
         {

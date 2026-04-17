@@ -14,6 +14,7 @@ public class ClientInputManager : Singleton<ClientInputManager>
     public Vector3 WorldMousePos;
     public Vector2 ScreenMousePos;
 
+
     // Start is called before the first frame update
     void Start()
     {
@@ -26,6 +27,9 @@ public class ClientInputManager : Singleton<ClientInputManager>
 
     bool isKeyDown;
 
+    // 플레이어의 게임이 시작되었는지 확인
+    bool isSessionStart = false;
+
     // Update is called once per frame
     void Update()
     {
@@ -35,10 +39,13 @@ public class ClientInputManager : Singleton<ClientInputManager>
         //    return;
         //}
 
-        InputKeyDown();
-        InputKeyStay();
-        InputKeyUp();
-        MouseAxis();
+        if (isSessionStart)
+        {
+            InputKeyDown();
+            InputKeyStay();
+            InputKeyUp();
+            MouseAxis();
+        }
 
         if(Input.GetMouseButtonDown(0))
         {
@@ -267,5 +274,9 @@ public class ClientInputManager : Singleton<ClientInputManager>
 
     }
 
+    public void SetisSessionStart(bool IsSessionStart)
+    {
+        isSessionStart = IsSessionStart;
+    }
 
 }

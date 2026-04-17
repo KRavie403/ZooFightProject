@@ -100,7 +100,7 @@ public class Item_ToyHammer : Items
         switch (action)
         {
             case HammerAction.Smash:
-                //Effectmanager.Inst.effectPool.
+                //EffectManager.Inst.effectPool.
                 break;
             case HammerAction.hit:
                 break;

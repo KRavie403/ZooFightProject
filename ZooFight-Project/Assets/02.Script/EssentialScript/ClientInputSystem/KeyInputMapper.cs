@@ -56,11 +56,7 @@ public class KeyInputMapper : MonoBehaviour
             Debug.Log("keys" + KeySetting.keys);
         }
 
-
     }
-
-
-
 
     // Start is called before the first frame update
     void Start()
@@ -68,30 +64,20 @@ public class KeyInputMapper : MonoBehaviour
 
     }
 
-
-
     // Update is called once per frame
     void Update()
     {
-
-
-
-
 
         if (Input.anyKeyDown)
         {
 
 
-
         }
-
 
     }
 
     public void KeycodeToInt(string keycode)
     {
-
-
 
     }
 
