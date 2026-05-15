@@ -7,10 +7,6 @@ using UnityEngine;
 public class ClientInputManager : Singleton<ClientInputManager>
 {
 
-    public KeyInputMapper InputMapper;
-
-    public KeySettingDecoder InputSettingDecoder;
-
     public Vector3 WorldMousePos;
     public Vector2 ScreenMousePos;
 
@@ -18,11 +14,6 @@ public class ClientInputManager : Singleton<ClientInputManager>
     // Start is called before the first frame update
     void Start()
     {
-        if (InputMapper == null)
-            InputMapper = FindObjectOfType<KeyInputMapper>();
-
-        if (InputSettingDecoder == null)
-            InputSettingDecoder = FindObjectOfType<KeySettingDecoder>();
     }
 
     bool isKeyDown;

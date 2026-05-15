@@ -159,7 +159,7 @@ public class LoadResultUI : MonoBehaviour
 
     public void LoadUserName(MatchGameResult matchGameResult)
     {
-        Logger.Log("playerTeam: LoadUserName 실행");
+        Logger.Log("LoadUserName 실행");
 
         Team winningTeam = Gamemanager.Inst.VictoryTeam;
 
@@ -196,7 +196,7 @@ public class LoadResultUI : MonoBehaviour
 
     public void LoadEff()
     {
-        Logger.Log("playerTeam: LoadEff 실행");
+        Logger.Log("LoadEff 실행");
         eff1.SetActive(true);
         eff2.SetActive(true);
 

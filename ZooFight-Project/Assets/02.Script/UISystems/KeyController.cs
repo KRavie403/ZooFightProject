@@ -8,12 +8,14 @@ using Cysharp.Threading.Tasks;
 public class KeyController : Singleton<KeyController>
 {
     public Button[] keyButtons;
-    public KeySettingDecoder InputSettingDecoder;
-    //public KeySettingDecoder InputSettingDecoder;
     public GameObject[] keyBindingPopup; // 0: 기본 팝업, 1: 키 변경 완료 팝업, 2: 중복 경고 팝업
 
     private KeyAction currentKeyAction;
     private bool isListeningForKey = false; // 키 입력 대기 중인지 여부
+
+    // 중복 처리용 임시 저장
+    private KeyAction duplicatedAction;
+    private KeyCode pendingKeyCode;
 
     private void Start()
     {
@@ -29,12 +31,6 @@ public class KeyController : Singleton<KeyController>
         for (int i = 0; i < keyButtons.Length; i++)
         {
             KeyAction action = (KeyAction)i;
-
-            if (i >= keyButtons.Length)
-            {
-                Logger.LogWarning($"keyButtons 배열에 {action}에 해당하는 버튼이 존재하지 않습니다.");
-                continue;
-            }
 
             keyButtons[i].GetComponentInChildren<TMP_Text>().text = KeySetting.keys[action].ToString();
             keyButtons[i].onClick.AddListener(() => OnKeyButtonClick(action));
@@ -61,7 +57,7 @@ public class KeyController : Singleton<KeyController>
             {
                 if (Input.GetKeyDown(keyCode))
                 {
-                    // 중복된 키가 아닌지 확인
+                    // 중복 → 확인 팝업
                     if (IsKeyCodeAlreadyAssigned(keyCode))
                     {
                         Debug.LogWarning($"{keyCode} 키는 이미 할당된 키입니다.");
@@ -85,6 +81,101 @@ public class KeyController : Singleton<KeyController>
             }
         }
     }
+
+
+
+    // PlayerPrefs 기반으로 모든 키 바인딩 저장
+    private void SaveAllKeyBindings()
+    {
+        foreach (var entry in KeySetting.keys)
+        {
+            PlayerPrefs.SetInt($"KeyBinding_{entry.Key}", (int)entry.Value);
+        }
+        PlayerPrefs.Save();
+    }
+
+    // PlayerPrefs 기반으로 모든 키 바인딩 불러오기
+    private void LoadAllKeyBindings()
+    {
+        foreach (KeyAction action in System.Enum.GetValues(typeof(KeyAction)))
+        {
+            if (action == KeyAction.KeyCount)
+                continue;
+
+            string key = $"KeyBinding_{action}";
+
+            if ((int)action >= keyButtons.Length)
+                continue;
+
+            if (PlayerPrefs.HasKey(key))
+            {
+                // 저장된 키가 있다면 그 값으로 설정
+                KeyCode code = (KeyCode)PlayerPrefs.GetInt(key);
+                KeySetting.keys[action] = code;
+            }
+            else
+            {
+                PlayerPrefs.SetInt(
+                    key,
+                    (int)KeySetting.keys[action]
+                );
+                //// 저장된 키가 없다면 기본값 설정
+                //KeyCode defaultKey = GetDefaultKeyForAction(action);
+                //KeySetting.keys[action] = defaultKey;
+                //PlayerPrefs.SetInt(key, (int)defaultKey); // 기본값도 저장
+            }
+
+            keyButtons[(int)action].GetComponentInChildren<TMP_Text>().text = KeySetting.keys[action].ToString();
+        }
+
+        PlayerPrefs.Save();
+    }
+
+    // 중복된 키 확인
+    private bool IsKeyCodeAlreadyAssigned(KeyCode keyCode)
+    {
+        foreach (var entry in KeySetting.keys)
+        {
+            if (entry.Value == keyCode)
+            {
+                duplicatedAction = entry.Key;
+                pendingKeyCode = keyCode;
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public void ConfirmDuplicateKey()
+    {
+        // 기존 키 제거
+        KeySetting.keys[duplicatedAction] = KeyCode.None;
+
+        // 새 키 적용
+        KeySetting.keys[currentKeyAction] = pendingKeyCode;
+
+        // UI 갱신
+        keyButtons[(int)duplicatedAction]
+            .GetComponentInChildren<TMP_Text>().text = "None";
+
+        keyButtons[(int)currentKeyAction]
+            .GetComponentInChildren<TMP_Text>().text = pendingKeyCode.ToString();
+
+        SaveAllKeyBindings();
+    }
+
+    public void CancelDuplicateKey()
+    {
+        keyBindingPopup[2].SetActive(false);
+
+        isListeningForKey = false;
+    }
+
+
+
+    #region 팝업 처리
 
     // 비동기 팝업 처리 함수 (1: 키 변경 완료)
     private async UniTaskVoid ShowKeyChangePopupAsync()
@@ -121,97 +212,5 @@ public class KeyController : Singleton<KeyController>
         Logger.Log($"{action}을 설정하기 위해 아무 키나 눌러주세요.");
     }
 
-    // PlayerPrefs 기반으로 모든 키 바인딩 저장
-    private void SaveAllKeyBindings()
-    {
-        foreach (var entry in KeySetting.keys)
-        {
-            PlayerPrefs.SetInt($"KeyBinding_{entry.Key}", (int)entry.Value);
-        }
-        PlayerPrefs.Save();
-    }
-
-    // PlayerPrefs 기반으로 모든 키 바인딩 불러오기
-    private void LoadAllKeyBindings()
-    {
-        foreach (KeyAction action in System.Enum.GetValues(typeof(KeyAction)))
-        {
-            string key = $"KeyBinding_{action}";
-
-            if ((int)action >= keyButtons.Length)
-                continue;
-
-            if (PlayerPrefs.HasKey(key))
-            {
-                // 저장된 키가 있다면 그 값으로 설정
-                KeyCode code = (KeyCode)PlayerPrefs.GetInt(key);
-                KeySetting.keys[action] = code;
-            }
-            else
-            {
-                // 저장된 키가 없다면 기본값 설정
-                KeyCode defaultKey = GetDefaultKeyForAction(action);
-                KeySetting.keys[action] = defaultKey;
-                PlayerPrefs.SetInt(key, (int)defaultKey); // 기본값도 저장
-            }
-
-            // UI 텍스트 반영
-            keyButtons[(int)action].GetComponentInChildren<TMP_Text>().text = KeySetting.keys[action].ToString();
-        }
-
-        PlayerPrefs.Save();
-    }
-
-    // 중복된 키가 있는지 검사하는 함수
-    private bool IsKeyCodeAlreadyAssigned(KeyCode keyCode)
-    {
-        // 현재 설정된 키들 중에서 이미 사용 중인 키코드가 있는지 확인
-        foreach (var entry in KeySetting.keys)
-        {
-            if (entry.Value == keyCode)
-            {
-                // 중복된 키가 있을 경우 기존 키를 비움
-                KeySetting.keys[entry.Key] = KeyCode.None;
-                keyButtons[(int)entry.Key].GetComponentInChildren<TMP_Text>().text = " ";
-                return true;
-            }
-        }
-        return false; // 중복된 키코드가 없음
-    }
-
-    private KeyCode GetDefaultKeyForAction(KeyAction action)
-    {
-        switch (action)
-        {
-            case KeyAction.Attack:
-                return KeyCode.Mouse0;
-            case KeyAction.Forward:
-                return KeyCode.W;
-            case KeyAction.Backward:
-                return KeyCode.S;
-            case KeyAction.Left:
-                return KeyCode.A;
-            case KeyAction.Right:
-                return KeyCode.D;
-            case KeyAction.Jump:
-                return KeyCode.Space;
-            case KeyAction.Run:
-                return KeyCode.LeftShift;
-            case KeyAction.Grab:
-                return KeyCode.Mouse1;
-            case KeyAction.Selectskill:
-                return KeyCode.E;
-            case KeyAction.Usingskill:
-                return KeyCode.F;
-            case KeyAction.Discard:
-                return KeyCode.R;
-            case KeyAction.Map:
-                return KeyCode.M;
-            case KeyAction.Menu:
-                return KeyCode.Escape;
-            default:
-                return KeyCode.None;
-        }
-    }
-
+    #endregion
 }

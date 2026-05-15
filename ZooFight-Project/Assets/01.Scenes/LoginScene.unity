@@ -24723,19 +24723,7 @@ MonoBehaviour:
   m_Value: 0.75
   m_OnValueChanged:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1815726124}
-        m_TargetAssemblyTypeName: GraphicManager, Assembly-CSharp
-        m_MethodName: DarkOverlay
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!1 &1508854699
 GameObject:
   m_ObjectHideFlags: 0
@@ -30216,8 +30204,6 @@ GameObject:
   - component: {fileID: 1815726125}
   - component: {fileID: 1815726124}
   - component: {fileID: 1815726130}
-  - component: {fileID: 1815726129}
-  - component: {fileID: 1815726131}
   m_Layer: 5
   m_Name: Settings Canvas
   m_TagString: Untagged
@@ -30263,7 +30249,7 @@ MonoBehaviour:
   displayModeDropdown: {fileID: 634202503}
   resolutionDropdown: {fileID: 666376538}
   brightnessSlider: {fileID: 1506625761}
-  overlay: {fileID: 306306722}
+  overlay: {fileID: 989312863}
 --- !u!114 &1815726125
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -30344,19 +30330,6 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 1
   m_TargetDisplay: 0
---- !u!114 &1815726129
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1815726122}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 32160670685b95341a2d2a42c83b9485, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  SavedKeyCodes: 000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 --- !u!114 &1815726130
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -30383,23 +30356,10 @@ MonoBehaviour:
   - {fileID: 891354111}
   - {fileID: 359348037}
   - {fileID: 359348037}
-  InputSettingDecoder: {fileID: 1815726129}
   keyBindingPopup:
   - {fileID: 39932823}
   - {fileID: 1460235977}
   - {fileID: 1783370705}
---- !u!114 &1815726131
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1815726122}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5f16c1db1c347be4da9d4258b1e25b9b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1822521153
 GameObject:
   m_ObjectHideFlags: 0
