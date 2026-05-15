@@ -6,7 +6,6 @@ using UnityEngine.UI;
 
 public class ResultUI : MonoBehaviour
 {
-    public Button[] btns;
 
     private void Update()
     {

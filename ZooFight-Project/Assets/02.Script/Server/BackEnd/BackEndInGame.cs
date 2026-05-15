@@ -131,12 +131,13 @@ public partial class BackEndMatchManager : MonoBehaviour
 
     public async UniTask MatchEnd()
     {
+        Logger.Log("게임 종료 중");
         Backend.Match.MatchEnd(matchGameResult);
 
         // 바로 씬 전환하지 말고, 서버에서 게임 종료 반영됐는지 확인
         SendQueue.Enqueue(Backend.Match.IsGameRoomActivate, result =>
         {
-                Logger.Log($"statusCode {result.GetStatusCode()}");
+             Logger.Log($"statusCode {result.GetStatusCode()}");
 
             if (result.GetStatusCode() == "statusCode : 404")
             {
@@ -223,12 +224,12 @@ public partial class BackEndMatchManager : MonoBehaviour
         }
 
         //MatchResultUI.GetInstance().SetGameResult(matchGameResult);
-        Logger.Log("playerTeam: MatchGameOver 실행");
         GameSceneManager.GetInstance().ShowResultBase();
         LoadResultUI.GetInstance().LoadResultBGM();
         LoadResultUI.GetInstance().LoadResultImg();
         LoadResultUI.GetInstance().LoadEff();
         LoadResultUI.GetInstance().LoadUserName(matchGameResult);
+
 
         RemoveAISessionInGameResult();
     }

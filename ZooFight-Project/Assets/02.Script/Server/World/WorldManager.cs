@@ -207,6 +207,7 @@ public class WorldManager : MonoBehaviour
 
         //GameEndMessage message = new GameEndMessage(result, winnerTeam, endTime, seesionList);
         BackEndMatchManager.GetInstance().SendDataToInGame<GameEndMessage>(message);
+
     }
 
     public SessionId GetMyPlayerIndex()
@@ -475,6 +476,7 @@ public class WorldManager : MonoBehaviour
 
     public void OnGameEnd()
     {
+        Logger.Log("게임 종료 체크");
         BackEndMatchManager.GetInstance().MatchEnd();
     }
 

@@ -1,12 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using Unity.IO;
-using UnityEngine.UIElements;
-using TMPro;
-using UnityEngine.Events;
-using System.Linq;
+
 
 public enum KeyAction
 {
@@ -19,6 +15,7 @@ public enum KeyAction
     KeyCount
 }
 
+#region 기존 (확인 후 제거)
 //public enum KeyAction
 //{
 //    Forward = 0, Backward, Left, Right,
@@ -29,61 +26,73 @@ public enum KeyAction
 //    KeyCount
 //}
 
+//public static class KeySetting
+//{
+//    public static Dictionary<KeyAction, KeyCode> keys = new Dictionary<KeyAction, KeyCode>();
+//}
+#endregion
+
 public static class KeySetting
 {
-    public static Dictionary<KeyAction, KeyCode> keys = new Dictionary<KeyAction, KeyCode>();
-}
+    public static readonly Dictionary<KeyAction, KeyCode> keys;
 
-
-public class KeyInputMapper : MonoBehaviour
-{
-    KeyCode[] defaultKeys = new KeyCode[]
+    static readonly KeyCode[] defaultKeys =
     {
-        KeyCode.W, KeyCode.S, KeyCode.A, KeyCode.D,
-        KeyCode.Space, KeyCode.LeftShift, KeyCode.Mouse0, KeyCode.E, KeyCode.F, KeyCode.Mouse1, 
-        KeyCode.R,
-        KeyCode.M,
-        KeyCode.Escape,
-        KeyCode.Q,
-        KeyCode.None
+            KeyCode.W, KeyCode.S, KeyCode.A, KeyCode.D,
+            KeyCode.Space, KeyCode.LeftShift, KeyCode.Mouse0, KeyCode.E, KeyCode.F, KeyCode.Mouse1,
+            KeyCode.R,
+            KeyCode.M,
+            KeyCode.Escape,
+            KeyCode.Q,
+            KeyCode.None
     };
 
-    private void Awake()
+    static KeySetting()
     {
+        keys = new Dictionary<KeyAction, KeyCode>();
+
         for (int i = 0; i < (int)KeyAction.KeyCount; i++)
         {
-            KeySetting.keys.Add((KeyAction)i, defaultKeys[i]);
-            Debug.Log("keys" + KeySetting.keys);
+            keys[(KeyAction)i] = defaultKeys[i];
         }
 
+        Logger.Log("KeySetting initialized");
     }
 
-    // Start is called before the first frame update
-    void Start()
-    {
 
-    }
+    #region 기존 (확인 후 제거)
+    //public class KeyInputMapper : MonoBehaviour
+    //{
+    //    KeyCode[] defaultKeys = new KeyCode[]
+    //    {
+    //        KeyCode.W, KeyCode.S, KeyCode.A, KeyCode.D,
+    //        KeyCode.Space, KeyCode.LeftShift, KeyCode.Mouse0, KeyCode.E, KeyCode.F, KeyCode.Mouse1, 
+    //        KeyCode.R,
+    //        KeyCode.M,
+    //        KeyCode.Escape,
+    //        KeyCode.Q,
+    //        KeyCode.None
+    //    };
 
-    // Update is called once per frame
-    void Update()
-    {
+    //    private void Awake()
+    //    {
+    //        for (int i = 0; i < (int)KeyAction.KeyCount; i++)
+    //        {
+    //            KeySetting.keys.Add((KeyAction)i, defaultKeys[i]);
+    //            Debug.Log("keys" + KeySetting.keys);
+    //        }
 
-        if (Input.anyKeyDown)
-        {
+    //    }
 
 
-        }
+    //    public void KeycodeToInt(string keycode)
+    //    {
 
-    }
+    //    }
+    //    public void TargetKeySetting(KeyAction KeyType,KeyCode keyCode) 
+    //    {
+    //        KeySetting.keys[KeyType] = keyCode;
+    //    }
 
-    public void KeycodeToInt(string keycode)
-    {
-
-    }
-
-    public void TargetKeySetting(KeyAction KeyType,KeyCode keyCode) 
-    {
-        KeySetting.keys[KeyType] = keyCode;
-    }
-
+    #endregion(수정함)
 }
