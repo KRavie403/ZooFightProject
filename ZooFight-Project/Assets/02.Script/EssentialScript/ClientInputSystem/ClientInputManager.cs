@@ -11,8 +11,7 @@ public class ClientInputManager : Singleton<ClientInputManager>
     public Vector2 ScreenMousePos;
 
 
-    // Start is called before the first frame update
-    void Start()
+    private void Awake()
     {
     }
 
