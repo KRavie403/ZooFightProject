@@ -15,14 +15,20 @@ public class ClientInputManager : Singleton<ClientInputManager>
     public Vector2 ScreenMousePos;
 
 
-    // Start is called before the first frame update
-    void Start()
+    private void Awake()
     {
         if (InputMapper == null)
             InputMapper = FindObjectOfType<KeyInputMapper>();
 
         if (InputSettingDecoder == null)
             InputSettingDecoder = FindObjectOfType<KeySettingDecoder>();
+        
+    }
+
+    // Start is called before the first frame update
+    void Start()
+    {
+
     }
 
     bool isKeyDown;

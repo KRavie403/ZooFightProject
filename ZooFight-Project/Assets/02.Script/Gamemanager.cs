@@ -45,6 +45,7 @@ public class Gamemanager : MonoBehaviour
     // 임시변수 
     public bool isOnline;
 
+    public float PollingRate = 30.0f;
 
     private static Gamemanager inst;
     public static Gamemanager Inst => inst;
@@ -74,7 +75,6 @@ public class Gamemanager : MonoBehaviour
 
     private IEnumerator ClientUpdateCoroutine;
 
-    public float PollingRate = 30.0f;
 
     public enum GameState { Login, MatchLobby, Ready, Start, InGame, Over, Result, Reconnect };
     private GameState gameState;
@@ -168,15 +168,12 @@ public class Gamemanager : MonoBehaviour
             Destroy(this.gameObject);
         }
 
-        //// 60프레임 고정
-        //Application.targetFrameRate = 60;
-        //// 게임중 슬립모드 해제
-        //Screen.sleepTimeout = SleepTimeout.NeverSleep;
 
         InGameUpdateCoroutine = InGameUpdate();
 
         DontDestroyOnLoad(this.gameObject);         // 씬 전환에 영향을 받지 않게 만듬
     }
+
     public static Gamemanager GetInstance()
     {
         if (inst == null)
@@ -185,6 +182,7 @@ public class Gamemanager : MonoBehaviour
             return null;
         }
         return inst;
+
     }
 
 
@@ -216,6 +214,8 @@ public class Gamemanager : MonoBehaviour
 
     }
 
+
+
     IEnumerator InGameUpdate()
     {
         while (true)
@@ -232,6 +232,8 @@ public class Gamemanager : MonoBehaviour
         }
     }
 
+
+
     public IEnumerator PollingRateUpdate()
     {
         float duringTime = 0;
@@ -244,6 +246,7 @@ public class Gamemanager : MonoBehaviour
             yield return ws;
         }
     }
+
 
     #region scene
     private void Login()
@@ -681,6 +684,7 @@ public class Gamemanager : MonoBehaviour
                 return null;
         }
     }
+
     public void AddBlockObj(BlockObject obj)
     {
         switch (obj.myTeam)

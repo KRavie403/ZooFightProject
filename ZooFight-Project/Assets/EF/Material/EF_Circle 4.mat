@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: EF_Circle 4
-  m_Shader: {fileID: -6465566751694194690, guid: 16bfb45496ab1594a881a4d00382cd40, type: 3}
+  m_Shader: {fileID: -6465566751694194690, guid: 572d8404e93fc9b44854ce28010f1794, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -49,6 +49,7 @@ Material:
     - _QueueOffset: 0
     m_Colors:
     - _Final_Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Tiling: {r: 1, g: 1, b: 0, a: 0}
   m_BuildTextureStacks: []
 --- !u!114 &8062240076921691229
 MonoBehaviour:

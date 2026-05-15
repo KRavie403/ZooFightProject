@@ -16,6 +16,7 @@ public class KeySettingDecoder : MonoBehaviour
     void Start()
     {
 
+
     }
 
     // Update is called once per frame
@@ -23,6 +24,8 @@ public class KeySettingDecoder : MonoBehaviour
     {
         
     }
+
+    // 저장 데이터 불러오기 만들어두기
 
     public void SavedCodeDecode(int[] ints)
     {

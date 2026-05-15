@@ -11,7 +11,7 @@ public class Clientmanager : MonoBehaviour
     public static Clientmanager Inst => inst;
 
     public ConfigReader ConfigReader;
-    public VersionChecker VersionChecker;
+
 
 
 
