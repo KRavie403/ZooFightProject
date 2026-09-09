@@ -142,8 +142,7 @@ public class ItemBase : ItemProperty , IItems , IEffect
                 A = true;
             }
 
-            Debug.Log("AA");
-            //A = true;
+
             yield return null;
         }
 

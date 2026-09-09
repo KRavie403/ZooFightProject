@@ -4966,7 +4966,7 @@ GameObject:
   - component: {fileID: 7410294665377356085}
   - component: {fileID: 7882935479008366428}
   m_Layer: 0
-  m_Name: E_BombExplose
+  m_Name: E_Bomb_ExploseAir
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5002,7 +5002,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e59c297fd434ac0409ac2740cf656707, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  myEffectCode: 104
+  myEffectCode: 105
   myObj: {fileID: 0}
   myEffect:
   - {fileID: 7410294666525941261}

@@ -65,6 +65,37 @@ MonoBehaviour:
   curRot: {x: 0, y: 0, z: 0}
   CameraChange: 0
   VertiaclAngle: {x: -20, y: 30}
+--- !u!1 &5211540877747465753
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7205383927023231834}
+  m_Layer: 0
+  m_Name: DebuffEffectPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7205383927023231834
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5211540877747465753}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 755575293661488890}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6468124298934183790
 GameObject:
   m_ObjectHideFlags: 0
@@ -208,6 +239,9 @@ MonoBehaviour:
   MaxShield: 0
   MotionSpeed: 2
   State: 0
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 64
   AxisX: 0
   AxisY: 0
   curNetPos: {x: 0, y: 0, z: 0}
@@ -215,12 +249,13 @@ MonoBehaviour:
   curNetAxis: {x: 0, y: 0}
   curNetDist: 0
   TargetCamera: {fileID: 3118051548614708299}
-  groundMask:
-    serializedVersion: 2
-    m_Bits: 64
   grabPoint: {fileID: 9212265269192179961}
   AttackPoint: {fileID: 0}
   ItemPoint: {fileID: 0}
+  StunEffectPoint: {fileID: 2317908961716122069}
+  BuffEffectPoint: {fileID: 7834873928081757755}
+  SlowEffectPoint: {fileID: 7205383927023231834}
+  ReverseEffectPoint: {fileID: 392170936693770080}
   curItems: {fileID: 0}
   isForceMoving: 0
   isPushing: 0
@@ -291,6 +326,37 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!1 &8320244423574377538
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 392170936693770080}
+  m_Layer: 0
+  m_Name: CurseEffectPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &392170936693770080
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8320244423574377538}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 755575293661488890}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8709925843599965852
 GameObject:
   m_ObjectHideFlags: 0
@@ -428,6 +494,68 @@ MonoBehaviour:
     mipBias: 0
     varianceClampScale: 0.9
     contrastAdaptiveSharpening: 0
+--- !u!1 &8941957069472256088
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2317908961716122069}
+  m_Layer: 0
+  m_Name: StunEffectPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2317908961716122069
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8941957069472256088}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 755575293661488890}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &8961186789175305015
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7834873928081757755}
+  m_Layer: 0
+  m_Name: BuffEffectPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7834873928081757755
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8961186789175305015}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 755575293661488890}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &6495475666790882417
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -490,7 +618,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 5789596182410082955, guid: a6217704231d3514ca41356f6c93b269, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7834873928081757755}
+    - targetCorrespondingSourceObject: {fileID: 5789596182410082955, guid: a6217704231d3514ca41356f6c93b269, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2317908961716122069}
+    - targetCorrespondingSourceObject: {fileID: 5789596182410082955, guid: a6217704231d3514ca41356f6c93b269, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 392170936693770080}
+    - targetCorrespondingSourceObject: {fileID: 5789596182410082955, guid: a6217704231d3514ca41356f6c93b269, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7205383927023231834}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 6562615063326416945, guid: a6217704231d3514ca41356f6c93b269, type: 3}
       insertIndex: -1

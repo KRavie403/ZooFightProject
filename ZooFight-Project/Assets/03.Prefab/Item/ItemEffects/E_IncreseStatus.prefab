@@ -24186,8 +24186,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7872747752081475933}
+  - component: {fileID: -4262939572493212348}
   m_Layer: 0
-  m_Name: StatusIncreseEffect
+  m_Name: E_IncreseStatus
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -24214,6 +24215,29 @@ Transform:
   - {fileID: 4015598190027430453}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &-4262939572493212348
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7904738960617721181}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e59c297fd434ac0409ac2740cf656707, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  myEffectCode: 112
+  myObj: {fileID: 0}
+  myEffect:
+  - {fileID: 6632015476345601939}
+  - {fileID: 642612118422164996}
+  - {fileID: 154759288473062555}
+  - {fileID: 8560232827040199418}
+  - {fileID: 8549016457782860257}
+  - {fileID: 3637275468902805229}
+  myEffectPlayers: []
+  triggerTarget: []
 --- !u!1 &9095817828343653866
 GameObject:
   m_ObjectHideFlags: 0

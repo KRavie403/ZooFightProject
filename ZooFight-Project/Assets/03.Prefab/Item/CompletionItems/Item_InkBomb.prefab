@@ -46,6 +46,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fde6a1acbb967684ea172148ce7a8179, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  myType: 0
+  myObjectId: 0
   Value1: 0
   Value2: 0
   Value3: 0
@@ -54,14 +56,18 @@ MonoBehaviour:
   myCode: 0
   effectCode: 0
   soundCode: 0
-  myPrefab: {fileID: 0}
+  myPrefab: {fileID: 5165083796546160346}
   Targets: []
   isTarget: 0
   myPlayer: {fileID: 0}
   InputCount: 0
   dir: {x: 0, y: 0, z: 0}
   ItemEffect: 0
+  myEffect: {fileID: 0}
+  NonActiveObj: {fileID: 0}
+  ActivedObj: {fileID: 0}
   HitScanner: {fileID: 0}
+  myTarget: []
 --- !u!1001 &3517552082804157383
 PrefabInstance:
   m_ObjectHideFlags: 0

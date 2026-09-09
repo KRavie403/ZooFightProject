@@ -15,10 +15,12 @@ public class EffectPool : MonoBehaviour
     #region 신규코드
 
     #region Create
+    // 사전세팅 작업 추후 코드로 변경예정
     [SerializeField] private List<PoolObjectData> EffectPools = new List<PoolObjectData>();
 
     private void Start()
     {
+        //
         ObjectPoolingManager.instance.EffectPoolSet(EffectPools);
         ObjectPoolingManager.instance.Pool(EffectPools);
     }
@@ -32,6 +34,15 @@ public class EffectPool : MonoBehaviour
     public GameObject GetEffectObject(EffectCode code, Transform _parent = null, bool _enable = true)
     {
         return ObjectPoolingManager.instance.GetObject(code.ToString(), _parent, _enable);
+        // 부족한 경우 추가 생성 후 하나를 반환해 줍니다.
+    }
+
+    /// <summary>
+    /// 오브젝트를 불러오고 컴퍼넌트 반환합니다.
+    /// </summary>
+    public T GetEffectObject<T>(EffectCode code, Transform _parent = null, bool _enable = true)
+    {
+        return ObjectPoolingManager.instance.GetObject(code.ToString(), _parent, _enable).GetComponent<T>();
         // 부족한 경우 추가 생성 후 하나를 반환해 줍니다.
     }
 
@@ -172,7 +183,7 @@ public class EffectPool : MonoBehaviour
         return EffectClones[EffectClones.IndexOf(players)].gameObject;
     }
 
-    // 주어진 'EffectCode'에 해당하는 'EffectPlayer' 객체를 찾아 복제하고 비활성화 상태로 'EffectClones' 리슴트에 추가
+    // 주어진 'EffectCode'에 해당하는 'EffectPlayer' 객체를 찾아 복제하고 비활성화 상태로 'EffectClones' 리스트에 추가
     public void CreateClones(GameObject gameObject)
     {
         GameObject clone = Instantiate(gameObject);

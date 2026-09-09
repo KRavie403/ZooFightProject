@@ -16,13 +16,13 @@ public enum EffectCode
     E_CharacterWalk = 0, E_CharacterRun, E_CharacterJump, E_CharacterAttack, E_CharacterDamaged,
     E_GuardDrink = 100, E_StaminaDrink, E_PowerDrink, 
     E_BananaTrap,
-    E_Bomb_Explose, E_SpiderBomb, E_InkBomb,
+    E_Bomb_Explose, E_Bomb_ExploseAir, E_SpiderBomb, E_InkBomb,
     E_WhippingMachine, E_MinimalRazer,
     E_CurseScroll, E_BlockChangeScroll,
     E_IncreseStatus,E_DecreseStatus,
     E_Stun,
     E_ButtonClick = 200,
-    E_GameWin = 300,E_GameLose,E_GamDraw,
+    E_GameWin = 300,E_GameLose,E_GameDraw,
 
     NotSetting,
     CodeCount
@@ -50,27 +50,30 @@ public class EffectManager : Singleton<EffectManager>
     protected override void Awake()
     {
         effectPlayers = new List<EffectPlayer>();  // 초기화
-        for (int i = 0; i < effectObj.Count; i++)
-        {
-            if (effectObj[i] != null) 
-            {
-                //effectPlayers.Add(effectObj[i].GetComponent<EffectPlayer>());
-                EffectPlayer effectPlayer = effectObj[i].GetComponent<EffectPlayer>();
-                effectPlayers.Add(effectPlayer);
-                EffectSetting.keys.Add(effectPlayers[i].GetComponent<IEffect>().EffectCode, effectPlayers[i]);
-                Debug.Log(effectPlayers[i].GetComponent<IEffect>().EffectCode);
-            }
-            //if (effectObj[i] != null)
-            //{
-            //    effectPlayers.Add(effectObj[i].GetComponent<EffectPlayer>());
-            //    EffectSetting.keys.Add(effectPlayers[i].GetComponent<IEffect>().GetEffectCode(), effectPlayers[i]);
-            //    Debug.Log(effectPlayers[i].GetComponent<IEffect>().GetEffectCode());
-            //}
-        }
+        //for (int i = 0; i < effectObj.Count; i++)
+        //{
+        //    if (effectObj[i] != null) 
+        //    {
+        //        //effectPlayers.Add(effectObj[i].GetComponent<EffectPlayer>());
+        //        EffectPlayer effectPlayer = effectObj[i].GetComponent<EffectPlayer>();
+        //        effectPlayers.Add(effectPlayer);
+        //        EffectSetting.keys.Add(effectPlayers[i].GetComponent<IEffect>().EffectCode, effectPlayers[i]);
+        //        Debug.Log(effectPlayers[i].GetComponent<IEffect>().EffectCode);
+        //    }
+        //    //if (effectObj[i] != null)
+        //    //{
+        //    //    effectPlayers.Add(effectObj[i].GetComponent<EffectPlayer>());
+        //    //    EffectSetting.keys.Add(effectPlayers[i].GetComponent<IEffect>().GetEffectCode(), effectPlayers[i]);
+        //    //    Debug.Log(effectPlayers[i].GetComponent<IEffect>().GetEffectCode());
+        //    //}
+        //}
 
         effectPool = GetComponentInChildren<EffectPool>();
 
     }
+
+
+    #region 몰?루
 
     public GameObject GetEffectObj(EffectPlayer player)
     {
@@ -114,4 +117,5 @@ public class EffectManager : Singleton<EffectManager>
             }
         }
     }
+    #endregion 
 }

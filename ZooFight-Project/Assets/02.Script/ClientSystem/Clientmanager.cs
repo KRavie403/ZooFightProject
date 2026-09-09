@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-
+/// <summary>
+/// 현재 미사용 코드
+/// </summary>
 public class Clientmanager : MonoBehaviour
 {
 

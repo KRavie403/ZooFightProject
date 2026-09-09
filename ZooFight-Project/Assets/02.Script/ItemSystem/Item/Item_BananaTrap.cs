@@ -31,6 +31,7 @@ public class Item_BananaTrap : Items , IHitScanner
 
     [SerializeField]
     EffectPlayer myEffect;
+    GameObject myEffectObj;
 
     public HitScanner myHitScanner;
 
@@ -175,6 +176,13 @@ public class Item_BananaTrap : Items , IHitScanner
         //myPlayer.SetState()
         float duringTime = 0;
         myHitScanner.SetScanActive(true);
+
+        myEffectObj = EffectManager.Inst.effectPool.GetEffectObject(effectCode);
+        myEffect = myEffectObj.GetComponent<EffectPlayer>();
+        //EffectManager.Inst.
+
+        myEffect.EffectPlayAll(myPlayer.StunEffectPoint, 0, true);
+
         // 바나나 지속시간동안 동작
         while (duringTime < Value2)
         {
@@ -209,6 +217,9 @@ public class Item_BananaTrap : Items , IHitScanner
             yield return null;
         }
         Debug.Log($"{this} ActiveEnd");
+
+        myEffect.EffectEndAll();
+        EffectManager.Inst.effectPool.ReturnObject(myEffectObj);
 
         // 사용이 끝나면 오브젝트 반환
         ReturnItem();
