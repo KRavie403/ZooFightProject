@@ -29,12 +29,12 @@ public class ClientInputManager : Singleton<ClientInputManager>
         //    return;
         //}
 
-        if (isSessionStart)
-        {
             InputKeyDown();
             InputKeyStay();
             InputKeyUp();
             MouseAxis();
+        if (isSessionStart)
+        {
         }
 
         if(Input.GetMouseButtonDown(0))
@@ -109,6 +109,7 @@ public class ClientInputManager : Singleton<ClientInputManager>
         if (Input.GetKeyDown(KeySetting.keys[KeyAction.Usingskill]))
         {
             if (Gamemanager.Inst.currentPlayer == null) return;
+            Logger.Log("key check: 아이템 사용 버튼 눌리는 중");
             Gamemanager.Inst.currentPlayer.ItemUse();
         }
         if (Input.GetKeyDown(KeySetting.keys[KeyAction.Grab]))
@@ -125,6 +126,7 @@ public class ClientInputManager : Singleton<ClientInputManager>
         }
         if (Input.GetKeyDown(KeySetting.keys[KeyAction.ItemCreate]))
         {
+            Logger.Log("key check: 아이템 생성 버튼 눌리는 중");
             Gamemanager.Inst.currentPlayer.GetItem();
             //ItemSystem.Inst.GiveItem(Gamemanager.Inst.currentPlayer,ItemSystem.Inst.RandomItemSelect());
         }

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using TMPro;
+using BackEnd;
 
 public class WorldManager : MonoBehaviour
 {
@@ -568,6 +569,21 @@ public class WorldManager : MonoBehaviour
                 PlayerNoMoveMessage noMoveMessage = DataParser.ReadJsonData<PlayerNoMoveMessage>(args.BinaryUserData);
                 ProcessPlayerData(noMoveMessage);
                 break;
+            case Protocol.Type.GetItem:
+                Logger.Log($"Item Test: 아이템 생성");
+                GetItem getItem = DataParser.ReadJsonData<GetItem>(args.BinaryUserData);
+                ProcessPlayerData(getItem);
+                break;
+            case Protocol.Type.ItemReady:
+                Logger.Log($"Item Test: 아이템 준비");
+                ItemReady itemReady = DataParser.ReadJsonData<ItemReady>(args.BinaryUserData);
+                ProcessPlayerData(itemReady);
+                break;
+            case Protocol.Type.ImmediateUseItem:
+                Logger.Log($"Item Test: 아이템 사용");
+                ImmediateUseItem immediateUseItem = DataParser.ReadJsonData<ImmediateUseItem>(args.BinaryUserData);
+                ProcessPlayerData(immediateUseItem);
+                break;
             //case DataScripts.Type.BlockData:
             //    BlockData blockDataMessage = DataParser.ReadJsonData<BlockData>(args.BinaryUserData);
             //    break;
@@ -583,13 +599,17 @@ public class WorldManager : MonoBehaviour
                 break;
             default:
                 Logger.Log("Unknown protocol type");
-                return;
+                break;
         }
         switch (bda.type)
         {
             case DataScripts.DataTypes.CharacterData:
                 CharacterData moveMessage = DataParser.ReadJsonData<CharacterData>(args.BinaryUserData);
                 //ProcessPlayerData(moveMessage);
+                break;
+            case DataScripts.DataTypes.PlayerBasicData:
+                C_MovementData data = DataParser.ReadJsonData<C_MovementData>(args.BinaryUserData);
+                ProcessPlayerData(data);
                 break;
             case DataScripts.DataTypes.ItemData:
                 ItemData itemMessage = DataParser.ReadJsonData<ItemData>(args.BinaryUserData);
@@ -665,20 +685,42 @@ public class WorldManager : MonoBehaviour
 
         if (isMove)
         {
-            players[index].SetMoveVector(moveVector);
-            PlayerMoveMessage msg = new PlayerMoveMessage(index, playerPos, moveVector);
-            BackEndMatchManager.GetInstance().SendDataToInGame<PlayerMoveMessage>(msg);
+            //players[index].SetMoveVector(moveVector);
+            //PlayerMoveMessage msg = new PlayerMoveMessage(index, playerPos, moveVector);
+            //BackEndMatchManager.GetInstance().SendDataToInGame<PlayerMoveMessage>(msg);
         }
         if (isNoMove)
         {
-            PlayerNoMoveMessage msg = new PlayerNoMoveMessage(index, playerPos);
-            BackEndMatchManager.GetInstance().SendDataToInGame<PlayerNoMoveMessage>(msg);
+            //PlayerNoMoveMessage msg = new PlayerNoMoveMessage(index, playerPos);
+            //BackEndMatchManager.GetInstance().SendDataToInGame<PlayerNoMoveMessage>(msg);
         }
         //if (isAttack)
         //{
         //    PlayerAttackMessage msg = new PlayerAttackMessage(index, attackPos);
         //    BackEndMatchManager.GetInstance().SendDataToInGame<PlayerAttackMessage>(msg);
         //}
+    }
+
+    private void ProcessPlayerData(C_MovementData data)
+    {
+        if (data.playerId == Backend.Match.GetMySessionId())
+            return;
+
+        Player player = players[data.playerId];
+
+        PlayerController controller =
+            player.GetComponent<PlayerController>();
+
+        controller.curNetPos = data.curPos;
+        controller.curNetRot = data.curRot;
+
+        controller.curNetAxis = new Vector2(
+    data.curAxis.x,
+    data.curAxis.z);
+
+        Logger.Log($"캐릭터 정보 받는 중: ID - {data.playerId}");
+        Logger.Log($"캐릭터 정보 받는 중: curPos: {data.curPos}, curRot: {data.curRot}, curAxis: {data.curAxis}");
+
     }
 
     private void ProcessAttackKeyData(SessionId session, Vector3 pos)
@@ -749,6 +791,58 @@ public class WorldManager : MonoBehaviour
         GameSceneManager.GetInstance().GetUser(index, data.modelId);
         GameSceneManager.GetInstance().UpdateCharacterUI(index, playersModelNum);
     }
+
+    // 플레이어 아이템 생성
+    private void ProcessPlayerData(GetItem data)
+    {
+        Logger.Log($"Item Test (생성) / dataPlayerID: {data.playerSession}, thisPlayerId:{Backend.Match.GetMySessionId()}");
+        if (data.playerSession == Backend.Match.GetMySessionId())
+            return;
+
+        Logger.Log($"Item Test / 여기?");
+        Player player = players[data.playerSession];
+        PlayerController controller =
+            player.GetComponent<PlayerController>();
+
+        if (controller == null)
+            return;
+        Logger.Log($"Item Test / 아님 여기??");
+
+        controller.GetItem(data.itemCode);
+        Logger.Log($"Item Test / {playerSessionId[data.playerSession]} player - ID: {data.playerSession} / 아이템 생성");
+    }
+
+
+    // 플레이어 아이템 준비
+    private void ProcessPlayerData(ItemReady data)
+    {
+        Logger.Log($"Item Test (준비) / dataPlayerID: {data.playerSession}, thisPlayerId:{Backend.Match.GetMySessionId()}");
+        if (data.playerSession == Backend.Match.GetMySessionId())
+            return;
+        Player player = players[data.playerSession];
+        PlayerController controller =
+            player.GetComponent<PlayerController>();
+
+        controller.ExecuteItemReady(data.isReady);
+
+        Logger.Log($"Item Test / {playerSessionId[data.playerSession]} player - ID: {data.playerSession} / 아이템 준비");
+    }
+
+    // 플레이어 아이템 사용
+    private void ProcessPlayerData(ImmediateUseItem data)
+    {
+        Logger.Log($"Item Test (사용) / dataPlayerID: {data.playerSession}, thisPlayerId:{Backend.Match.GetMySessionId()}");
+        if (data.playerSession == Backend.Match.GetMySessionId())
+            return;
+        Player player = players[data.playerSession];
+        PlayerController controller =
+            player.GetComponent<PlayerController>();
+
+        controller.ExecuteItemUse();
+
+        Logger.Log($"Item Test / {playerSessionId[data.playerSession]} player - ID: {data.playerSession} / 아이템 사용중");
+    }
+
 
     private void ProcessSyncData(GameSyncMessage syncMessage)
     {

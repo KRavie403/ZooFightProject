@@ -6,10 +6,10 @@ public class CombineMeshes : MonoBehaviour
 {
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            Combine();
-        }
+        //if (Input.GetKeyDown(KeyCode.Space))
+        //{
+        //    Combine();
+        //}
     }
 
     void Combine()

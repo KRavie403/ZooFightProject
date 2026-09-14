@@ -67,6 +67,7 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
     public Vector3 curNetRot = Vector3.zero;
     public Vector2 curNetAxis = Vector2.zero;
     public float curNetDist = 0.0f;
+    public bool curNetIsRunning;
 
     public CharacterCamera TargetCamera;
 
@@ -87,6 +88,10 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
 
     CharacterData myData;
     C_MovementData movementData;
+
+
+    [SerializeField] private float sendInterval = 0.05f;
+    private float sendTimer;
 
     public bool isPlayersConrtol
     {
@@ -241,6 +246,10 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
                     break;
                 case ItemCode.CurseScroll:
                     GetCrowdControl(StatusCode.Reverse,component.GetComponent<Item_CurseScroll>().Value1);
+
+                    RunEffect msg = new RunEffect(Backend.Match.GetMySessionId(),EffectCode.E_CurseScroll);
+                    BackEndMatchManager.GetInstance().SendDataToInGame<RunEffect>(msg);
+
                     break;
                 case ItemCode.SpiderBomb:
                     GetCrowdControl(StatusCode.Slow,component.GetComponent<Item_SpiderBomb>().Value2,component.GetComponent<Item_SpiderBomb>().Value1);
@@ -321,7 +330,12 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
         //}
         //CharacterMove(AxisX, AxisY,isDenial);
         Debug.Log(transform.forward);
-        
+
+        if (isOwner)
+        {
+            StatusPolling();
+        }
+
     }
     protected override void LateUpdate()
     {
@@ -356,7 +370,24 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
     /// </summary>
     public void StatusPolling()
     {
+        sendTimer += Time.deltaTime;
 
+        if (sendTimer < sendInterval)
+            return;
+
+        sendTimer = 0;
+
+        C_MovementData data =
+            new C_MovementData(Backend.Match.GetMySessionId());
+
+        data.curPos = transform.position;
+        data.curRot = transform.eulerAngles;
+
+        data.curAxis = new Vector3(AxisX, 0f, AxisY);
+
+        Logger.Log($"캐릭터 정보 보내는 중: curPos: {data.curPos}, curRot: {data.curRot}, curAxis: {data.curAxis}");
+        BackEndMatchManager.GetInstance()
+            .SendDataToInGame(data);
     }
 
     /// <summary>
@@ -459,23 +490,89 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
 
     #region 이동관련 신규코드
 
+
+    //public void Move()
+    //{
+    //    float Speed = isRunning ? MoveSpeed * RunSpeedRate : MoveSpeed;
+
+    //    if (!isForceMoving)
+    //    {
+    //        // 구조 변환 예정
+    //        if (isOwner)
+    //        {
+    //            PlayerMove(new Vector2(AxisX, AxisY), transform.forward, Speed * Time.deltaTime);
+    //        }
+    //        else
+    //        {
+    //            PlayerMove(curNetPos, curNetRot,curNetDist);
+    //        }
+    //    }
+
+    //}
     public void Move()
     {
         float Speed = isRunning ? MoveSpeed * RunSpeedRate : MoveSpeed;
 
-        if (!isForceMoving)
+        if (isForceMoving)
+            return;
+
+        if (isOwner)
         {
-            // 구조 변환 예정
-            if (isOwner)
-            {
-                PlayerMove(new Vector2(AxisX, AxisY), transform.forward, Speed * Time.deltaTime);
-            }
-            else
-            {
-                PlayerMove(curNetPos, curNetRot,curNetDist);
-            }
+            // 내 캐릭터는 입력으로 이동
+            PlayerMove(
+                new Vector2(AxisX, AxisY),
+                transform.forward,
+                Speed * Time.deltaTime
+            );
         }
-              
+        else
+        {
+            // 다른 플레이어는 받은 위치를 따라감
+            NetworkMove();
+        }
+    }
+
+    private void NetworkMove()
+    {
+        transform.position = Vector3.Lerp(
+        transform.position,
+        curNetPos,
+        Time.deltaTime * 15f
+    );
+
+        transform.rotation = Quaternion.Lerp(
+            transform.rotation,
+            Quaternion.Euler(curNetRot),
+            Time.deltaTime * 15f
+        );
+
+        UpdateMoveAnimation(curNetAxis);
+        //transform.position = Vector3.Lerp(
+        //    transform.position,
+        //    curNetPos,
+        //    Time.deltaTime * 15f
+        //);
+
+        //transform.rotation = Quaternion.Lerp(
+        //    transform.rotation,
+        //    Quaternion.Euler(curNetRot),
+        //    Time.deltaTime * 15f
+        //);
+    }
+
+    private void UpdateMoveAnimation(Vector2 axis)
+    {
+        if (axis == Vector2.zero)
+        {
+            MoveMotionStop();
+            return;
+        }
+
+        myAnim.SetFloat("MoveAxisX", Mathf.Clamp(axis.x * MotionSpeed, -1f, 1f));
+        myAnim.SetFloat("MoveAxisY", Mathf.Clamp(axis.y * MotionSpeed, -1f, 1f));
+
+        myAnim.SetBool("IsMoving", true);
+        myAnim.SetBool("IsRunning", isRunning);
     }
 
     public Vector3 GetMoveVector()
@@ -545,18 +642,19 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
             BackEndMatchManager.GetInstance().SendDataToInGame<DataScripts.BlockData>(blockDataMessage);
         }
 
-        myAnim.SetFloat("MoveAxisX", Mathf.Clamp(AxisX * MotionSpeed, -1.0f, 1.0f));
-        myAnim.SetFloat("MoveAxisY", Mathf.Clamp(AxisY * MotionSpeed, -1.0f, 1.0f));
+        //myAnim.SetFloat("MoveAxisX", Mathf.Clamp(AxisX * MotionSpeed, -1.0f, 1.0f));
+        //myAnim.SetFloat("MoveAxisY", Mathf.Clamp(AxisY * MotionSpeed, -1.0f, 1.0f));
 
-        myAnim.SetBool("IsMoving", true);
-        if (isRunning)
-        {
-            myAnim.SetBool("IsRunning", true);
-        }
-        else
-        {
-            myAnim.SetBool("IsRunning", false);
-        }
+        //myAnim.SetBool("IsMoving", true);
+        //if (isRunning)
+        //{
+        //    myAnim.SetBool("IsRunning", true);
+        //}
+        //else
+        //{
+        //    myAnim.SetBool("IsRunning", false);
+        //}
+        UpdateMoveAnimation(Axis);
 
     }
      
@@ -956,6 +1054,23 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
     }
 
     // 동작 불가능상태 = 아이템 사용중 , 상태이상, 기상, 점프
+    //public void ItemReady()
+    //{
+    //    if (curItems == null) return;
+    //    if (PlayerSM.CurrentState == p_States[pState.ItemUse]) return;
+    //    if (PlayerSM.CurrentState == p_States[pState.Down]) return;
+    //    if (PlayerSM.CurrentState == p_States[pState.Recovery]) return;
+    //    if (PlayerSM.CurrentState == p_States[pState.Jump]) return;
+
+    //    if (PlayerSM.CurrentState == p_States[pState.ItemReady])
+    //    {
+    //        ItemRelease();
+    //    }
+    //    else
+    //    {
+    //        PlayerSM.ChangeState(p_States[pState.ItemReady]);
+    //    }
+    //}
     public void ItemReady()
     {
         if (curItems == null) return;
@@ -964,31 +1079,94 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
         if (PlayerSM.CurrentState == p_States[pState.Recovery]) return;
         if (PlayerSM.CurrentState == p_States[pState.Jump]) return;
 
+        bool ready;
+
         if (PlayerSM.CurrentState == p_States[pState.ItemReady])
         {
+            ready = false;
             ItemRelease();
         }
         else
         {
+            ready = true;
             PlayerSM.ChangeState(p_States[pState.ItemReady]);
         }
+
+        ItemReady msg = new ItemReady(
+            Backend.Match.GetMySessionId(),
+            ready
+        );
+
+        BackEndMatchManager.GetInstance()
+            .SendDataToInGame<ItemReady>(msg);
     }
+
+    public void ExecuteItemReady(bool ready)
+    {
+        if (curItems == null) return;
+
+        if (ready)
+        {
+            if (PlayerSM.CurrentState == p_States[pState.ItemUse])
+                return;
+
+            PlayerSM.ChangeState(p_States[pState.ItemReady]);
+        }
+        else
+        {
+            if (PlayerSM.CurrentState == p_States[pState.ItemReady])
+            {
+                ItemRelease();
+            }
+        }
+    }
+
 
     /// <summary>
     /// 아이템 사용동작의 시작을 알리는 함수
     /// </summary>
+    //public void ItemUse()
+    //{
+    //    if(curItems != null)
+    //    {
+    //        if(PlayerSM.CurrentState == p_States[pState.ItemReady])
+    //        {
+    //            PlayerSM.ChangeState(p_States[pState.ItemUse]);
+
+    //            curItems.ItemUse();
+    //        }
+    //    }
+    //}
     public void ItemUse()
     {
-        if(curItems != null)
-        {
-            if(PlayerSM.CurrentState == p_States[pState.ItemReady])
-            {
-                PlayerSM.ChangeState(p_States[pState.ItemUse]);
+        if (curItems == null) return;
 
-                curItems.ItemUse();
-            }
-        }
+        if (PlayerSM.CurrentState != p_States[pState.ItemReady])
+            return;
+
+        PlayerSM.ChangeState(p_States[pState.ItemUse]);
+        curItems.ItemUse();
+
+        ImmediateUseItem msg =
+            new ImmediateUseItem(Backend.Match.GetMySessionId());
+
+        BackEndMatchManager.GetInstance()
+            .SendDataToInGame<ImmediateUseItem>(msg);
     }
+
+
+    public void ExecuteItemUse()
+    {
+        if (curItems == null) return;
+
+        if (PlayerSM.CurrentState != p_States[pState.ItemReady])
+            return;
+
+        PlayerSM.ChangeState(p_States[pState.ItemUse]);
+
+        curItems.ItemUse();
+    }
+
 
     /// <summary>
     /// 아이템 사용동작이 끝남을 알리는 함수
@@ -1006,12 +1184,63 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
     /// <summary>
     /// 아이템을 지급받는 함수
     /// </summary>
+    //public void GetItem()
+    //{
+
+    //    Items items = ItemSystem.Inst.GiveItem(this, ItemSystem.Inst.RandomItemSelect());
+    //    if( items == null) return;  
+    //    if(curItems == null)
+    //    {
+    //        curItems = items;
+    //    }
+    //    else
+    //    {
+    //        items.ReturnItem();
+    //    }
+    //}
     public void GetItem()
     {
+        Items items = ItemSystem.Inst.GiveItem(
+            this,
+            ItemSystem.Inst.RandomItemSelect()
+        );
 
-        Items items = ItemSystem.Inst.GiveItem(this, ItemSystem.Inst.RandomItemSelect());
-        if( items == null) return;  
-        if(curItems == null)
+        if (items == null)
+            return;
+
+        if (curItems == null)
+        {
+            curItems = items;
+
+            GetItem msg = new GetItem(
+                Backend.Match.GetMySessionId(),
+                items.myCode
+            );
+
+            BackEndMatchManager.GetInstance()
+                .SendDataToInGame<GetItem>(msg);
+        }
+        else
+        {
+            items.ReturnItem();
+        }
+    }
+
+    // 다른 플레이어 아이템 생성
+    public void GetItem(ItemCode itemCode)
+    {
+        Logger.Log($"Item Test : ItemCode-{itemCode}");
+        Items originItem = ItemSystem.Inst.GetItemByCode(itemCode);
+
+        if (originItem == null)
+            return;
+
+        Items items = ItemSystem.Inst.GiveItem(this, originItem);
+
+        if (items == null)
+            return;
+
+        if (curItems == null)
         {
             curItems = items;
         }
@@ -1020,6 +1249,7 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
             items.ReturnItem();
         }
     }
+
 
     #endregion
 
@@ -1345,6 +1575,7 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
 
         DownAction();
     }
+
 
     private void OnCollisionEnter(Collision collision)
     {

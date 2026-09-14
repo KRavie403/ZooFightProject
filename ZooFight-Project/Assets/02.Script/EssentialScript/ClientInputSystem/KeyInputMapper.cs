@@ -54,6 +54,7 @@ public static class KeySetting
         for (int i = 0; i < (int)KeyAction.KeyCount; i++)
         {
             keys[(KeyAction)i] = defaultKeys[i];
+            Logger.Log($"key check: {keys[(KeyAction)i]} : {defaultKeys[i]}");
         }
 
         Logger.Log("KeySetting initialized");

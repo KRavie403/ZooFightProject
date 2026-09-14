@@ -25,10 +25,12 @@ namespace Protocol
         //ItemInfo,       //플레이어가 가지고 있는 아이템 정보
 
         ItemDrop,   //아이템 드랍
-        ItemGet,    //아이템 얻음
+        GetItem,   //아이템 드랍
+        ItemReady,    //아이템 얻음
 
         ImmediateUseItem,   //즉시 사용 아이템 사용
         ProjectileUseItem,     //투사체 아이템 사용
+        RunEffect, // 아이템 이팩트 작동
 
         BlockMove,      //블럭 이동
         BlockNoMove,    //블럭 이동 멈춤
@@ -208,29 +210,51 @@ namespace Protocol
         }
     }
 
-    public class ItemGet : Message
+    public class GetItem : Message
     {
         public SessionId playerSession;
-        public float xPos;
-        public float yPos;
-        public float zPos;
-        public ItemGet(SessionId session, Vector3 pos) : base(Type.ItemGet)
+        public ItemCode itemCode;
+
+        public GetItem(SessionId session, ItemCode code)
+            : base(Type.GetItem)
         {
-            this.playerSession = session;
-            this.xPos = pos.x;
-            this.yPos = pos.y;
-            this.zPos = pos.z;
+            playerSession = session;
+            itemCode = code;
+        }
+    }
+
+
+    public class ItemReady : Message
+    {
+        public SessionId playerSession;
+        public bool isReady;
+
+        public ItemReady(SessionId session, bool ready)
+            : base(Type.ItemReady)
+        {
+            playerSession = session;
+            isReady = ready;
         }
     }
 
     public class ImmediateUseItem : Message
     {
         public SessionId playerSession;
-        PlayerController player;
-        public ImmediateUseItem(SessionId session,PlayerController p) : base(Type.ImmediateUseItem)
+        public ImmediateUseItem(SessionId session) : base(Type.ImmediateUseItem)
         {
             this.playerSession = session;
-            this.player = p;
+        }
+    }
+
+    public class RunEffect : Message
+    {
+        public SessionId playerSession;
+        public EffectCode effectCode;
+
+        public RunEffect(SessionId session, EffectCode effectCode) : base(Type.RunEffect)
+        {
+            this.playerSession = session;
+            this.effectCode = effectCode;
         }
     }
 
