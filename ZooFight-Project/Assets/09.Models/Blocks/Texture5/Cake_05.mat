@@ -22,11 +22,13 @@ Material:
   - _USEPURESKETCH_ON
   - _USESPECULAR_ON
   m_InvalidKeywords:
+  - _GLOSSYREFLECTIONS_OFF
+  - _NORMALMAP
   - _USESHADOWS_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: 1024
+  m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
   m_LockedProperties: 
@@ -41,6 +43,10 @@ Material:
         m_Texture: {fileID: 2800000, guid: f5f947d864ff4f94e83fae473fe33ebe, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _DecalTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _DetailAlbedoMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -50,6 +56,10 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DetailNormalMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailTex:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -119,6 +129,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _Abs: 0
     - _AdaptiveThicnkess: 0
     - _AdditionalLightsAmount: 1
     - _AdditionalLightsFaloff: 1
@@ -135,6 +146,7 @@ Material:
     - _BumpScale: 1
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
+    - _ColorMask: 15
     - _Cull: 2
     - _Cutoff: 0.5
     - _Darken: 0
@@ -164,8 +176,10 @@ Material:
     - _MainLightIntesity: 1
     - _MaxScaleDependingOnCamera: 1
     - _Metallic: 0
+    - _Mode: 0
     - _NormalMapStrength: 0.2
     - _OcclusionStrength: 1
+    - _Offset: 0
     - _OutlineDynamicSpeed: 0
     - _OutlineNoiseIntesity: 1
     - _OutlineNoiseScale: 10
@@ -185,6 +199,7 @@ Material:
     - _RimSmoothness: 0
     - _RimSplitColor: 0
     - _RimThickness: 1
+    - _Scale: 1
     - _ShapeSmoothness: 0.2
     - _SideShineAmount: 0.2717647
     - _SideShineHardness: 0
@@ -201,17 +216,24 @@ Material:
     - _SpecularShadowMask: 0
     - _SrcBlend: 1
     - _SrcBlendAlpha: 1
+    - _Stencil: 0
+    - _StencilComp: 8
+    - _StencilOp: 0
+    - _StencilReadMask: 255
+    - _StencilWriteMask: 255
     - _StepHalftoneTexture: 0
     - _StepOffset: 0
     - _Strength: 0
     - _Surface: 0
     - _Thicnkess: 0
+    - _Type: 6
     - _UVAnimationSpeed: 0
     - _UVAnimationSpeedSpec: 0
     - _UVAnimationSpeedWarp: 0
     - _UVScrollSpeed: 0
     - _UVScrollSpeedSpec: 0
     - _UVScrollSpeedWarp: 0
+    - _UVSec: 0
     - _UVSrcrollAngle: 0
     - _UVSrcrollAngleSpec: 0
     - _UVSrcrollAngleWarp: 0
@@ -236,9 +258,11 @@ Material:
     - _UseShadows: 1
     - _UseSpecular: 1
     - _UseSpecularMask: 0
+    - _UseUIAlphaClip: 0
     - _WarpStrength: 0
     - _WarpTextureRotation: 0
     - _WarpTextureScale: 1
+    - _WindQuality: 0
     - _WorkflowMode: 1
     - _ZWrite: 1
     m_Colors:
@@ -247,6 +271,7 @@ Material:
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _HalftoneColor: {r: 0, g: 0, b: 0, a: 1}
     - _HatchingColor: {r: 0, g: 0, b: 0, a: 1}
+    - _HueVariation: {r: 1, g: 0.5, b: 0, a: 0.1}
     - _OutlineColor: {r: 0, g: 0, b: 0, a: 0}
     - _RimColor: {r: 1, g: 1, b: 1, a: 0}
     - _RimShadowColor: {r: 0, g: 0.05551431, b: 0.9622642, a: 0}

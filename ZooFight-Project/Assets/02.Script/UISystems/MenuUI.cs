@@ -10,13 +10,12 @@ public class MenuUI : MonoBehaviour
     public GameObject WarningPopup;
 
     private SettingsController settingsController;
-    private bool _isSettingESC = true;
-    private bool _isMenuESC = true;
+    private bool _settingOpened = false;
+    private bool _menuOpened = false;
 
     // Start is called before the first frame update
     private void Start()
     {
-        Menu.SetActive(false);
         CanvasGroupOff(MenuGroup);
         WarningPopup.SetActive(false);
 
@@ -25,28 +24,26 @@ public class MenuUI : MonoBehaviour
 
     public void ClickESC()
     {
-        _isSettingESC = true;
+        _settingOpened = true;
     }
 
     public void ESC()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (!_menuOpened)
         {
-            if (_isSettingESC && _isMenuESC)
-            {
-                _isMenuESC = false;
-                CanvasGroupOn(MenuGroup);
-            }
-            else if (_isSettingESC && !_isMenuESC)
-            {
-                _isMenuESC = true;
-                CanvasGroupOff(MenuGroup);
-            }
-            else if (!_isSettingESC)
-            {
-                ClickESC();
-            }
+            _menuOpened = true;
+            CanvasGroupOn(MenuGroup);
+            return;
         }
+
+        if (!SettingsController.Inst.IsESC)
+        {
+            SettingsController.Inst.ClickESC();
+            return;
+        }
+
+        _menuOpened = false;
+        CanvasGroupOff(MenuGroup);
     }
 
     public void ClickContinue()
@@ -83,6 +80,19 @@ public class MenuUI : MonoBehaviour
     public void ClickQuit()
     {
         WorldManager.Inst.OnGameResult();
+    }
+
+    public void OnSettingsButtonClick()
+    {
+        if (SettingsController.Inst != null)
+        {
+            _settingOpened = true;
+            SettingsController.Inst.OpenSettings();
+        }
+        else
+        {
+            Logger.LogWarning("SettingsController 인스턴스를 찾을 수 없습니다.");
+        }
     }
 
     public void CanvasGroupOn(CanvasGroup cg)

@@ -16,7 +16,14 @@ public class SettingsController : Singleton<SettingsController>
     public CanvasGroup ControlGroup;
 
     private bool _isESC = true;
-    private MenuUI menuUI;
+
+    public bool IsESC
+    {
+        get => _isESC;
+        set => _isESC = value;
+    }
+
+    [SerializeField] private MenuUI menuUI;
 
     private Dictionary<string, CanvasGroup> _tabs;      // 카테고리 관리용
 
@@ -34,7 +41,6 @@ public class SettingsController : Singleton<SettingsController>
             { "Control", ControlGroup }
         };
 
-        menuUI = FindObjectOfType<MenuUI>();
     }
 
     private void Update()
@@ -95,29 +101,47 @@ public class SettingsController : Singleton<SettingsController>
 
     private void ESC()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (!Input.GetKeyDown(KeyCode.Escape))
+            return;
+
+        if (SceneManager.GetActiveScene().name == "GameScene")
         {
-            if ((SceneManager.GetActiveScene().name == "GameScene" || SceneManager.GetActiveScene().name == "LobbyScene") && menuUI != null)
+            if (menuUI != null)
             {
-                // 게임 씬에서 ESC 키를 누를 때 MenuUI를 관리
                 menuUI.ESC();
-            }
-            else
-            {
-                // 일반적인 ESC 키 처리
-                if (_isESC)
-                {
-                    _isESC = !_isESC;
-                    OpenSettings();
-                }
-                else
-                {
-                    _isESC = !_isESC;
-                    Settings.SetActive(false);
-                    CanvasGroupOff(SettingGroup);
-                }
+                return;
             }
         }
+
+        // 기존 Settings 처리
+        else if (_isESC)
+        {
+            _isESC = false;
+            Logger.Log($"check 뭐지 _isESC 열 : {_isESC}");
+            OpenSettings();
+        }
+        else
+        {
+            _isESC = true;
+            Logger.Log($"check 뭐지 _isESC 닫 : {_isESC}");
+            Settings.SetActive(false);
+            CanvasGroupOff(SettingGroup);
+        }
+    }
+
+    private void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        menuUI = FindObjectOfType<MenuUI>();
     }
 
     private void CanvasGroupOn(CanvasGroup cg)
@@ -126,7 +150,7 @@ public class SettingsController : Singleton<SettingsController>
         cg.interactable = true;
         cg.blocksRaycasts = true;
     }
-    private void CanvasGroupOff(CanvasGroup cg)
+    public void CanvasGroupOff(CanvasGroup cg)
     {
         cg.alpha = 0;
         cg.interactable = false;
@@ -140,17 +164,17 @@ public class SettingsController : Singleton<SettingsController>
 //{
 //    if(Input.GetKeyDown(KeyCode.Escape))
 //    {
-//        if(isESC && isSetESC) 
+//        if(_isESC && isSetESC) 
 //        {
 //            isSetESC = false;
 //            CanvasGroupOn(SetGroup); 
 //        }
-//        else if(isESC && !isSetESC) 
+//        else if(_isESC && !isSetESC) 
 //        {
 //            isSetESC = true;
 //            CanvasGroupOff(SetGroup);
 //        }
-//        else if (!isESC)
+//        else if (!_isESC)
 //        {
 //            ClickESC();
 //        }

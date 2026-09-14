@@ -137,11 +137,10 @@ namespace DataScripts
         public Vector3 curPos;
 
         public Vector3 curRot;
-        public float curRotX;
-        public float curRotZ;
-
+        //public float curRotX;
+        //public float curRotZ;
         public Vector3 curAxis;
-        public float curDist;
+        //public float curDist;
 
         #endregion
 

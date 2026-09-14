@@ -138,5 +138,15 @@ public class ItemSystem : Singleton<ItemSystem>
         return null;
     }
 
+
+    public Items GetItemByCode(ItemCode itemCode)
+    {
+        if (ItemKeys.TryGetValue(itemCode, out Items item))
+        {
+            return item;
+        }
+
+        return null;
+    }
 }
 
