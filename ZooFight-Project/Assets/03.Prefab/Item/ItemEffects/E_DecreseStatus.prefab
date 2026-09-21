@@ -14566,8 +14566,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7662270939917046228}
+  - component: {fileID: 5844666152232130191}
   m_Layer: 0
-  m_Name: StatusDecreseEffect
+  m_Name: E_DecreseStatus
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -14593,6 +14594,28 @@ Transform:
   - {fileID: 1646660465872677224}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5844666152232130191
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6971238383044317469}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e59c297fd434ac0409ac2740cf656707, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  myEffectCode: 113
+  myObj: {fileID: 0}
+  myEffect:
+  - {fileID: 8191686225099689285}
+  - {fileID: 5953222560629252427}
+  - {fileID: 8409271804033631552}
+  - {fileID: 7409035664784042587}
+  - {fileID: 7376882800756524569}
+  myEffectPlayers: []
+  triggerTarget: []
 --- !u!1 &8146870368521190411
 GameObject:
   m_ObjectHideFlags: 0

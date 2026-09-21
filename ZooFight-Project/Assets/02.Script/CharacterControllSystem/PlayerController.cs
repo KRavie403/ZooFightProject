@@ -306,6 +306,7 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
         p_States.Add(pState.Down, new Character_Down(this, PlayerSM));
         p_States.Add(pState.Recovery, new Character_Recovery(this, PlayerSM));
 
+        BaseSpeedRate = 1.0f;
 
         //CharacterInitalize(myTeam, SessionId, CharacterID);
 
@@ -1390,7 +1391,7 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
         GameObject stunEffectObj = EffectManager.Inst.effectPool.GetEffectObject(EffectCode.E_CharacterDamaged, null, false);
         EffectPlayer stunEffect =  stunEffectObj.GetComponent<EffectPlayer>();
 
-        stunEffect.EffectPlayAll(0, this.transform);
+        stunEffect.EffectPlayAll(this.transform);
         while (duringTime < time)
         {
             duringTime += Time.deltaTime;
@@ -1400,7 +1401,7 @@ public class PlayerController : MovementController, IHitScanTarget , IHitScanner
             //myAnim.SetTrigger("GetStun");
             if (stunEffect.myEffect[0].isPlaying == false)
             {
-                stunEffect.EffectPlayAll(0, this.transform);
+                stunEffect.EffectPlayAll(this.transform);
             }
             // 이펙트 추가중
             yield return null;

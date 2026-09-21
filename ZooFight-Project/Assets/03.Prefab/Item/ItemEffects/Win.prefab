@@ -4897,6 +4897,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5235843859088402196}
+  - component: {fileID: 6113156606570778949}
   m_Layer: 5
   m_Name: Win
   m_TagString: Untagged
@@ -4921,6 +4922,23 @@ Transform:
   - {fileID: 5235843858448866205}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6113156606570778949
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5235843859088402411}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e59c297fd434ac0409ac2740cf656707, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  myEffectCode: 0
+  myObj: {fileID: 0}
+  myEffect: []
+  myEffectPlayers: []
+  triggerTarget: []
 --- !u!1 &5235843859583981859
 GameObject:
   m_ObjectHideFlags: 0

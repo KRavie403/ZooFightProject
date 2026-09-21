@@ -163,7 +163,6 @@ public class HitScan : Singleton<HitScan>
         switch (type)
         {
             case ScanType.Sphere:
-                Debug.Log("aa");
                 return ScanSphere(obj, range, GetTargets(targets));
             case ScanType.Circle:
                 break;

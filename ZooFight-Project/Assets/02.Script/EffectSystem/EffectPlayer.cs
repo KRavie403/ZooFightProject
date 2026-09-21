@@ -32,6 +32,10 @@ public class EffectPlayer : MonoBehaviour , IEffect
     private void Awake()
     {
         //gameObject.name = myEffectCode.ToString();
+        if(EffectManager.Inst != null)
+        {
+            EffectManager.Inst.effectPlayers.Add(this);
+        }
     }
 
     // Update is called once per frame
@@ -60,7 +64,10 @@ public class EffectPlayer : MonoBehaviour , IEffect
 
     public void EffectPlay(int index, Transform StartPoint)
     {
-        myEffect[index].transform.position = StartPoint.position;
+        //myEffect[index].transform.position = StartPoint.position;
+
+        myEffect[index].transform.parent = StartPoint;
+        myEffect[index].transform.localPosition = Vector3.zero;
         myEffect[index].Play();
     }
 
@@ -70,7 +77,9 @@ public class EffectPlayer : MonoBehaviour , IEffect
     {
         var main = myEffect[index].main;
         main.loop = isLoop;
-        myEffect[index].transform.position = StartPoint.position;
+        //myEffect[index].transform.position = StartPoint.position;
+        myEffect[index].transform.parent = StartPoint;
+        myEffect[index].transform.localPosition = Vector3.zero;
         myEffect[index].time = playTime; 
         myEffect[index].Play();
     }
@@ -78,7 +87,9 @@ public class EffectPlayer : MonoBehaviour , IEffect
     public void EffectPlay(int index,float playTime,Transform StartPoint,Vector3 dir)
     {
         myEffect[index].time = playTime;
-        myEffect[index].transform.position = StartPoint.position;
+        //myEffect[index].transform.position = StartPoint.position;
+        myEffect[index].transform.parent = StartPoint;
+        myEffect[index].transform.localPosition = Vector3.zero;
         myEffect[index].transform.LookAt(dir);
         myEffect[index].Play();
 
@@ -87,7 +98,9 @@ public class EffectPlayer : MonoBehaviour , IEffect
     public void EffectPlay(int index, float playTime,Transform StartPoint,Quaternion rot)
     {
         myEffect[index].time = playTime;
-        myEffect[index].transform.position = StartPoint.position;
+        //myEffect[index].transform.position = StartPoint.position;
+        myEffect[index].transform.parent = StartPoint;
+        myEffect[index].transform.localPosition = Vector3.zero;
         myEffect[index].transform.rotation = rot;
         myEffect[index].Play();
     }
@@ -100,7 +113,9 @@ public class EffectPlayer : MonoBehaviour , IEffect
         main.loop = isLoop;
 
         myEffect[index].time = playTime;
-        myEffect[index].transform.position = StartPoint.position;
+        //myEffect[index].transform.position = StartPoint.position;
+        myEffect[index].transform.parent = StartPoint;
+        myEffect[index].transform.localPosition = Vector3.zero;
         myEffect[index].transform.rotation = rot;
         myEffect[index].Play();
     }
@@ -108,8 +123,10 @@ public class EffectPlayer : MonoBehaviour , IEffect
     public void EffectPlay(int index, float playTime, Transform StartPoint, Quaternion rot,Vector3 size)
     {
         myEffect[index].time = playTime;
-        
-        myEffect[index].transform.position = StartPoint.position;
+
+        //myEffect[index].transform.position = StartPoint.position;
+        myEffect[index].transform.parent = StartPoint;
+        myEffect[index].transform.localPosition = Vector3.zero;
         myEffect[index].transform.rotation = rot;
         myEffect[index].Play();
     }
@@ -158,22 +175,22 @@ public class EffectPlayer : MonoBehaviour , IEffect
         }
     }
 
-    public void EffectPlayAll(float playTime,Transform Target)
+    public void EffectPlayAll(Transform Target, float playTime = 0, bool isLoop = false)
     {
         for (int i = 0; i < myEffect.Count; i++)
         {
-            EffectPlay(i, playTime,Target,false);
+            EffectPlay(i, playTime, Target, isLoop);
         }
     }
 
-    public void EffectPlayAll(float playTime,Transform Target , Quaternion Rot)
+    public void EffectPlayAll(Transform Target, Quaternion Rot, float playTime = 0)
     {
         for (int i = 0; i < myEffect.Count; i++)
         {
             EffectPlay(i, playTime, Target, Rot);
         }
     }
-    public void EffectPlayAll(float playTime, Transform Target, Quaternion Rot,Vector3 size)
+    public void EffectPlayAll(Transform Target, Quaternion Rot, Vector3 size, float playTime = 0)
     {
         for (int i = 0; i < myEffect.Count; i++)
         {
@@ -194,16 +211,16 @@ public class EffectPlayer : MonoBehaviour , IEffect
 
     public void EffectPlayAll(EffectPlayer curPlayer, float playTime, Transform Target)
     {
-        curPlayer.EffectPlayAll(playTime, Target);
+        curPlayer.EffectPlayAll(Target, playTime);
     }
 
     public void EffectPlayAll(EffectPlayer curPlayer, float playTime, Transform Target, Quaternion Rot)
     {
-        curPlayer.EffectPlayAll(playTime, Target, Rot);
+        curPlayer.EffectPlayAll(Target, Rot, playTime);
     }
     public void EffectPlayAll(EffectPlayer curPlayer, float playTime, Transform Target, Quaternion Rot, Vector3 size)
     {
-        curPlayer.EffectPlayAll(playTime, Target, Rot, size);
+        curPlayer.EffectPlayAll(Target, Rot, size, playTime);
     }
 
     public void EffectPlayAll(int index)
@@ -218,16 +235,16 @@ public class EffectPlayer : MonoBehaviour , IEffect
 
     public void EffectPlayAll(int index, float playTime, Transform Target)
     {
-        myEffectPlayers[index].EffectPlayAll(playTime, Target);
+        myEffectPlayers[index].EffectPlayAll(Target, playTime);
     }
 
     public void EffectPlayAll(int index, float playTime, Transform Target, Quaternion Rot)
     {
-        myEffectPlayers[index].EffectPlayAll(playTime, Target, Rot);
+        myEffectPlayers[index].EffectPlayAll(Target, Rot, playTime);
     }
     public void EffectPlayAll(int index, float playTime, Transform Target, Quaternion Rot, Vector3 size)
     {
-        myEffectPlayers[index].EffectPlayAll(playTime, Target, Rot, size);
+        myEffectPlayers[index].EffectPlayAll(Target, Rot, size);
     }
 
 
@@ -259,6 +276,7 @@ public class EffectPlayer : MonoBehaviour , IEffect
 
     public void EffectEnd(int index,UnityAction e = null)
     {
+        ReturnEffects();
         if (myEffect[index].isStopped)        {
             e?.Invoke();
             gameObject.SetActive(false);        // 이펙트가 종료되면 게임 오브젝트 비활성화
@@ -270,6 +288,14 @@ public class EffectPlayer : MonoBehaviour , IEffect
         for (int i = 0; i < myEffect.Count; i++)
         {
             EffectEnd(i, e);
+        }
+    }
+
+    public void ReturnEffects()
+    {
+        for (int i = 0; i < myEffect.Count; i++)
+        {
+            myEffect[i].transform.parent = this.transform;
         }
     }
  

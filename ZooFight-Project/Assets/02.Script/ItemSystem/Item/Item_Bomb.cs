@@ -175,7 +175,7 @@ public class Item_Bomb : Items ,IHitScanner
     public void BombExplosionEffect()
     {
 
-        myEffect.EffectPlayAll(0,transform);
+        myEffect.EffectPlayAll(transform);
 
     }
 

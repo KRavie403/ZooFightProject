@@ -118,7 +118,7 @@ public class ItemSystem : Singleton<ItemSystem>
     public Items RandomItemSelect()
     {
         // 테스트용 고정출력
-        return ItemBase[0];// 삭제예정
+        return ItemBase[4];// 삭제예정
         return ItemBase[Random.Range(0, ItemList.Count)];
 
     }

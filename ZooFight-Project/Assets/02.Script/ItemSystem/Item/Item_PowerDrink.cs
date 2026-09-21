@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// ¾ÆÀÌÅÛ¸í : ÆÄ¿ö µå¸µÅ©
-/// Value 1 ÀÌµ¿ ¼Óµµ Áõ°¡·®
-/// Value 2 µ¿ÀÛ ½Ã°£
+/// ì•„ì´í…œëª… : íŒŒì›Œ ë“œë§í¬
+/// Value 1 ì´ë™ ì†ë„ ì¦ê°€ëŸ‰ í¼ì„¼íŠ¸
+/// Value 2 ë™ì‘ ì‹œê°„
 /// 
 /// </summary>
 
@@ -17,7 +17,8 @@ public class Item_PowerDrink : Items
 
     }
 
-    EffectPlayer myEffect;
+    EffectPlayer myEffect = null;
+    GameObject myEffectObj = null;
 
     protected override void Awake()
     {
@@ -44,37 +45,45 @@ public class Item_PowerDrink : Items
 
     protected override IEnumerator ItemActions()
     {
+
         yield return base.ItemActions();
 
         float duringTime = 0;
 
-        // ±âº» ¼Óµµ°ª ÀúÀå
+        // ê¸°ë³¸ ì†ë„ê°’ ì €ì¥
         float BaseSpeedRate = 1.0f;
 
-        myPlayer.BaseSpeedRate = Value1;
+        myPlayer.BaseSpeedRate = myPlayer.BaseSpeedRate * (100 + Value1) / 100;
 
-        // ÀÌÆåÆ® Ãâ·Â
+        // ì´í™íŠ¸ ì¶œë ¥
 
-        // ¸¶½Ã´Â ¸ğ¼Ç Ãâ·Â
+        // ë§ˆì‹œëŠ” ëª¨ì…˜ ì¶œë ¥
         myPlayer.myAnim.SetBool("isDrink", true);
         myPlayer.myAnim.SetTrigger("Drinking");
 
         myPlayer.ItemUseEnd();
 
+        myEffectObj = EffectManager.Inst.effectPool.GetEffectObject(effectCode);
+        //myEffect = EffectManager.Inst.effectPool.GetEffectObject<EffectPlayer>(EffectCode.E_IncreseStatus, myPlayer.BuffEffectPoint, true);
+        myEffect = myEffectObj.GetComponent<EffectPlayer>();
 
-        // Áö¼Ó½Ã°£ Ã¼Å©
+        myEffect.EffectPlayAll(myPlayer.BuffEffectPoint, 0, true);
+        // ì§€ì†ì‹œê°„ ì²´í¬
         while (duringTime < Value2)
         {
             duringTime += Time.deltaTime;
 
 
-            // UI Ãß°¡ÇÒ½Ã ³²Àº°ªÀü´ŞÀº ¿©±â¼­
+            // UI ì¶”ê°€í• ì‹œ ë‚¨ì€ê°’ì „ë‹¬ì€ ì—¬ê¸°ì„œ
 
             yield return null;
 
         }
 
-        // Áö¼Ó½Ã°£ Á¾·á ÈÄ ¼Óµµ º¹±Í
+        myEffect.EffectEndAll();
+        EffectManager.Inst.effectPool.ReturnObject(myEffectObj);
+
+        // ì§€ì†ì‹œê°„ ì¢…ë£Œ í›„ ì†ë„ ë³µê·€
         myPlayer.BaseSpeedRate = BaseSpeedRate;
         ReturnItem();
     }
